@@ -1,0 +1,43 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:id="@+id/map"
+        tools:context=".MapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="5"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            style="@style/MapButtons"
+            android:id="@+id/loggingStartButton"
+            android:text="START"/>
+
+        <Button
+            style="@style/MapButtons"
+            android:id="@+id/loggingStopButton"
+            android:visibility="gone"
+            android:text="STOP"/>
+
+        <Button
+            style="@style/MapButtons"
+            android:id="@+id/nextButton"
+            android:text="CLEAR"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>
+
