@@ -94,6 +94,8 @@ public class SendDataService extends Service {
             Log.d(TAG, "Send Failure");
         }
 
+        dbHandler.clearTable();
+
         return START_NOT_STICKY;
     }
 
