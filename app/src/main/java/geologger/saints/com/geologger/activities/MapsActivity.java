@@ -23,6 +23,7 @@ import geologger.saints.com.geologger.services.GPSLoggingService_;
 @EActivity
 public class MapsActivity extends FragmentActivity {
 
+    private final String TAG = getClass().getSimpleName();
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     @ViewById(R.id.loggingStartButton)
@@ -34,7 +35,7 @@ public class MapsActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(this.getClass().getName(), "onCreate");
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
@@ -42,7 +43,7 @@ public class MapsActivity extends FragmentActivity {
 
     @Override
     protected void onResume() {
-        Log.d(this.getClass().getName(), "onResume");
+        Log.d(TAG, "onResume");
         super.onResume();
         setUpMapIfNeeded();
     }
@@ -50,7 +51,7 @@ public class MapsActivity extends FragmentActivity {
     @Click(R.id.loggingStartButton)
     public void onLoggingStart(View clicked) {
 
-        Log.d(this.getClass().getSimpleName(), "onLoggingStart");
+        Log.d(TAG, "onLoggingStart");
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
         startService(serviceIntent);
@@ -62,7 +63,7 @@ public class MapsActivity extends FragmentActivity {
     @Click(R.id.loggingStopButton)
     public void onLoggingStop(View clicked) {
 
-        Log.d(this.getClass().getSimpleName(), "onLoggingStop");
+        Log.d(TAG, "onLoggingStop");
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
         stopService(serviceIntent);

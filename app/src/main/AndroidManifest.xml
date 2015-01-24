@@ -2,20 +2,63 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="geologger.saints.com.geologger" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but are recommended.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
-            android:name=".activities.MapsActivity_"
-            android:label="@string/title_activity_maps"
-            android:screenOrientation="sensorPortrait">
+            android:name=".activities.HomeActivity_"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_home"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.MapsActivity_"
+            android:label="@string/title_activity_maps"
+            android:screenOrientation="sensorPortrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.LogActivity_"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_log"
+            android:theme="@style/FullscreenTheme"
+            android:screenOrientation="sensorPortrait">
+        </activity>
+        <activity
+            android:name=".activities.PoiActivity"
+            android:label="@string/title_activity_poi"
+            android:screenOrientation="sensorPortrait">
+        </activity>
+        <activity
+            android:name=".activities.SettingActivity_"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_setting"
+            android:theme="@style/FullscreenTheme"
+            android:screenOrientation="sensorPortrait">
         </activity>
 
         <meta-data
@@ -30,7 +73,6 @@
             android:enabled="true"
             android:exported="true" >
         </service>
-
         <service
             android:name=".services.SendDataService_"
             android:enabled="true"
@@ -41,28 +83,13 @@
             android:name=".routes.RouteReceiver_"
             android:enabled="true"
             android:exported="true" >
-
             <intent-filter>
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
-                <action android:name="android.net.wifi.STATE_CHANGE"/>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
             </intent-filter>
-
         </receiver>
 
+
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but are recommended.
-    -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

@@ -23,18 +23,18 @@
         <Button
             style="@style/MapButtons"
             android:id="@+id/loggingStartButton"
-            android:text="START"/>
+            android:text="@string/start"/>
 
         <Button
             style="@style/MapButtons"
             android:id="@+id/loggingStopButton"
             android:visibility="gone"
-            android:text="STOP"/>
+            android:text="@string/stop"/>
 
         <Button
             style="@style/MapButtons"
-            android:id="@+id/nextButton"
-            android:text="CLEAR"/>
+            android:id="@+id/checkInButton"
+            android:text="@string/checkin"/>
 
 
     </LinearLayout>

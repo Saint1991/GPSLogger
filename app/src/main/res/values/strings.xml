@@ -3,5 +3,19 @@
 
     <string name="app_name">GeoLogger</string>
     <string name="title_activity_maps">Map</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="checkin">CHECK IN</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_poi_search">PoiSearchActivity</string>
+    <string name="title_activity_log">LogActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
+    <string name="poi_search_hint">place name</string>
+    <string name="send">send</string>
+    <string name="title_activity_poi">PoiActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

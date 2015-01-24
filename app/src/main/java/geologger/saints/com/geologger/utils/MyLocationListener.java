@@ -16,7 +16,7 @@ import org.androidannotations.annotations.RootContext;
 public class MyLocationListener implements LocationListener{
 
     @RootContext
-    Context context;
+    Context mContext;
 
     public MyLocationListener(Context context) {}
 
@@ -29,7 +29,7 @@ public class MyLocationListener implements LocationListener{
         float latitude = (float)location.getLatitude();
         float longitude = (float)location.getLongitude();
 
-        Position.savePosition(context, latitude, longitude);
+        Position.savePosition(mContext, latitude, longitude);
     }
 
     @Override
