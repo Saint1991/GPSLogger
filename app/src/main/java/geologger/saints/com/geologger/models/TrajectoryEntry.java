@@ -2,8 +2,6 @@ package geologger.saints.com.geologger.models;
 
 import android.util.Log;
 
-import org.androidannotations.annotations.EBean;
-
 /**
  * Created by Seiya on 2014/12/31.
  */

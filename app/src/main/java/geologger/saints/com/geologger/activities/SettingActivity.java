@@ -1,7 +1,5 @@
 package geologger.saints.com.geologger.activities;
 
-import geologger.saints.com.geologger.activities.util.SystemUiHider;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
@@ -13,6 +11,7 @@ import android.view.View;
 import org.androidannotations.annotations.EActivity;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.activities.util.SystemUiHider;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.

@@ -1,7 +1,5 @@
 package geologger.saints.com.geologger.models;
 
-import org.androidannotations.annotations.EBean;
-
 import java.util.HashMap;
 
 /**

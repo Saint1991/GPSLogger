@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import org.androidannotations.annotations.EBean;
-
 /**
  * Created by Seiya on 2015/01/01.
  */

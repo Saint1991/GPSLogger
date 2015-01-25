@@ -1,6 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -8,7 +10,6 @@
     android:background="#000000">
 
     <LinearLayout
-        android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -22,23 +23,23 @@
             <EditText
                 android:id="@+id/search_text"
                 android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_weight="2"
                 android:hint="@string/poi_search_hint"
                 android:background="@color/white"
-                android:layout_marginRight="2dp"
+                android:layout_marginRight="6dp"
                 android:padding="5dp"
-                android:textSize="25sp"
+                android:textSize="20sp"
                 android:fontFamily="Meiryo"/>
 
             <Button
                 android:id="@+id/search_submit"
-                android:layout_width="10dp"
-                android:layout_height="50dp"
+                android:layout_width="50dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@color/app_color"
-                android:text="@string/send"
-                android:textSize="25sp"
+                android:text="@string/search"
+                android:textSize="20sp"
                 android:fontFamily="Meiryo"
                 android:textColor="@color/white"/>
 
@@ -48,7 +49,7 @@
             android:id="@+id/poi_search_result"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="15dp"></ListView>
+            android:layout_marginTop="15dp"/>
 
     </LinearLayout>
 

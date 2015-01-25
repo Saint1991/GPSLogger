@@ -7,7 +7,6 @@ import org.androidannotations.annotations.EBean;
 
 import java.util.HashMap;
 
-import geologger.saints.com.geologger.services.SendDataService;
 import geologger.saints.com.geologger.services.SendDataService_;
 
 /**

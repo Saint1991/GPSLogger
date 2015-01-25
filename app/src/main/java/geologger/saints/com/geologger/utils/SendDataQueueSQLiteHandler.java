@@ -8,9 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import org.androidannotations.annotations.EBean;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import geologger.saints.com.geologger.models.SQLiteModelDefinition;
 import geologger.saints.com.geologger.models.TableDefinitions;

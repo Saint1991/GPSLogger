@@ -3,12 +3,9 @@ package geologger.saints.com.geologger.routes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import org.androidannotations.annotations.EReceiver;
-
-import geologger.saints.com.geologger.services.GPSLoggingService;
 
 @EReceiver
 public class RouteReceiver extends BroadcastReceiver {
