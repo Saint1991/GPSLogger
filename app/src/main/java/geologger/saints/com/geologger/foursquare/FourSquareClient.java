@@ -28,7 +28,7 @@ public class FourSquareClient extends BaseHttpClient {
     private final String TAG = getClass().getSimpleName();
     private static final String ENDPOINT_POISEARCH = "https://api.foursquare.com/v2/venues/search?";
     private static final String LANGUAGE = Locale.getDefault().toString();
-    private static final int LIMIT = 10;
+    private static final int LIMIT = 25;
 
     private static final String CLIENT_ID = "ZTOAPLAJWKM5A5HETKK1GILH2V2EVFQCOI1QMKPNEBXNJH4Q";
     private static final String CLIENT_SECRET = "ARI1OE35YBJDQQXCRWW3ZWSU5EO3XNT2DZUTDWK1CZ3ANWCE";

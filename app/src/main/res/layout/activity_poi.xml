@@ -34,22 +34,25 @@
 
             <Button
                 android:id="@+id/search_submit"
-                android:layout_width="50dp"
+                android:layout_width="20dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="@color/app_color"
-                android:text="@string/search"
+                android:text="@string/send"
                 android:textSize="20sp"
                 android:fontFamily="Meiryo"
                 android:textColor="@color/white"/>
 
         </LinearLayout>
 
-        <ListView
+
+        <fragment
+            class="geologger.saints.com.geologger.uicomponents.PoiListFragment_"
+            android:name="geologger.saints.com.geologger.uicomponents.PoiListFlagment_"
             android:id="@+id/poi_search_result"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="15dp"/>
+            android:layout_marginTop="6dp"/>
 
     </LinearLayout>
 

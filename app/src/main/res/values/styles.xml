@@ -33,6 +33,16 @@
         <item name="android:background">@android:drawable/bottom_bar</item>
     </style>
 
+    <style name="poiListEntryTextViews">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
     <style name="ButtonBarButton" />
 
 </resources>

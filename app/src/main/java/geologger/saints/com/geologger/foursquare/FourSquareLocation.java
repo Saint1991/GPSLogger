@@ -16,7 +16,7 @@ public class FourSquareLocation {
     private String city;
     private String state;
     private String country;
-    private String[] fomattedAddress;
+    private String[] formattedAddress;
 
     public FourSquareLocation() {
 
@@ -86,12 +86,12 @@ public class FourSquareLocation {
         this.country = country;
     }
 
-    public String[] getFomattedAddress() {
-        return fomattedAddress;
+    public String[] getFormattedAddress() {
+        return formattedAddress;
     }
 
     public void setFomattedAddress(String[] fomattedAddress) {
-        this.fomattedAddress = fomattedAddress;
+        this.formattedAddress = fomattedAddress;
     }
 
 }
