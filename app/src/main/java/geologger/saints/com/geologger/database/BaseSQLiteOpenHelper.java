@@ -4,8 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import geologger.saints.com.geologger.database.SQLiteModelDefinition;
-import geologger.saints.com.geologger.database.TableDefinitions;
+import geologger.saints.com.geologger.models.TableDefinitions;
 
 /**
  * Created by Seiya on 2015/01/01.
@@ -14,7 +13,7 @@ import geologger.saints.com.geologger.database.TableDefinitions;
  * */
 public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
 
-    private SQLiteModelDefinition mTableDefinition = null;
+    protected SQLiteModelDefinition mTableDefinition = null;
 
     public BaseSQLiteOpenHelper(Context context, SQLiteModelDefinition tableDefinition) {
         super(context, TableDefinitions.DBNAME, null, 1);

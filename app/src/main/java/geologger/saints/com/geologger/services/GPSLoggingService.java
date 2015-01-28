@@ -2,24 +2,15 @@ package geologger.saints.com.geologger.services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.LocationManager;
 import android.os.IBinder;
 import android.util.Log;
-
-import com.google.gson.Gson;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-
-import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.MyLocationListener;
-import geologger.saints.com.geologger.utils.Position;
 
 @EService
 public class GPSLoggingService extends Service {
@@ -29,7 +20,7 @@ public class GPSLoggingService extends Service {
 
 
     @SystemService
-    LocationManager locationManager;
+    LocationManager mLocationManager;
 
     @Bean
     MyLocationListener mLocationListener;
@@ -50,13 +41,13 @@ public class GPSLoggingService extends Service {
 
         Log.i(TAG, "onStartCommand");
 
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setPowerRequirement(Criteria.POWER_MEDIUM);
+        String provider = (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) ? LocationManager.GPS_PROVIDER : null;
+        if (provider == null && mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            provider = LocationManager.NETWORK_PROVIDER;
+        }
 
-        String provider = locationManager.getBestProvider(criteria, true);
-        if (locationManager.isProviderEnabled(provider)) {
-            locationManager.requestLocationUpdates(provider, SAMPLINGINTERVAL, 0, mLocationListener);
+        if (provider != null && mLocationManager.isProviderEnabled(provider)) {
+            mLocationManager.requestLocationUpdates(provider, SAMPLINGINTERVAL, 0, mLocationListener);
         }
 
         return START_REDELIVER_INTENT;
@@ -65,6 +56,7 @@ public class GPSLoggingService extends Service {
     @Override
     public void onDestroy() {
         Log.i(TAG, "onDestroy");
+        mLocationManager.removeUpdates(mLocationListener);
     }
 
 

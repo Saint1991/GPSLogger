@@ -8,10 +8,17 @@ import android.util.Log;
  */
 public class TrajectoryEntry {
 
+    public static final String LATITUDE = "latitude";
+    public static final String LONGITUDE = "longitude";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String TID = "t_id";
+    public static final String ISGPSON = "is_gps_on";
+
     protected float latitude = -1;
     protected float longitude = -1;
     protected String timestamp = null;
     protected String tid = null;
+    protected boolean isGpsOn = false;
 
     public TrajectoryEntry() {}
 
@@ -21,9 +28,10 @@ public class TrajectoryEntry {
         this.setLongitude(longitude);
     }
 
-    public TrajectoryEntry(String tid, float latitude, float longitude, String timestamp) {
+    public TrajectoryEntry(String tid, float latitude, float longitude, String timestamp, boolean isGpsOn) {
         this(tid, latitude, longitude);
         this.setTimestamp(timestamp);
+        this.setIsGpsOn(isGpsOn);
     }
 
 
@@ -74,5 +82,13 @@ public class TrajectoryEntry {
 
     public void setTid(String tid) {
         this.tid = tid;
+    }
+
+    public boolean getIsGpsOn() {
+        return this.isGpsOn;
+    }
+
+    public void setIsGpsOn(boolean isGpsOn) {
+        this.isGpsOn = isGpsOn;
     }
 }

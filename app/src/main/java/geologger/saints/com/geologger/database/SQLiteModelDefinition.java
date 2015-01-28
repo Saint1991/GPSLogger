@@ -2,6 +2,8 @@ package geologger.saints.com.geologger.database;
 
 import java.util.HashMap;
 
+import geologger.saints.com.geologger.models.TableDefinitions;
+
 /**
  * Created by Seiya on 2015/01/01.
  * テーブル作成のためのスキーマを定義する．
