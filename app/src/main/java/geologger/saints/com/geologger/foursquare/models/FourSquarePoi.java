@@ -1,4 +1,4 @@
-package geologger.saints.com.geologger.foursquare;
+package geologger.saints.com.geologger.foursquare.models;
 
 import org.androidannotations.annotations.EBean;
 
@@ -6,9 +6,9 @@ import org.androidannotations.annotations.EBean;
  * Created by Mizuno on 2015/01/26.
  */
 @EBean
-public class Poi {
+public class FourSquarePoi {
 
-    public Poi() {
+    public FourSquarePoi() {
 
     }
 

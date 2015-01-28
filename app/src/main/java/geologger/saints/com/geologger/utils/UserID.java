@@ -7,6 +7,7 @@ import java.util.UUID;
 
 /**
  * Created by Seiya on 2014/12/31.
+ * プリファレンスへのユーザIDを生成，読出しを実行するクラス
  */
 public class UserID {
 

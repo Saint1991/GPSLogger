@@ -24,7 +24,7 @@ public class MyLocationListener implements LocationListener{
     @Override
     public void onLocationChanged(Location location) {
 
-        Log.d("MyLocationListener", "onLocationChanged");
+        Log.i("MyLocationListener", "onLocationChanged");
 
         float latitude = (float)location.getLatitude();
         float longitude = (float)location.getLongitude();
@@ -34,16 +34,16 @@ public class MyLocationListener implements LocationListener{
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        Log.d("MyLocationListener", "onStatusChanged");
+        Log.i("MyLocationListener", "onStatusChanged");
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        Log.d("MyLocationListener", "onProviderEnabled");
+        Log.i("MyLocationListener", "onProviderEnabled");
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        Log.d("MyLocationListener", "onProviderDisabled");
+        Log.i("MyLocationListener", "onProviderDisabled");
     }
 }

@@ -26,17 +26,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.models.TrajectoryEntry;
-import geologger.saints.com.geologger.utils.SendDataQueueSQLiteHandler;
 import geologger.saints.com.geologger.utils.UserID;
 
+/**
+ * TODO 要実装
+ */
 @EService
 public class SendDataService extends Service {
 
     private final String TAG = getClass().getSimpleName();
     private final String SERVERURL = "http://";
-
-    @Bean
-    SendDataQueueSQLiteHandler dbHandler;
 
     @SystemService
     ConnectivityManager connectivityManager;
@@ -47,13 +46,13 @@ public class SendDataService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate");
+        Log.i(TAG, "onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d(TAG, "onStartCommand");
+        Log.i(TAG, "onStartCommand");
 
         NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
         if (netInfo == null || netInfo.getState() != NetworkInfo.State.CONNECTED) {
@@ -62,6 +61,7 @@ public class SendDataService extends Service {
             return START_NOT_STICKY;
         }
 
+        /*
         List<TrajectoryEntry> load = dbHandler.readAll();
         Gson gson = new Gson();
         String data = gson.toJson(load);
@@ -88,12 +88,12 @@ public class SendDataService extends Service {
             this.stopSelf(startId);
         }
 
+
         //TODO Failure
         if (response == null || response.getStatusLine().getStatusCode() != 200) {
             Log.d(TAG, "Send Failure");
         }
-
-        dbHandler.clearTable();
+        */
 
         return START_NOT_STICKY;
     }

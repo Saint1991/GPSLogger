@@ -1,16 +1,17 @@
-package geologger.saints.com.geologger.utils;
+package geologger.saints.com.geologger.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import geologger.saints.com.geologger.models.SQLiteModelDefinition;
-import geologger.saints.com.geologger.models.TableDefinitions;
+import geologger.saints.com.geologger.database.SQLiteModelDefinition;
+import geologger.saints.com.geologger.database.TableDefinitions;
 
 /**
  * Created by Seiya on 2015/01/01.
- */
-
+ * SQLiteOpenHelperの実装
+ * SQLiteModelDefinitionに応じてテーブルを初期化します．
+ * */
 public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private SQLiteModelDefinition mTableDefinition = null;

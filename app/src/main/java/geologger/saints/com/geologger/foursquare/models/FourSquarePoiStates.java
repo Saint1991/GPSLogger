@@ -1,4 +1,4 @@
-package geologger.saints.com.geologger.foursquare;
+package geologger.saints.com.geologger.foursquare.models;
 
 import org.androidannotations.annotations.EBean;
 

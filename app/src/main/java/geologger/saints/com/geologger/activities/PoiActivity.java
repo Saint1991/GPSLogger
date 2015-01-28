@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -27,7 +26,7 @@ import java.util.List;
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.adapters.PoiListAdapter;
 import geologger.saints.com.geologger.foursquare.FourSquareClient;
-import geologger.saints.com.geologger.foursquare.Poi;
+import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
 
 @EActivity
@@ -39,7 +38,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
     private ProgressDialog mProgress;
 
     private PoiListAdapter mAdapter;
-    private List<Poi> mPoiList;
+    private List<FourSquarePoi> mFourSquarePoiList;
 
     @Bean
     FourSquareClient mFourSquareClient;
@@ -63,14 +62,14 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
         Thread thread = new Thread(new Runnable() {
            public void run() {
 
-               List<Poi> pois = mFourSquareClient.searchPoi(query);
+               List<FourSquarePoi> fourSquarePois = mFourSquareClient.searchPoi(query);
                Log.i(TAG, query);
-               if (pois == null || pois.size() == 0) {
+               if (fourSquarePois == null || fourSquarePois.size() == 0) {
                    mHandler.sendEmptyMessage(0);
                    return;
                }
 
-               mPoiList = pois;
+               mFourSquarePoiList = fourSquarePois;
                mHandler.sendEmptyMessage(1);
 
                mHandler.sendEmptyMessage(0);
@@ -82,7 +81,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
 
     @Override
     public void onFragmentInteraction(ListView parent, View called, int position, long id) {
-        Poi entry = (Poi)parent.getAdapter().getItem(position);
+        FourSquarePoi entry = (FourSquarePoi)parent.getAdapter().getItem(position);
         String url = FOURSQUARE_ROOT + entry.getId();
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browserIntent);
@@ -112,7 +111,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
                         PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_search_result);
                         ListView poiList = fragment.getListView();
                         mAdapter = (PoiListAdapter)poiList.getAdapter();
-                        mAdapter.addAll(mPoiList);
+                        mAdapter.addAll(mFourSquarePoiList);
                         poiList.setAdapter(mAdapter);
                         break;
 

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -18,6 +19,7 @@ import org.androidannotations.annotations.ViewById;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
+import geologger.saints.com.geologger.utils.Position;
 
 
 @EActivity
@@ -52,9 +54,6 @@ public class MapsActivity extends FragmentActivity {
     public void onLoggingStart(View clicked) {
 
         Log.d(TAG, "onLoggingStart");
-
-        Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
-        startService(serviceIntent);
 
         clicked.setVisibility(View.GONE);
         mLoggingStopButton.setVisibility(View.VISIBLE);
@@ -107,7 +106,9 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        float[] position = Position.getPosition(getApplicationContext());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(position[0], position[1]), 10));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(position[0], position[1])).title("Marker"));
     }
 
 

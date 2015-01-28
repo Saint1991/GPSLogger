@@ -1,7 +1,5 @@
 package geologger.saints.com.geologger.foursquare;
 
-import android.content.Context;
-
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -16,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
 import geologger.saints.com.geologger.utils.BaseHttpClient;
 import geologger.saints.com.geologger.utils.Position;
 
@@ -38,9 +37,9 @@ public class FourSquareClient extends BaseHttpClient {
 
     }
 
-    public List<Poi> searchPoi(String term) {
+    public List<FourSquarePoi> searchPoi(String term) {
 
-        List<Poi> ret = null;
+        List<FourSquarePoi> ret = null;
 
         float[] position = Position.getPosition(mContext);
         float latitude = position[0];
@@ -65,9 +64,9 @@ public class FourSquareClient extends BaseHttpClient {
         return ret;
     }
 
-    private List<Poi> parsePoiSearchResult(String json) {
+    private List<FourSquarePoi> parsePoiSearchResult(String json) {
 
-        List<Poi> ret = null;
+        List<FourSquarePoi> ret = null;
 
         try {
             JSONObject root = new JSONObject(json);
@@ -75,7 +74,7 @@ public class FourSquareClient extends BaseHttpClient {
             JSONArray venues = response.getJSONArray("venues");
 
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<Collection<Poi>>(){}.getType();
+            Type collectionType = new TypeToken<Collection<FourSquarePoi>>(){}.getType();
             ret = gson.fromJson(venues.toString(), collectionType);
 
         } catch (JSONException e) {

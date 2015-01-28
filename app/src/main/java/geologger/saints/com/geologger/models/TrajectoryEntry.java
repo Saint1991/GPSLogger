@@ -4,6 +4,7 @@ import android.util.Log;
 
 /**
  * Created by Seiya on 2014/12/31.
+ * トラジェクトリエントリを記述したBean
  */
 public class TrajectoryEntry {
 

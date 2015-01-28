@@ -54,7 +54,7 @@ public class HomeActivity extends Activity {
 
     @Click(R.id.button_settings)
     void settingsButtonClicked() {
-        Intent intent = new Intent(getApplicationContext(), SettingActivity_.class);
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity_.class);
         startActivity(intent);
     }
 

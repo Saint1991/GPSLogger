@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.ViewById;
 
 
 import java.util.ArrayList;
@@ -18,8 +17,7 @@ import java.util.ArrayList;
 import geologger.saints.com.geologger.R;
 
 import geologger.saints.com.geologger.adapters.PoiListAdapter;
-import geologger.saints.com.geologger.foursquare.Poi;
-import geologger.saints.com.geologger.uicomponents.dummy.DummyContent;
+import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
 
 /**
  * A fragment representing a list of Items.
@@ -66,7 +64,7 @@ public class PoiListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         // TODO: Change Adapter to display your content
-        setListAdapter(new PoiListAdapter(getActivity().getApplicationContext(), new ArrayList<Poi>()));
+        setListAdapter(new PoiListAdapter(getActivity().getApplicationContext(), new ArrayList<FourSquarePoi>()));
     }
 
     @Override

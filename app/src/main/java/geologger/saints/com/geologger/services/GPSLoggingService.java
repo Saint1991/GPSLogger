@@ -20,25 +20,20 @@ import java.util.UUID;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.MyLocationListener;
 import geologger.saints.com.geologger.utils.Position;
-import geologger.saints.com.geologger.utils.SendDataQueueSQLiteHandler;
 
 @EService
 public class GPSLoggingService extends Service {
 
     private final String TAG = getClass().getSimpleName();
-    private final long SAMPLINGINTERVAL = 20000l;
+    private final long SAMPLINGINTERVAL = 10000l;
 
 
     @SystemService
     LocationManager locationManager;
 
     @Bean
-    SendDataQueueSQLiteHandler dbHandler;
-
-    @Bean
     MyLocationListener mLocationListener;
 
-    private Timer mTimer = null;
 
     //Constructor
     public GPSLoggingService() {
@@ -47,13 +42,13 @@ public class GPSLoggingService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate");
+        Log.i(TAG, "onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d(TAG, "onStartCommand");
+        Log.i(TAG, "onStartCommand");
 
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -64,30 +59,12 @@ public class GPSLoggingService extends Service {
             locationManager.requestLocationUpdates(provider, SAMPLINGINTERVAL, 0, mLocationListener);
         }
 
-        final String tid = UUID.randomUUID().toString();
-
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-                float[] position = Position.getPosition(getApplicationContext());
-                float latitude = position[0];
-                float longitude = position[1];
-                TrajectoryEntry entry = new TrajectoryEntry(tid, latitude, longitude);
-                Log.d(TAG,new Gson().toJson(entry));
-                dbHandler.insert(entry);
-            }
-
-        }, 0l, SAMPLINGINTERVAL);
         return START_REDELIVER_INTENT;
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        mTimer.cancel();
-        mTimer = null;
+        Log.i(TAG, "onDestroy");
     }
 
 
