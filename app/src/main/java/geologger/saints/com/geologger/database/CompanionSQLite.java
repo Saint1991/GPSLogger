@@ -43,7 +43,10 @@ public class CompanionSQLite {
         insertValues.put(CompanionEntry.COMPANION, companion);
         insertValues.put(CompanionEntry.TIMESTAMP, timestamp);
 
-        return db.insert(TABLENAME, null, insertValues) != -1;
+        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
+        db.close();
+
+        return result;
     }
 
     /**
@@ -90,6 +93,7 @@ public class CompanionSQLite {
             isEOF = cursor.moveToNext();
         }
         cursor.close();
+        db.close();
 
         return ret;
     }

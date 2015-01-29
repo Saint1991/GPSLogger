@@ -41,7 +41,10 @@ public class SentTrajectorySQLite {
         insertValues.put(SentTrajectoryEntry.TID, tid);
         insertValues.put(SentTrajectoryEntry.ISSENT, isSent);
 
-        return db.insert(TABLENAME, null, insertValues) != -1;
+        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
+        db.close();
+
+        return result;
     }
 
     /**
@@ -74,6 +77,7 @@ public class SentTrajectorySQLite {
 
         ret = !cursor.isNull(cursor.getColumnIndex(SentTrajectoryEntry.ISSENT)) && cursor.getInt(cursor.getColumnIndex(SentTrajectoryEntry.ISSENT)) == 1;
         cursor.close();
+        db.close();
 
         return ret;
     }
@@ -95,6 +99,7 @@ public class SentTrajectorySQLite {
             isEOF = cursor.moveToNext();
         }
         cursor.close();
+        db.close();
 
         return sentTable;
     }

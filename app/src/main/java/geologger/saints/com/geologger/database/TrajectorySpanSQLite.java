@@ -42,7 +42,10 @@ public class TrajectorySpanSQLite {
         insertValues.put(TrajectorySpanEntry.TID, tid);
         insertValues.put(TrajectorySpanEntry.BEGIN, begin);
 
-        return db.insert(TABLENAME, null, insertValues) != -1;
+        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
+        db.close();
+
+        return result;
     }
 
     /**
@@ -68,7 +71,10 @@ public class TrajectorySpanSQLite {
         ContentValues updateValues = new ContentValues();
         updateValues.put(TrajectorySpanEntry.END, end);
 
-        return db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
+        boolean result = db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
+        db.close();
+
+        return result;
     }
 
 
@@ -92,6 +98,9 @@ public class TrajectorySpanSQLite {
             return false;
         }
 
+        cursor.close();
+        db.close();
+
         end = end.toLowerCase();
         return end != "null";
     }
@@ -114,6 +123,8 @@ public class TrajectorySpanSQLite {
             isEOF = cursor.moveToNext();
         }
         cursor.close();
+        db.close();
+
         return ret;
     }
 
@@ -135,6 +146,8 @@ public class TrajectorySpanSQLite {
             isEOF = cursor.moveToNext();
         }
         cursor.close();
+        db.close();
+
         return ret;
     }
 

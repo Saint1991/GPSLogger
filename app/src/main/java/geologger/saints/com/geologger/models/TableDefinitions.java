@@ -22,6 +22,7 @@ public class TableDefinitions {
     public static final String CHECKIN = "checkin";
     public static final String TRAJECTORY_SPAN = "trajectory_span";
     public static final String SENTTRAJECTORY = "sent_trajectory";
+    public static final String CHECKIN_FREE_FORM = "checkin_free_form";
 
     public static final HashMap <String, LinkedHashMap<String, String>> tables = new HashMap<String, LinkedHashMap<String, String>>() {
 
@@ -54,6 +55,15 @@ public class TableDefinitions {
             {put("PRIMARY KEY(" + CheckinEntry.TID + ", " + CheckinEntry.TIMESTAMP + ")", "");}
         };
         {put(CHECKIN, CHECKINTABLE);}
+
+        //フリーフォームのチェックイン入力用
+        final LinkedHashMap<String, String> CHECKINFREEFORMTABLE = new LinkedHashMap<String, String>() {
+            {put(CheckinFreeFormEntry.TID, "TEXT");}
+            {put(CheckinFreeFormEntry.PLACENAME, "TEXT");}
+            {put(CheckinFreeFormEntry.TIMESTAMP, "TEXT");}
+            {put("PRIMARY KEY (" + CheckinFreeFormEntry.TID + ", " + CheckinFreeFormEntry.TIMESTAMP + ")" , "");}
+        };
+        {put(CHECKIN_FREE_FORM, CHECKINFREEFORMTABLE);}
 
         //trajectory_spanテーブルの定義
         final LinkedHashMap<String, String> TRAJECTORYSPANTABLE = new LinkedHashMap<String, String>() {

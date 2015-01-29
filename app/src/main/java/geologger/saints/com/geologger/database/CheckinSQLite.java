@@ -46,7 +46,10 @@ public class CheckinSQLite {
         insertValues.put(CheckinEntry.CATEGORYID, categoryId);
         insertValues.put(CheckinEntry.TIMESTAMP, timestamp);
 
-        return db.insert(TABLENAME, null, insertValues) != -1;
+        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
+        db.close();
+
+        return result;
     }
 
     /**
@@ -96,6 +99,7 @@ public class CheckinSQLite {
             isEOF = cursor.moveToNext();
         }
         cursor.close();
+        db.close();
 
         return ret;
     }

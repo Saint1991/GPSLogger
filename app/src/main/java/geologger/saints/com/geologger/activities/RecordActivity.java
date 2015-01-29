@@ -29,12 +29,9 @@ import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.CompanionSQLite;
-import geologger.saints.com.geologger.database.SQLiteModelDefinition;
-import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
-import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.utils.Position;
 
 
@@ -43,6 +40,7 @@ public class RecordActivity extends FragmentActivity {
 
     private final String TAG = getClass().getSimpleName();
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private final int POICONFIRMATIONCODE = 1;
 
     @SystemService
     ActivityManager mActivityManager;
@@ -65,6 +63,7 @@ public class RecordActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
         setUpMapIfNeeded();
+        setLoggingStateOnView();
     }
 
     @Override
@@ -133,7 +132,6 @@ public class RecordActivity extends FragmentActivity {
                 Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
             }
 
-
         });
 
         builder.show();
@@ -149,6 +147,18 @@ public class RecordActivity extends FragmentActivity {
         stopService(serviceIntent);
 
         setLoggingStateOnView();
+
+        String toastMessage = getResources().getString(R.string.stop_logging);
+        Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Click(R.id.checkInButton)
+    public void onCheckedIn(View cliecked) {
+
+        Log.i(TAG, "onCheckedIn");
+
+        Intent intent = new Intent(getApplicationContext(), PoiConfirmationActivity_.class);
+        startActivityForResult(intent, POICONFIRMATIONCODE);
     }
 
     //ロギング中かどうかによってボタンの表示非表示の状態を制御する

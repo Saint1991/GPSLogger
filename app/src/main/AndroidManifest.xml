@@ -70,6 +70,10 @@
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+        <activity
+            android:name=".activities.PoiConfirmationActivity_"
+            android:label="@string/title_activity_poi_confirmation" >
+        </activity>
 
         <service
             android:name=".services.PositioningService_"
@@ -86,7 +90,6 @@
             android:enabled="true"
             android:exported="true" >
         </service>
-
 
         <receiver
             android:name=".routes.RouteReceiver_"

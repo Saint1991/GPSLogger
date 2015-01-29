@@ -54,7 +54,10 @@ public class TrajectorySQLite {
         insertValues.put(TrajectoryEntry.TIMESTAMP, timestamp);
         insertValues.put(TrajectoryEntry.ISGPSON, isGpsOn);
 
-        return db.insert(TABLENAME, null, insertValues) != -1;
+        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
+        db.close();
+
+        return result;
     }
 
     /**
@@ -100,6 +103,7 @@ public class TrajectorySQLite {
 
         TrajectoryEntry entry = getEntryFromCursor(cursor);
         cursor.close();
+        db.close();
 
         return entry;
     }
@@ -118,6 +122,7 @@ public class TrajectorySQLite {
 
         TrajectoryEntry entry = getEntryFromCursor(cursor);
         cursor.close();
+        db.close();
 
         return entry;
     }
@@ -140,6 +145,7 @@ public class TrajectorySQLite {
             isEOF = cursor.moveToNext();
         }
         cursor.close();
+        db.close();
 
         return ret;
     }

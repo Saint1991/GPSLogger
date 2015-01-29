@@ -16,6 +16,7 @@
     <string name="send">send</string>
     <string name="title_activity_poi">PoiActivity</string>
     <string name="start_logging">Start Logging...</string>
+    <string name="stop_logging">Finish Logging!</string>
     <string name="action_settings">Settings</string>
     <string name="search">SEARCH</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -24,7 +25,6 @@
     <string name="companion">Companion</string>
     <string name="companion_alert">Please check at least one</string>
 
-
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
         <item>Boyfriend / Girlfriend</item>
@@ -32,5 +32,8 @@
         <item>Friend(s)</item>
         <item>Pet</item>
     </string-array>
+
+    <string name="title_activity_poi_confirmation">PoiConfirmationActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>
