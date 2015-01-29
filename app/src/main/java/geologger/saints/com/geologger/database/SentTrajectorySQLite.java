@@ -5,19 +5,27 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EBean;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import geologger.saints.com.geologger.models.SentTrajectoryEntry;
+import geologger.saints.com.geologger.models.TableDefinitions;
 
 /**
  * Created by Mizuno on 2015/01/29.
  */
-public class SentTrajectorySQLite extends BaseSQLiteOpenHelper {
+@EBean
+public class SentTrajectorySQLite {
 
-    public SentTrajectorySQLite(Context context, SQLiteModelDefinition tableDefinition) {
-        super(context, tableDefinition);
-    }
+    private final String TABLENAME = TableDefinitions.SENTTRAJECTORY;
+
+    @Bean
+    BaseSQLiteOpenHelper mDbHelper;
+
+    public SentTrajectorySQLite() {}
 
     /**
      * 指定したトラジェクトリ送信情報のエントリを格納する
@@ -27,14 +35,13 @@ public class SentTrajectorySQLite extends BaseSQLiteOpenHelper {
      */
     public boolean insert(String tid, boolean isSent) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        String tableName = mTableDefinition.getTableName();
         ContentValues insertValues = new ContentValues();
         insertValues.put(SentTrajectoryEntry.TID, tid);
         insertValues.put(SentTrajectoryEntry.ISSENT, isSent);
 
-        return db.insert(tableName, null, insertValues) != -1;
+        return db.insert(TABLENAME, null, insertValues) != -1;
     }
 
     /**
@@ -57,8 +64,8 @@ public class SentTrajectorySQLite extends BaseSQLiteOpenHelper {
      */
     public boolean isSent(String tid) {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, SentTrajectoryEntry.TID + "=" + tid, null, null, null, null, "1");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, SentTrajectoryEntry.TID + "=?" , new String[]{tid}, null, null, null, "1");
 
         boolean ret = cursor.moveToFirst();
         if (!ret) {
@@ -77,8 +84,8 @@ public class SentTrajectorySQLite extends BaseSQLiteOpenHelper {
      */
     public Map<String, Boolean> getSentTrajectoryList() {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, null, null, null, null, null);
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, null);
 
         Map<String, Boolean> sentTable = new HashMap<String, Boolean>();
         boolean isEOF = cursor.moveToFirst();

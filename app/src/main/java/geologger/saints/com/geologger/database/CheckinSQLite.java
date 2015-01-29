@@ -5,20 +5,28 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EBean;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 /**
  * Created by Mizuno on 2015/01/29.
  */
-public class CheckinSQLite extends BaseSQLiteOpenHelper {
+@EBean
+public class CheckinSQLite {
 
-    public CheckinSQLite(Context context, SQLiteModelDefinition tableDefinition) {
-        super(context, tableDefinition);
-    }
+    private final String TABLENAME = TableDefinitions.CHECKIN;
+
+    @Bean
+    BaseSQLiteOpenHelper mDbHelper;
+
+    public CheckinSQLite() {}
 
     /**
      * チェックイン情報のエントリを格納する
@@ -30,16 +38,15 @@ public class CheckinSQLite extends BaseSQLiteOpenHelper {
      */
     public boolean insert(String tid, String placeId, String categoryId, String timestamp) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        String tableName = mTableDefinition.getTableName();
         ContentValues insertValues = new ContentValues();
         insertValues.put(CheckinEntry.TID, tid);
         insertValues.put(CheckinEntry.PLACEID, placeId);
         insertValues.put(CheckinEntry.CATEGORYID, categoryId);
         insertValues.put(CheckinEntry.TIMESTAMP, timestamp);
 
-        return db.insert(tableName, null, insertValues) != -1;
+        return db.insert(TABLENAME, null, insertValues) != -1;
     }
 
     /**
@@ -78,8 +85,8 @@ public class CheckinSQLite extends BaseSQLiteOpenHelper {
      */
     public List<CheckinEntry> getCheckinList(String tid) {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, CheckinEntry.TID + "=" + tid, null, null, null, CheckinEntry.TIMESTAMP + " ASC");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, CheckinEntry.TID + "=?", new String[]{tid}, null, null, CheckinEntry.TIMESTAMP + " ASC");
 
         List<CheckinEntry> ret = new ArrayList<CheckinEntry>();
         boolean isEOF = cursor.moveToFirst();

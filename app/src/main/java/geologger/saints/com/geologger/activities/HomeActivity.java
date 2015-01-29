@@ -36,13 +36,13 @@ public class HomeActivity extends Activity {
 
     @Click(R.id.button_record)
     void recordButtonClicked() {
-        Intent intent = new Intent(getApplicationContext(), MapsActivity_.class);
+        Intent intent = new Intent(getApplicationContext(), RecordActivity_.class);
         startActivity(intent);
     }
 
     @Click(R.id.button_log)
     void logButtonClicked() {
-        Intent intent = new Intent(getApplicationContext(), LogActivity_.class);
+        Intent intent = new Intent(getApplicationContext(), LogListActivity_.class);
         startActivity(intent);
     }
 

@@ -5,20 +5,28 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EBean;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 /**
  * Created by Mizuno on 2015/01/29.
  */
-public class TrajectorySpanSQLite extends BaseSQLiteOpenHelper {
+@EBean
+public class TrajectorySpanSQLite {
 
-    public TrajectorySpanSQLite(Context context, SQLiteModelDefinition tableDefinition) {
-        super(context, tableDefinition);
-    }
+    private final String TABLENAME = TableDefinitions.TRAJECTORY_SPAN;
+
+    @Bean
+    BaseSQLiteOpenHelper mDbHelper;
+
+    public TrajectorySpanSQLite() {}
 
     /**
      * 指定したtid, 開始時刻beginを持つエントリを作成する
@@ -28,14 +36,13 @@ public class TrajectorySpanSQLite extends BaseSQLiteOpenHelper {
      */
     public boolean insert(String tid, String begin) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        String tableName = mTableDefinition.getTableName();
         ContentValues insertValues = new ContentValues();
         insertValues.put(TrajectorySpanEntry.TID, tid);
         insertValues.put(TrajectorySpanEntry.BEGIN, begin);
 
-        return db.insert(tableName, null, insertValues) != -1;
+        return db.insert(TABLENAME, null, insertValues) != -1;
     }
 
     /**
@@ -57,11 +64,11 @@ public class TrajectorySpanSQLite extends BaseSQLiteOpenHelper {
      */
     public boolean setEnd(String tid, String end) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         ContentValues updateValues = new ContentValues();
         updateValues.put(TrajectorySpanEntry.END, end);
 
-        return db.update(mTableDefinition.getTableName(), updateValues, TrajectorySpanEntry.TID + "=" + tid, null) == 1;
+        return db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
     }
 
 
@@ -73,8 +80,8 @@ public class TrajectorySpanSQLite extends BaseSQLiteOpenHelper {
      */
     public boolean isEnd(String tid) {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, TrajectorySpanEntry.TID + "=" + tid, null, null, null, null, null);
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
 
         if (!cursor.moveToFirst()) {
             return false;
@@ -96,8 +103,8 @@ public class TrajectorySpanSQLite extends BaseSQLiteOpenHelper {
      */
     public List<TrajectorySpanEntry> getSpanList() {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
 
         List<TrajectorySpanEntry> ret = new ArrayList<TrajectorySpanEntry>();
         boolean isEOF = cursor.moveToFirst();
@@ -117,8 +124,8 @@ public class TrajectorySpanSQLite extends BaseSQLiteOpenHelper {
      */
     public List<String> getTidList() {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), new String[]{TrajectorySpanEntry.TID}, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
 
         List<String> ret = new ArrayList<String>();
         boolean isEOF = cursor.moveToFirst();

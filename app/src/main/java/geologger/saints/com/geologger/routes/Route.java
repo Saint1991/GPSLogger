@@ -7,7 +7,7 @@ import org.androidannotations.annotations.EBean;
 
 import java.util.HashMap;
 
-import geologger.saints.com.geologger.services.GPSLoggingService_;
+import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.services.SendDataService_;
 
 /**
@@ -19,7 +19,7 @@ public class Route {
     private static HashMap<String, Class> routeMap = new HashMap<String, Class>() {
         {
             put(WifiManager.WIFI_STATE_CHANGED_ACTION, SendDataService_.class);
-            put(Intent.ACTION_BOOT_COMPLETED, GPSLoggingService_.class);
+            put(Intent.ACTION_BOOT_COMPLETED, PositioningService_.class);
         }
     };
 

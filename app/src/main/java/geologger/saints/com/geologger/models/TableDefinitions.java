@@ -1,6 +1,7 @@
 package geologger.saints.com.geologger.models;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 import geologger.saints.com.geologger.models.CheckinEntry;
@@ -16,12 +17,16 @@ import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 public class TableDefinitions {
 
     public static final String DBNAME = "geologger";
+    public static final String TRAJECTORY = "trajectory";
+    public static final String COMPANION = "companion";
+    public static final String CHECKIN = "checkin";
+    public static final String TRAJECTORY_SPAN = "trajectory_span";
+    public static final String SENTTRAJECTORY = "sent_trajectory";
 
-    public static final HashMap <String, HashMap<String, String>> tables = new HashMap<String, HashMap<String, String>>() {
+    public static final HashMap <String, LinkedHashMap<String, String>> tables = new HashMap<String, LinkedHashMap<String, String>>() {
 
         //trajectoryテーブルの定義
-        final String TRAJECTORY = "trajectory";
-        final HashMap<String, String> TRAJECTORYTABLE = new HashMap<String, String>() {
+        final LinkedHashMap<String, String> TRAJECTORYTABLE = new LinkedHashMap<String, String>() {
             {put(TrajectoryEntry.TID, "TEXT");}
             {put(TrajectoryEntry.LATITUDE, "REAL");}
             {put(TrajectoryEntry.LONGITUDE, "REAL");}
@@ -33,37 +38,37 @@ public class TableDefinitions {
         {put(TRAJECTORY, TRAJECTORYTABLE);}
 
         //companionテーブルの定義
-        final String COMPANION = "companion";
-        final HashMap<String, String> COMPANIONTABLE = new HashMap<String, String>() {
+        final LinkedHashMap<String, String> COMPANIONTABLE = new LinkedHashMap<String, String>() {
             {put(CompanionEntry.TID, "TEXT PRIMARY KEY");}
             {put(CompanionEntry.COMPANION, "TEXT");}
             {put(CompanionEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
         };
+        {put(COMPANION, COMPANIONTABLE);}
 
         //checkinテーブルの定義
-        final String CHECKIN = "checkin";
-        final HashMap<String, String> CHECKINTABLE = new HashMap<String, String>() {
+        final LinkedHashMap<String, String> CHECKINTABLE = new LinkedHashMap<String, String>() {
             {put(CheckinEntry.TID, "TEXT");}
             {put(CheckinEntry.PLACEID, "TEXT");}
             {put(CheckinEntry.CATEGORYID, "TEXT");}
             {put(CheckinEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
             {put("PRIMARY KEY(" + CheckinEntry.TID + ", " + CheckinEntry.TIMESTAMP + ")", "");}
         };
+        {put(CHECKIN, CHECKINTABLE);}
 
         //trajectory_spanテーブルの定義
-        final String TRAJECTORY_SPAN = "trajectory_span";
-        final HashMap<String, String> TRAJECTORYSPANTABLE = new HashMap<String, String>() {
+        final LinkedHashMap<String, String> TRAJECTORYSPANTABLE = new LinkedHashMap<String, String>() {
             {put(TrajectorySpanEntry.TID, "TEXT PRIMARY KEY");}
             {put(TrajectorySpanEntry.BEGIN, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
             {put(TrajectorySpanEntry.END, "TEXT");}
         };
+        {put(TRAJECTORY_SPAN, TRAJECTORYSPANTABLE);}
 
         //送信済みのトラジェクトリを管理するテーブルsentの定義
-        final String SENTTRAJECTORY = "sent_trajectory";
-        final HashMap<String, String> SENTTABLE = new HashMap<String, String>() {
+        final LinkedHashMap<String, String> SENTTABLE = new LinkedHashMap<String, String>() {
             {put(SentTrajectoryEntry.TID, "TEXT PRIMARY KEY");}
             {put(SentTrajectoryEntry.ISSENT, "BOOLEAN");}
         };
+        {put(SENTTRAJECTORY, SENTTABLE);}
 
     };
 
@@ -71,7 +76,7 @@ public class TableDefinitions {
         return tables.keySet();
     }
 
-    public static HashMap<String, String> getColumnDefinition(String tableName) {
+    public static LinkedHashMap<String, String> getColumnDefinition(String tableName) {
         return tables.get(tableName);
     }
 

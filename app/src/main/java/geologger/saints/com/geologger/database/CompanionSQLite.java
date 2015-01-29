@@ -5,20 +5,28 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EBean;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.models.CompanionEntry;
+import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 /**
  * Created by Mizuno on 2015/01/29.
  */
-public class CompanionSQLite extends BaseSQLiteOpenHelper {
+@EBean
+public class CompanionSQLite {
 
-    public CompanionSQLite(Context context, SQLiteModelDefinition tableDefinition) {
-        super(context, tableDefinition);
-    }
+    private final String TABLENAME = TableDefinitions.COMPANION;
+
+    @Bean
+    BaseSQLiteOpenHelper mDbHelper;
+
+    public CompanionSQLite() {}
 
     /**
      * 同伴者情報のエントリを格納する
@@ -28,15 +36,14 @@ public class CompanionSQLite extends BaseSQLiteOpenHelper {
      */
     public boolean insert(String tid, String companion, String timestamp) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        String tableName = mTableDefinition.getTableName();
         ContentValues insertValues = new ContentValues();
         insertValues.put(CompanionEntry.TID, tid);
         insertValues.put(CompanionEntry.COMPANION, companion);
         insertValues.put(CompanionEntry.TIMESTAMP, timestamp);
 
-        return db.insert(tableName, null, insertValues) != -1;
+        return db.insert(TABLENAME, null, insertValues) != -1;
     }
 
     /**
@@ -72,8 +79,8 @@ public class CompanionSQLite extends BaseSQLiteOpenHelper {
      */
     public List<CompanionEntry> getCompanionList(String tid) {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor= db.query(mTableDefinition.getTableName(), null, CompanionEntry.TID + "=" + tid, null, null, null, CompanionEntry.TIMESTAMP + " ASC");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor= db.query(TABLENAME, null, CompanionEntry.TID + "=?", new String[]{tid}, null, null, CompanionEntry.TIMESTAMP + " ASC");
 
         List<CompanionEntry> ret = new ArrayList<CompanionEntry>();
         boolean isEOF = cursor.moveToFirst();

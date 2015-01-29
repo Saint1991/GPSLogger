@@ -6,9 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EBean;
+import org.androidannotations.annotations.SystemService;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
@@ -16,14 +21,18 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/28.
  * Trajectoryテーブルに対するデータの操作を扱うクラス
  */
-public class TrajectorySQLite extends BaseSQLiteOpenHelper {
+@EBean
+public class TrajectorySQLite {
 
-    private LocationManager mLocationManager;
+    private final String TABLENAME = TableDefinitions.TRAJECTORY;
 
-    public TrajectorySQLite(Context context, SQLiteModelDefinition tableDefinition) {
-        super(context, tableDefinition);
-        mLocationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-    }
+    @SystemService
+    LocationManager mLocationManager;
+
+    @Bean
+    BaseSQLiteOpenHelper mDbHelper;
+
+    public TrajectorySQLite() {}
 
     /**
      * トラジェクトリのエントリを格納する
@@ -36,9 +45,8 @@ public class TrajectorySQLite extends BaseSQLiteOpenHelper {
      */
     public boolean insert(String tid, float latitude, float longitude, String timestamp, boolean isGpsOn) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-        String tableName = mTableDefinition.getTableName();
         ContentValues insertValues = new ContentValues();
         insertValues.put(TrajectoryEntry.TID, tid);
         insertValues.put(TrajectoryEntry.LATITUDE, latitude);
@@ -46,7 +54,7 @@ public class TrajectorySQLite extends BaseSQLiteOpenHelper {
         insertValues.put(TrajectoryEntry.TIMESTAMP, timestamp);
         insertValues.put(TrajectoryEntry.ISGPSON, isGpsOn);
 
-        return db.insert(tableName, null, insertValues) != -1;
+        return db.insert(TABLENAME, null, insertValues) != -1;
     }
 
     /**
@@ -84,8 +92,8 @@ public class TrajectorySQLite extends BaseSQLiteOpenHelper {
      */
     public TrajectoryEntry getFirstEntry(String tid) {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, TrajectoryEntry.TID + "=" + tid, null, null, null, TrajectoryEntry.TIMESTAMP + " ASC", "1");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " ASC", "1");
         if (!cursor.moveToFirst()) {
             return null;
         }
@@ -102,8 +110,8 @@ public class TrajectorySQLite extends BaseSQLiteOpenHelper {
      * @return 最後のトラジェクトリエントリ
      */
     public TrajectoryEntry getLastEntry(String tid) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, TrajectoryEntry.TID + "=" + tid, null, null, null, TrajectoryEntry.TIMESTAMP + " DESC", "1");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " DESC", "1");
         if (!cursor.moveToFirst()) {
             return null;
         }
@@ -121,8 +129,8 @@ public class TrajectorySQLite extends BaseSQLiteOpenHelper {
      */
     public List<TrajectoryEntry> getTrajectory(String tid) {
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(mTableDefinition.getTableName(), null, TrajectoryEntry.TID + "=" + tid, null, null, null, TrajectoryEntry.TIMESTAMP + " ASC");
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " ASC");
 
         List<TrajectoryEntry> ret = new ArrayList<TrajectoryEntry>();
         boolean isEOF = cursor.moveToFirst();

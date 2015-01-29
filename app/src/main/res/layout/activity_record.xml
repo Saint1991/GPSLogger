@@ -35,7 +35,8 @@
         <Button
             style="@style/MapButtons"
             android:id="@+id/checkInButton"
-            android:text="@string/checkin"/>
+            android:text="@string/checkin"
+            android:visibility="gone"/>
 
 
     </LinearLayout>
