@@ -2,8 +2,11 @@ package geologger.saints.com.geologger.activities;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -14,13 +17,16 @@ import android.widget.Toast;
 import com.google.android.gms.identity.intents.AddressConstants;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
@@ -32,6 +38,8 @@ import geologger.saints.com.geologger.database.CompanionSQLite;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
+import geologger.saints.com.geologger.map.MapWorker;
+import geologger.saints.com.geologger.utils.MyLocationListener;
 import geologger.saints.com.geologger.utils.Position;
 
 
@@ -41,6 +49,8 @@ public class RecordActivity extends FragmentActivity {
     private final String TAG = getClass().getSimpleName();
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private final int POICONFIRMATIONCODE = 1;
+
+    private MapWorker mMapWorker;
 
     @SystemService
     ActivityManager mActivityManager;
@@ -147,6 +157,9 @@ public class RecordActivity extends FragmentActivity {
         stopService(serviceIntent);
 
         setLoggingStateOnView();
+        mMap.clear();
+        float[] position = Position.getPosition(getApplicationContext());
+        mMapWorker.updateCurrentMarkerPosition(position[0], position[1]);
 
         String toastMessage = getResources().getString(R.string.stop_logging);
         Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
@@ -190,6 +203,43 @@ public class RecordActivity extends FragmentActivity {
         return false;
     }
 
+
+    @Receiver(actions = GPSLoggingService.ACTION)
+    public void onPositionLogged(Intent intent) {
+
+        if (mMap == null || mMapWorker == null) {
+            return;
+        }
+
+        try {
+
+            float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
+            float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
+            mMapWorker.addMarker(latitude, longitude);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Receiver(actions = MyLocationListener.ACTION)
+    public void onCurrentPositionUpdated(Intent intent) {
+
+        if (mMap == null || mMapWorker == null) {
+            return;
+        }
+
+        try {
+
+            float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
+            float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
+            mMapWorker.updateCurrentMarkerPosition(latitude, longitude);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
@@ -225,10 +275,17 @@ public class RecordActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
+
         float[] position = Position.getPosition(getApplicationContext());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(position[0], position[1]), 10));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(position[0], position[1])).title("Marker"));
+        MarkerOptions currentPositionMarkerOption = new MarkerOptions();
+        currentPositionMarkerOption.position(new LatLng(position[0], position[1])).title("I'm here!");
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(position[0], position[1]), 15));
+
+        Marker currentPositionMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(position[0], position[1])).title("I'm here"));
+        mMapWorker = new MapWorker(mMap, currentPositionMarker);
     }
 
+    //endregion
 
 }

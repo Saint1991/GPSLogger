@@ -10,8 +10,8 @@ import android.util.Log;
 public class Position {
 
     private static final String PREFNAME = "Position";
-    private static final String LATITUDE = "latitude";
-    private static final String LONGITUDE = "longitude";
+    public static final String LATITUDE = "latitude";
+    public static final String LONGITUDE = "longitude";
 
     public static void savePosition(Context context, float latitude, float longitude) {
         Log.d("Position", "savePosition");
