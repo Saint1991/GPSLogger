@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.OnActivityResult;
 import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
@@ -34,7 +35,10 @@ import java.util.List;
 import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
+import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
+import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
@@ -50,6 +54,8 @@ public class RecordActivity extends FragmentActivity {
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private final int POICONFIRMATIONCODE = 1;
 
+    private String tid = null;
+
     private MapWorker mMapWorker;
 
     @SystemService
@@ -57,6 +63,12 @@ public class RecordActivity extends FragmentActivity {
 
     @Bean
     CompanionSQLite mCompanionDbHandler;
+
+    @Bean
+    TrajectorySpanSQLite mTrajectorySpanDbHandler;
+
+    @Bean
+    CheckinSQLite mCheckinSQLite;
 
     @ViewById(R.id.loggingStartButton)
     Button mLoggingStartButton;
@@ -124,7 +136,7 @@ public class RecordActivity extends FragmentActivity {
 
                 //Companionが正しく選択されていれば Trajectory IDを生成し，
                 //別スレッドでデータベースに格納
-                final String tid = UUID.randomUUID().toString();
+                tid = UUID.randomUUID().toString();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -172,6 +184,32 @@ public class RecordActivity extends FragmentActivity {
 
         Intent intent = new Intent(getApplicationContext(), PoiConfirmationActivity_.class);
         startActivityForResult(intent, POICONFIRMATIONCODE);
+    }
+
+    @OnActivityResult(POICONFIRMATIONCODE)
+    void onCheckinResult(int resultCode, Intent data) {
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        final String tid = mTrajectorySpanDbHandler.getLoggingTid();
+        if (tid == null) {
+            return;
+        }
+
+        final String placeId = data.getStringExtra(CheckinEntry.PLACEID);
+        final String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
+
+        Log.i(TAG, "onCheckinResult " + placeId);
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+               mCheckinSQLite.insert(tid, placeId, categoryId);
+            }
+        }).start();
     }
 
     //ロギング中かどうかによってボタンの表示非表示の状態を制御する
@@ -224,6 +262,8 @@ public class RecordActivity extends FragmentActivity {
 
     @Receiver(actions = MyLocationListener.ACTION)
     public void onCurrentPositionUpdated(Intent intent) {
+
+        Log.i(TAG, MyLocationListener.ACTION);
 
         if (mMap == null || mMapWorker == null) {
             return;

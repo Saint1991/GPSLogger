@@ -1,5 +1,6 @@
 package geologger.saints.com.geologger.utils;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -19,25 +20,25 @@ public class MyLocationListener implements LocationListener{
     public static final String ACTION = "CurrentPositionUpdated";
 
     @RootContext
-    Context mContext;
+    Service mService;
 
-    public MyLocationListener(Context context) {}
+    public MyLocationListener() {}
 
     //Definition of LocationListener
     @Override
     public void onLocationChanged(Location location) {
 
-        Log.i("MyLocationListener", "onLocationChanged");
-
         float latitude = (float)location.getLatitude();
         float longitude = (float)location.getLongitude();
+
+        Position.savePosition(mService, latitude, longitude);
 
         Intent broadcastIntent = new Intent(ACTION);
         broadcastIntent.putExtra(Position.LATITUDE, latitude);
         broadcastIntent.putExtra(Position.LONGITUDE, longitude);
-        mContext.sendBroadcast(broadcastIntent);
+        mService.sendBroadcast(broadcastIntent);
 
-        Position.savePosition(mContext, latitude, longitude);
+        Log.i("MyLocationListener", ACTION);
     }
 
     @Override

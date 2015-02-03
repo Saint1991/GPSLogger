@@ -102,7 +102,9 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
                 switch (message.what) {
 
                     case 0:
-                        mProgress.dismiss();
+                        if (mProgress != null) {
+                            mProgress.dismiss();
+                        }
                         break;
 
                     case 1:

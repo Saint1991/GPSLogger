@@ -106,6 +106,30 @@ public class TrajectorySpanSQLite {
     }
 
     /**
+     * 現在ロギング中のトラジェクトリのTIDを取得
+     * @return ロギング中のものがない場合はnullを返す
+     */
+    public String getLoggingTid() {
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, null);
+
+        if (!cursor.moveToFirst()) {
+            return null;
+        }
+
+        String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
+        if (tid.length() == 0 || tid == null) {
+            return null;
+        }
+
+        cursor.close();
+        db.close();
+
+        return tid;
+    }
+
+    /**
      * トラジェクトリスパンの一覧をListで取得する
      * 結果は開始時刻beginでソートされている
      * @return
