@@ -27,6 +27,7 @@ import android.widget.ListView;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
 
 import java.util.List;
 
@@ -44,7 +45,6 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
 public class PoiConfirmationActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener {
 
     private final String TAG = getClass().getSimpleName();
-    private static Handler mHandler;
     private ProgressDialog mProgress;
 
     private PoiListAdapter mAdapter;
@@ -143,46 +143,34 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
         confirmationDialog.show();
     }
 
+    @UiThread
+    public void dismissProgress() {
+        if (mProgress != null) {
+            mProgress.dismiss();
+        }
+    }
+
+    @UiThread
+    public void initListView() {
+
+        FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
+        PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
+        ListView poiList = fragment.getListView();
+        Log.i(TAG, mFourSquarePoiList.toString());
+        mAdapter = (PoiListAdapter)poiList.getAdapter();
+        mAdapter.addAll(mFourSquarePoiList);
+        poiList.setAdapter(mAdapter);
+
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi_confirmation);
-
-
-        mHandler = new Handler() {
-
-            @Override
-            public void handleMessage(Message message) {
-
-                switch (message.what) {
-
-                    case 0:
-                        if (mProgress != null) {
-                            mProgress.dismiss();
-                        }
-                        break;
-
-                    case 1:
-
-                        FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
-                        PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
-                        ListView poiList = fragment.getListView();
-                        Log.i(TAG, mFourSquarePoiList.toString());
-                        mAdapter = (PoiListAdapter)poiList.getAdapter();
-                        mAdapter.addAll(mFourSquarePoiList);
-                        poiList.setAdapter(mAdapter);
-                        break;
-
-                    default:
-                        if (mProgress != null) {
-                            mProgress.dismiss();
-                        }
-                        break;
-                }
-            }
-        };
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("searching...");
@@ -196,17 +184,16 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
                 mFourSquarePoiList = mFourSquareClient.searchPoi(null);
                 if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
-                    mHandler.sendEmptyMessage(0);
+                    dismissProgress();
                     Log.i(TAG, "emptyResult");
                     return;
                 }
 
-                mHandler.sendEmptyMessage(1);
-                mHandler.sendEmptyMessage(0);
+                initListView();
+                dismissProgress();
             }
 
         }).start();
-
 
     }
 
@@ -232,4 +219,5 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
         return super.onOptionsItemSelected(item);
     }
+
 }
