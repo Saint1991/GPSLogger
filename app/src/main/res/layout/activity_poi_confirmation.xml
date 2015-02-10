@@ -21,6 +21,33 @@
         android:id="@+id/poi_candidates"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="7"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Not found? →"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/buttonToFreeForm"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Input By Free Form"
+            android:textSize="18sp"
+            android:background="@color/app_color"/>
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -35,10 +35,12 @@ import java.util.List;
 import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
@@ -69,6 +71,9 @@ public class RecordActivity extends FragmentActivity {
 
     @Bean
     CheckinSQLite mCheckinSQLite;
+
+    @Bean
+    CheckinFreeFormSQLite mCheckinFreeFormSQLite;
 
     @ViewById(R.id.loggingStartButton)
     Button mLoggingStartButton;
@@ -198,18 +203,44 @@ public class RecordActivity extends FragmentActivity {
             return;
         }
 
-        final String placeId = data.getStringExtra(CheckinEntry.PLACEID);
-        final String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
+        //Confirm whether result is by free form.
+        boolean isFreeform = data.getBooleanExtra("IsFreeForm", false);
+        if (!isFreeform) {
 
-        Log.i(TAG, "onCheckinResult " + placeId);
+            final String placeId = data.getStringExtra(CheckinEntry.PLACEID);
+            final String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
+            final String placeName = data.getStringExtra("PlaceName");
+            Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
 
-        new Thread(new Runnable() {
+            Log.i(TAG, "onCheckinResult " + placeId);
 
-            @Override
-            public void run() {
-               mCheckinSQLite.insert(tid, placeId, categoryId);
-            }
-        }).start();
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    mCheckinSQLite.insert(tid, placeId, categoryId);
+                }
+            }).start();
+        }
+
+        //By Free Form Result
+        else {
+
+            final String placeName = data.getStringExtra(CheckinFreeFormEntry.PLACENAME);
+            Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
+
+            Log.i(TAG, "onCheckinResult " + placeName);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mCheckinFreeFormSQLite.insert(tid, placeName);
+                }
+            });
+
+        }
+
+
     }
 
     //ロギング中かどうかによってボタンの表示非表示の状態を制御する

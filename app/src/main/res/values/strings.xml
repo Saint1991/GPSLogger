@@ -24,6 +24,8 @@
     <string name="delete">delete</string>
     <string name="companion">Companion</string>
     <string name="companion_alert">Please check at least one</string>
+    <string name="freeform">Free Form</string>
+    <string name="freeform_hint">Input checking in place name here</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
