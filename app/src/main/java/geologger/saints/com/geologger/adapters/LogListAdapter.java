@@ -18,14 +18,22 @@ import geologger.saints.com.geologger.models.TrajectorySpanEntry;
  */
 public class LogListAdapter extends ArrayAdapter<TrajectorySpanEntry> {
 
-    private List<TrajectorySpanEntry> mTrajectorySpanList;
-    private Context mContext;
+    protected List<TrajectorySpanEntry> mTrajectorySpanList;
+    protected Context mContext;
+    protected int entryResource;
 
-    public LogListAdapter(Context context, List<TrajectorySpanEntry> datas) {
-        super(context, R.layout.log_list_entry, datas);
+    //For Extended class
+    protected LogListAdapter(Context context, int resourceId, List<TrajectorySpanEntry> datas) {
+        super(context, resourceId, datas);
         this.mContext = context;
         this.mTrajectorySpanList = datas;
+        this.entryResource = resourceId;
     }
+
+    public LogListAdapter(Context context, List<TrajectorySpanEntry> data) {
+        this(context, R.layout.log_list_entry, data);
+    }
+
 
     @Override
     public int getCount() {
@@ -41,11 +49,17 @@ public class LogListAdapter extends ArrayAdapter<TrajectorySpanEntry> {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout logListEntry = (LinearLayout)inflater.inflate(R.layout.log_list_entry, null);
 
         TrajectorySpanEntry entry = mTrajectorySpanList.get(position);
-        ((TextView)logListEntry.findViewById(R.id.begin_timestamp)).setText(entry.getBegin());
+        TextView entryText = (TextView)inflater.inflate(this.entryResource, null);
+        entryText.setText(entry.getBegin());
 
-        return logListEntry;
+        return entryText;
     }
+
+
+    public LogListAdapter cloneInOtherLayout(int resourceId) {
+        return new LogListAdapter(mContext, resourceId, mTrajectorySpanList);
+    }
+
 }

@@ -8,30 +8,47 @@
     android:orientation="vertical"
     tools:context="geologger.saints.com.geologger.activities.LogListActivity">
 
-    <ListView
-        android:id="@+id/log_list"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@color/app_color"
-        android:dividerHeight="1dp"
-        android:layout_weight="5"/>
+        android:layout_weight="5">
+
+        <ListView
+            android:id="@+id/log_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/app_color"
+            android:dividerHeight="1dp"/>
+
+        <TextView
+            android:id="@+id/text_no_record"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="No Record"
+            android:textSize="20sp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="#000000"
-        android:gravity="right">
+        android:gravity="center">
 
         <Button
             android:id="@+id/log_delete_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:background="@color/app_color"
+            style="@style/LogListButtons"
             android:text="@string/delete"
-            android:textColor="@color/white"
-            android:textSize="20sp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/log_delete_cancel_button"
+            style="@style/LogListButtons"
+            android:text="@string/cancel"
             android:visibility="gone"/>
 
     </LinearLayout>

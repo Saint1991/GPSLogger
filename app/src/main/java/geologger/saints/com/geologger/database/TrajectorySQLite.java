@@ -22,7 +22,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Trajectoryテーブルに対するデータの操作を扱うクラス
  */
 @EBean
-public class TrajectorySQLite {
+public class TrajectorySQLite implements IRemoveByTid {
 
     private final String TABLENAME = TableDefinitions.TRAJECTORY;
 
@@ -86,6 +86,20 @@ public class TrajectorySQLite {
         String timestamp = TimestampGenerator.getTimestamp();
         boolean isGpsOn = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         return this.insert(tid, latitude, longitude, timestamp, isGpsOn);
+    }
+
+    /**
+     * 指定したtidに対応するエントリを削除する
+     * @param tid
+     * @return 成功時true, 失敗時false
+     */
+    public int removeByTid(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removedCount = db.delete(TABLENAME, TrajectoryEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removedCount;
     }
 
     /**

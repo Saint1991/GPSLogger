@@ -19,7 +19,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class TrajectorySpanSQLite {
+public class TrajectorySpanSQLite implements IRemoveByTid {
 
     private final String TABLENAME = TableDefinitions.TRAJECTORY_SPAN;
 
@@ -57,6 +57,19 @@ public class TrajectorySpanSQLite {
     public boolean insert(String tid) {
         String begin = TimestampGenerator.getTimestamp();
         return this.insert(tid, begin);
+    }
+
+    /**
+     * 指定したtidに対応するエントリを削除する
+     * @param tid
+     * @return 成功時true, 失敗時false
+     */
+    public int removeByTid(String tid) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removedCount = db.delete(TABLENAME, TrajectorySpanEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removedCount;
     }
 
     /**

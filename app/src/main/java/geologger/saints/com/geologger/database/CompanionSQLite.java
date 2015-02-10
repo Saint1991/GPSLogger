@@ -19,7 +19,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class CompanionSQLite {
+public class CompanionSQLite implements IRemoveByTid {
 
     private final String TABLENAME = TableDefinitions.COMPANION;
 
@@ -72,6 +72,20 @@ public class CompanionSQLite {
     public boolean insert(String tid, String companion) {
         String timestamp = TimestampGenerator.getTimestamp();
         return this.insert(tid, companion, timestamp);
+    }
+
+    /**
+     * 指定したtidに対応するエントリを削除する
+     * @param tid
+     * @return 成功時true, 失敗時false
+     */
+    public int removeByTid(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removedCount = db.delete(TABLENAME, CompanionEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removedCount;
     }
 
     /**

@@ -18,7 +18,7 @@ import geologger.saints.com.geologger.models.TableDefinitions;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class SentTrajectorySQLite {
+public class SentTrajectorySQLite implements IRemoveByTid {
 
     private final String TABLENAME = TableDefinitions.SENTTRAJECTORY;
 
@@ -58,6 +58,20 @@ public class SentTrajectorySQLite {
         boolean isSent = entry.getIsSent();
 
         return this.insert(tid, isSent);
+    }
+
+    /**
+     * 指定したtidに対応するエントリを削除する
+     * @param tid
+     * @return 成功時true, 失敗時false
+     */
+    public int removeByTid(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removedCount = db.delete(TABLENAME, SentTrajectoryEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removedCount;
     }
 
     /**

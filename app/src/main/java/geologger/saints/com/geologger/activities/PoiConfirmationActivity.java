@@ -44,7 +44,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
 public class PoiConfirmationActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener {
 
     private final String TAG = getClass().getSimpleName();
-    private Handler mHandler;
+    private static Handler mHandler;
     private ProgressDialog mProgress;
 
     private PoiListAdapter mAdapter;
@@ -106,22 +106,41 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
         FourSquarePoi entry = (FourSquarePoi)parent.getAdapter().getItem(position);
 
-        String placeId = entry.getId();
+        final String placeId = entry.getId();
+        final String placeName = entry.getName();
         FourSquarePoiCategory[] categories = entry.getCategories();
-        String timestamp = TimestampGenerator.getTimestamp();
-        String placeName = entry.getName();
-        StringBuilder categoryId = new StringBuilder();
+
+        final StringBuilder categoryId = new StringBuilder();
         for (FourSquarePoiCategory category : categories) {
             categoryId.append(category.getId() + ",");
         }
 
-        Intent intent = new Intent();
-        intent.putExtra(CheckinEntry.PLACEID, placeId);
-        intent.putExtra(CheckinEntry.CATEGORYID, categoryId.substring(0, categoryId.length() - 1));
-        intent.putExtra("PlaceName", placeName);
+        AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
+        confirmationDialog.setTitle("Check-in");
+        confirmationDialog.setMessage("Check-in " + placeName + "?");
 
-        setResult(RESULT_OK, intent);
-        finish();
+        confirmationDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Intent intent = new Intent();
+                intent.putExtra(CheckinEntry.PLACEID, placeId);
+                intent.putExtra(CheckinEntry.CATEGORYID, categoryId.substring(0, categoryId.length() - 1));
+                intent.putExtra("PlaceName", placeName);
+
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
+
+        confirmationDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        confirmationDialog.show();
     }
 
     @Override

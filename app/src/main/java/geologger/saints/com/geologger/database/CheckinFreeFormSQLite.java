@@ -18,7 +18,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/30.
  */
 @EBean
-public class CheckinFreeFormSQLite {
+public class CheckinFreeFormSQLite implements IRemoveByTid {
 
     private final String TABLENAME = TableDefinitions.CHECKIN_FREE_FORM;
 
@@ -73,6 +73,20 @@ public class CheckinFreeFormSQLite {
     public boolean insert(String tid, String placeName) {
         String timestamp = TimestampGenerator.getTimestamp();
         return this.insert(tid, placeName, timestamp);
+    }
+
+    /**
+     * 指定したtidに対応するエントリを削除する
+     * @param tid
+     * @return 成功時true, 失敗時false
+     */
+    public int removeByTid(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removedCount = db.delete(TABLENAME, CheckinFreeFormEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removedCount;
     }
 
     /**
