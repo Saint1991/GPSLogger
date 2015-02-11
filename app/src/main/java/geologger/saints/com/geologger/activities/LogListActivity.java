@@ -5,8 +5,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -19,7 +17,6 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
@@ -27,7 +24,6 @@ import geologger.saints.com.geologger.adapters.LogListAdapter;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
-import geologger.saints.com.geologger.database.IRemoveByTid;
 import geologger.saints.com.geologger.database.SentTrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
@@ -80,9 +76,17 @@ public class LogListActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
 
-        //ListViewを作成
-        //データが空の場合は空である旨を表示するTextViewのみを描画する
+        initLogList();
+    }
+
+    //region Init
+
+    // Initializing LogList
+    private void initLogList() {
+
         List<TrajectorySpanEntry> spanList = mTrajectorySpanDbHandler.getSpanList();
+
+        // If there is no entry, show the message "No Record"
         if (spanList == null || spanList.size() == 0) {
             TextView messageView = new TextView(this);
             messageView.setText("No Record");
@@ -91,17 +95,18 @@ public class LogListActivity extends ActionBarActivity {
             return;
         }
 
+        //Registering Items to ListView
         LogListAdapter adapter = new LogListAdapter(getApplicationContext(), spanList);
         mLogList.setAdapter(adapter);
 
-        //クリックイベントを登録
-        //対応するtidをインテントに渡してLogActivityを起動
+        // Click Event
+        // In the Delete mode, only check the entry
+        // In the Normal mode, start Log Activity with corresponding TID to clicked entry
         mLogList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                //DELETEモードの場合はチェックのみ入れて終了し，アクティビティ遷移は行わない
                 if (mode.equals(MODE.DELETE)) {
                     return;
                 }
@@ -115,7 +120,8 @@ public class LogListActivity extends ActionBarActivity {
             }
         });
 
-        //長押しイベントを登録
+        // Long Click Event
+        // Switch to Delete mode
         mLogList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
             @Override
@@ -126,42 +132,40 @@ public class LogListActivity extends ActionBarActivity {
         });
     }
 
-    @Click(R.id.log_delete_cancel_button)
-    public void cancelLogDeleteMode() {
-        switchMode(MODE.NORMAL);
-    }
+    //endregion
 
+    //region DELETE
+
+    //This is called when the DELETE Button is Clicked
+    //Remove Selected entries from view and DB
     @Click(R.id.log_delete_button)
     public void deleteSelectedLog() {
 
-        //DELETEモードでない場合は終了
+        //If not DELETE mode, finish
         if (!mode.equals(MODE.DELETE) || mLogList == null) {
             return;
         }
 
-        //チェックされている行を取得する
+        //Getting Checked entries
         SparseBooleanArray checkedPositions = mLogList.getCheckedItemPositions();
         if (checkedPositions == null) {
             return;
         }
 
-        //チェックされている要素をDBとアダプタから削除する
-        //後ろから探索するのは，削除に伴ってインデックスがずれるのを防ぐため
+        //Remove Item From End.
         LogListAdapter adapter = (LogListAdapter)mLogList.getAdapter();
         int removedItemCount = 0;
         for (int position = mLogList.getCount() - 1; 0 <= position; position--) {
 
-            //選択されていない行はスキップ
             if (!checkedPositions.get(position)) {
                 continue;
             }
 
-            //選択されている行のTidを取得
+            //Getting corresponding TID to the entry
             TrajectorySpanEntry entry = adapter.getItem(position);
             String tid = entry.getTid();
-            Log.i(TAG, tid);
 
-            //DBとアダプタから削除
+            //Removing from DB and View
             mTrajectoryDbHander.removeByTid(tid);
             mCheckinFreeFormDbHandler.removeByTid(tid);
             mCheckinDbHandler.removeByTid(tid);
@@ -174,21 +178,29 @@ public class LogListActivity extends ActionBarActivity {
 
             removedItemCount++;
             adapter.remove(entry);
-
         }
 
-        //Adapter内のデータの変更をViewに反映
         adapter.notifyDataSetChanged();
 
         Toast.makeText(getApplicationContext(), removedItemCount + "items removed", Toast.LENGTH_SHORT).show();
         switchMode(MODE.NORMAL);
 
-        //空になった場合はその旨を通知するTextViewを表示
+        //If List becomes empty, show message
         int visibility = mLogList.getCount() == 0 ? View.VISIBLE : View.GONE;
         mTextNoRecord.setVisibility(visibility);
     }
 
-    //モード切替時の処理
+
+    @Click(R.id.log_delete_cancel_button)
+    public void cancelLogDeleteMode() {
+        switchMode(MODE.NORMAL);
+    }
+
+    //endregion
+
+    //region ModeChange
+
+    //Switch Delete Mode and Normal Mode
     private void switchMode(MODE to) {
 
         if (mLogList == null) {
@@ -223,25 +235,7 @@ public class LogListActivity extends ActionBarActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_log_list, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    //endregion
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

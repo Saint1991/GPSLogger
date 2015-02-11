@@ -6,22 +6,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import org.androidannotations.annotations.Bean;
@@ -39,7 +30,6 @@ import geologger.saints.com.geologger.foursquare.models.FourSquarePoiCategory;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 @EActivity
 public class PoiConfirmationActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener {
@@ -47,13 +37,69 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
     private final String TAG = getClass().getSimpleName();
     private ProgressDialog mProgress;
 
-    private PoiListAdapter mAdapter;
     private List<FourSquarePoi> mFourSquarePoiList;
 
     @Bean
     FourSquareClient mFourSquareClient;
 
-    //EditText付きのダイアログを表示する
+
+    //region SelectFromList
+    @Override
+    public void onFragmentInteraction(ListView parent, View called, int position, long id) {
+
+        PoiListAdapter adapter = (PoiListAdapter)parent.getAdapter();
+        if (adapter == null || adapter.getCount() < 1) {
+            return;
+        }
+
+        FourSquarePoi entry = adapter.getItem(position);
+        final String placeId = entry.getId();
+        final String placeName = entry.getName();
+        FourSquarePoiCategory[] categories = entry.getCategories();
+
+        //Make Category String
+        final StringBuilder categoryId = new StringBuilder();
+        for (FourSquarePoiCategory category : categories) {
+            categoryId.append(category.getId() + ",");
+        }
+
+        //Make Confirmation Dialog
+        AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
+        String checkin = getResources().getString(R.string.checkin);
+        confirmationDialog.setTitle(checkin);
+        confirmationDialog.setMessage(checkin + " " + placeName + "?");
+
+        //Set Information and finish Activity
+        confirmationDialog.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Intent intent = new Intent();
+                intent.putExtra(CheckinEntry.PLACEID, placeId);
+                intent.putExtra(CheckinEntry.CATEGORYID, categoryId.substring(0, categoryId.length() - 1));
+                intent.putExtra("PlaceName", placeName);
+
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
+
+        confirmationDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        confirmationDialog.show();
+    }
+
+    //endregion
+
+
+    //region FreeForm
+
+    //Show Dialog for Free Form input
     @Click(R.id.buttonToFreeForm)
     public void showFreeFormDialog() {
 
@@ -61,7 +107,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
         inputForm.requestFocus();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -101,67 +147,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
         dialog.show();
     }
 
-    @Override
-    public void onFragmentInteraction(ListView parent, View called, int position, long id) {
-
-        FourSquarePoi entry = (FourSquarePoi)parent.getAdapter().getItem(position);
-
-        final String placeId = entry.getId();
-        final String placeName = entry.getName();
-        FourSquarePoiCategory[] categories = entry.getCategories();
-
-        final StringBuilder categoryId = new StringBuilder();
-        for (FourSquarePoiCategory category : categories) {
-            categoryId.append(category.getId() + ",");
-        }
-
-        AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
-        confirmationDialog.setTitle("Check-in");
-        confirmationDialog.setMessage("Check-in " + placeName + "?");
-
-        confirmationDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                Intent intent = new Intent();
-                intent.putExtra(CheckinEntry.PLACEID, placeId);
-                intent.putExtra(CheckinEntry.CATEGORYID, categoryId.substring(0, categoryId.length() - 1));
-                intent.putExtra("PlaceName", placeName);
-
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-        });
-
-        confirmationDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        confirmationDialog.show();
-    }
-
-    @UiThread
-    public void dismissProgress() {
-        if (mProgress != null) {
-            mProgress.dismiss();
-        }
-    }
-
-    @UiThread
-    public void initListView() {
-
-        FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
-        PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
-        ListView poiList = fragment.getListView();
-        Log.i(TAG, mFourSquarePoiList.toString());
-        mAdapter = (PoiListAdapter)poiList.getAdapter();
-        mAdapter.addAll(mFourSquarePoiList);
-        poiList.setAdapter(mAdapter);
-
-    }
+    //endregion
 
 
 
@@ -173,7 +159,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
         setContentView(R.layout.activity_poi_confirmation);
 
         mProgress = new ProgressDialog(this);
-        mProgress.setMessage("searching...");
+        mProgress.setMessage(getResources().getString(R.string.searching));
         mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         mProgress.show();
 
@@ -181,14 +167,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
             @Override
             public void run() {
-
                 mFourSquarePoiList = mFourSquareClient.searchPoi(null);
-                if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
-                    dismissProgress();
-                    Log.i(TAG, "emptyResult");
-                    return;
-                }
-
                 initListView();
                 dismissProgress();
             }
@@ -197,27 +176,28 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
     }
 
+    @UiThread
+    public void initListView() {
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_poi_confirmation, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
+            return;
         }
 
-        return super.onOptionsItemSelected(item);
+        FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
+        PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
+        ListView poiList = fragment.getListView();
+        PoiListAdapter adapter = (PoiListAdapter)poiList.getAdapter();
+        adapter.addAll(mFourSquarePoiList);
+        poiList.setAdapter(adapter);
+
     }
+
+    @UiThread
+    public void dismissProgress() {
+        if (mProgress != null) {
+            mProgress.dismiss();
+        }
+    }
+
 
 }

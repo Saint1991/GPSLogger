@@ -70,12 +70,12 @@
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:screenOrientation="sensorPortrait">
+            android:screenOrientation="sensorPortrait" >
         </activity>
         <activity
             android:name=".activities.PoiConfirmationActivity_"
             android:label="@string/title_activity_poi_confirmation"
-            android:screenOrientation="sensorPortrait">
+            android:screenOrientation="sensorPortrait" >
         </activity>
 
         <service
@@ -115,6 +115,10 @@
         <activity
             android:name=".activities.PoiConfirmationActivity"
             android:label="@string/title_activity_poi_confirmation" >
+        </activity>
+        <activity
+            android:name=".activities.LogActivity"
+            android:label="@string/title_activity_log" >
         </activity>
     </application>
 

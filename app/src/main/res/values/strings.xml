@@ -34,6 +34,7 @@
     <string name="Gps_confirmation_message">GPS is currently not ON. \n Turn on the GPS?</string>
     <string name="imhere">I\'m here</string>
     <string name="timestamp">Timestamp</string>
+    <string name="searching">Searching...</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>

@@ -107,7 +107,7 @@ public class RecordActivity extends FragmentActivity {
 
     //endregion]
 
-    
+
     //region Logging
 
     /**
