@@ -17,6 +17,13 @@ public class MapWorker extends BaseMapWorker {
 
     public MapWorker() {}
 
+    /**
+     * Clear recorded previous position.
+     */
+    public void clearPrevious() {
+        mPreviousPosition = null;
+    }
+
     //region Marker
 
     /**
@@ -51,4 +58,5 @@ public class MapWorker extends BaseMapWorker {
     }
 
     //endregion
+
 }

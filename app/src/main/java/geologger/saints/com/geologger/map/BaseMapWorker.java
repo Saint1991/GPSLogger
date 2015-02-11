@@ -2,6 +2,7 @@ package geologger.saints.com.geologger.map;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -28,6 +29,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
 @EBean
 public class BaseMapWorker {
 
+    private final String TAG = getClass().getSimpleName();
 
     protected GoogleMap mMap;
     protected Marker mCurrentPositionMarker;
@@ -45,8 +47,13 @@ public class BaseMapWorker {
      */
     public void initMap(GoogleMap map) {
 
+        map.clear();
         setMap(map);
-        mMap.clear();
+
+        if (mCurrentPositionMarker != null) {
+            mCurrentPositionMarker = null;
+        }
+
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
             @Override
@@ -123,16 +130,14 @@ public class BaseMapWorker {
         }
 
         if (mCurrentPositionMarker == null) {
-
             MarkerOptions marker = new MarkerOptions();
             marker.position(position).title(mContext.getResources().getString(R.string.imhere));
             mCurrentPositionMarker = mMap.addMarker(marker);
-
-        } else {
-
-            mCurrentPositionMarker.setPosition(position);
-
+            return;
         }
+
+        mCurrentPositionMarker.setPosition(position);
+
     }
 
     /**

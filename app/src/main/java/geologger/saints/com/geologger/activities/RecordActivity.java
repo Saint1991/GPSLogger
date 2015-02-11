@@ -1,12 +1,11 @@
 package geologger.saints.com.geologger.activities;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +24,6 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
-import java.util.List;
 import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
@@ -39,8 +37,10 @@ import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
 import geologger.saints.com.geologger.map.MapWorker;
-import geologger.saints.com.geologger.services.PositioningService;
+
 import geologger.saints.com.geologger.services.PositioningService_;
+import geologger.saints.com.geologger.utils.EncourageGpsOn;
+import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
 import geologger.saints.com.geologger.utils.MyLocationListener;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
@@ -50,11 +50,9 @@ import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
 public class RecordActivity extends FragmentActivity {
 
     private final String TAG = getClass().getSimpleName();
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private final int POICONFIRMATIONCODE = 1;
 
-    private String tid = null;
-
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     @SystemService
     LocationManager mLocationManager;
@@ -74,6 +72,8 @@ public class RecordActivity extends FragmentActivity {
     @Bean
     ServiceRunningConfirmation mServiceRunningConfirmation;
 
+    @Bean
+    EncourageGpsOn mEncourageGpsOn;
 
     @Bean
     MapWorker mMapWorker;
@@ -105,129 +105,30 @@ public class RecordActivity extends FragmentActivity {
         setUpMapIfNeeded();
     }
 
-    //endregion
+    //endregion]
+
+    
+    //region Logging
 
     /**
-     * GPSの有効化を促す
-     * @return true: もともとGPSが有効な場合
+     * Called when Start Button Clicked
+     * startLogginig and update View
+     * @param clicked
      */
-    private void startLoggingWithEncourageGpsOn() {
-
-        //もともとGPSがONの場合は何も行わない
-        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            startLogging();
-            return;
-        }
-
-        boolean isProviderAvailable = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle(getResources().getString(R.string.Gps_confirmation));
-        dialog.setMessage(getResources().getString(R.string.Gps_confirmation_message));
-
-        String positiveButtonMessage = isProviderAvailable ? getResources().getString(R.string.yes) : getResources().getString(R.string.ok);
-        dialog.setPositiveButton(positiveButtonMessage, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent callGPSIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(callGPSIntent);
-            }
-        });
-
-        //NETWORKプロバイダが利用可能な場合はGPSの利用は強制しない
-        if (isProviderAvailable) {
-            dialog.setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                    startLogging();
-                }
-            });
-        }
-
-        dialog.show();
-    }
-
-
-    /**
-     * ロギングを開始する際の処理
-     * Companion入力のダイアログを表示し，OKが選択された際にロギングを行うサービスを開始する
-     */
-    private void startLogging() {
-
-        //Providerが更新された可能性があるのでPositionningServiceを再起動する
-        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
-        if ( mServiceRunningConfirmation.isPositioning() ) {
-            stopService(intent);
-        }
-        startService(intent);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, AddressConstants.Themes.THEME_DARK);
-        builder.setTitle(getResources().getString(R.string.companion));
-
-        final String[] candidates = getResources().getStringArray(R.array.companion_candidate_list);
-        final boolean[] checks = new boolean[candidates.length];
-        checks[0] = true;
-        builder.setMultiChoiceItems(R.array.companion_candidate_list, checks, new DialogInterface.OnMultiChoiceClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                checks[which] = isChecked;
-            }
-        });
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                int count = 0;
-                final StringBuilder companions = new StringBuilder();
-                for (int i = 0; i < checks.length; i++) {
-                    if (checks[i]) {
-                        count++;
-                        companions.append(candidates[i] + ",");
-                    }
-                }
-
-                String toastMessage = getResources().getString(R.string.start_logging);
-                if (count == 0) {
-                    toastMessage = getResources().getString(R.string.companion_alert);
-                    Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                //Companionが正しく選択されていれば Trajectory IDを生成し，
-                //別スレッドでデータベースに格納
-                tid = UUID.randomUUID().toString();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCompanionDbHandler.insert(tid, companions.substring(0, companions.length() - 1));
-                    }
-                }).start();
-
-                //Trajectory IDを渡してGPSLoggingServiceを起動
-                Intent intent = new Intent(getApplicationContext(), GPSLoggingService_.class);
-                intent.putExtra(TrajectoryEntry.TID, tid);
-                startService(intent);
-
-                //Viewを更新し開始した旨を通知
-                setLoggingStateOnView();
-                Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
-            }
-
-        });
-
-        builder.show();
-    }
-
     @Click(R.id.loggingStartButton)
     public void onLoggingStartButtonClicked(View clicked) {
+
         Log.i(TAG, "onLoggingStart");
+
         startLoggingWithEncourageGpsOn();
+        mMapWorker.initMap(mMap);
     }
 
+    /**
+     * Called When Stop Button Clicked
+     * stop logging and update view
+     * @param clicked
+     */
     @Click(R.id.loggingStopButton)
     public void onLoggingStop(View clicked) {
 
@@ -235,16 +136,141 @@ public class RecordActivity extends FragmentActivity {
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
         stopService(serviceIntent);
+        mMapWorker.clearPrevious();
 
         setLoggingStateOnView();
-        mMap.clear();
-        float[] position = Position.getPosition(getApplicationContext());
-        mMapWorker.updateCurrentPositionMarker(position[0], position[1]);
 
         String toastMessage = getResources().getString(R.string.stop_logging);
         Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
     }
 
+
+    /**
+     * Encourage to turn on the GPS and execute callback
+     */
+    private void startLoggingWithEncourageGpsOn() {
+        mEncourageGpsOn.encourageGpsOn(new StartLoggingTask(), false);
+    }
+
+
+    class StartLoggingTask implements IEncourageGpsOnAlertDialogCallback {
+
+        //Restart PositioningService if it is running
+        private void restartPositioningServiceIfRunning() {
+
+            Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+            if ( mServiceRunningConfirmation.isPositioning() ) {
+                stopService(intent);
+            }
+            startService(intent);
+
+        }
+
+        @Override
+        public void executeTaskIfProviderIsEnabled() {
+
+            //Restart PositioningService because provider for the locationListener is possibly changed
+            restartPositioningServiceIfRunning();
+
+            //Definitions of Companion Selection Dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(RecordActivity.this, AddressConstants.Themes.THEME_DARK);
+            builder.setTitle(getResources().getString(R.string.companion));
+
+            final String[] candidates = getResources().getStringArray(R.array.companion_candidate_list);
+            final boolean[] checks = new boolean[candidates.length];
+            checks[0] = true;
+            builder.setMultiChoiceItems(R.array.companion_candidate_list, checks, new DialogInterface.OnMultiChoiceClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                    checks[which] = isChecked;
+                }
+
+            });
+
+
+            //Define the process when OK is clicked
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    Resources resources = getResources();
+
+                    //make companions string
+                    boolean isValid = false;
+                    final StringBuilder companions = new StringBuilder();
+                    for (int i = 0; i < checks.length; i++) {
+                        if (checks[i]) {
+                            isValid = true;
+                            companions.append(candidates[i] + ",");
+                        }
+                    }
+
+                    // If no option is selected, show Toast to alert and finish
+                    if (!isValid) {
+                        Toast.makeText(getApplicationContext(), resources.getString(R.string.companion_alert), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+
+                    //Insert companions into DB in the other thread
+                    final String tid = UUID.randomUUID().toString();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCompanionDbHandler.insert(tid, companions.substring(0, companions.length() - 1));
+                        }
+                    }).start();
+
+                    //Start GpsLoggingService with TID
+                    Intent intent = new Intent(getApplicationContext(), GPSLoggingService_.class);
+                    intent.putExtra(TrajectoryEntry.TID, tid);
+                    startService(intent);
+
+                    //Update View and show the message
+                    setLoggingStateOnView();
+                    Toast.makeText(getApplicationContext(), resources.getString(R.string.start_logging), Toast.LENGTH_SHORT).show();
+                }
+
+            });
+
+            builder.show();
+        }
+    }
+
+    //endregion
+
+
+    //region ViewControl
+
+    //Change view controls according to Logging State
+    private void setLoggingStateOnView() {
+
+        if (mServiceRunningConfirmation.isLogging()) {
+
+            mLoggingStartButton.setVisibility(View.GONE);
+            mLoggingStopButton.setVisibility(View.VISIBLE);
+            mCheckinButton.setVisibility(View.VISIBLE);
+
+        } else {
+
+            mLoggingStopButton.setVisibility(View.GONE);
+            mCheckinButton.setVisibility(View.GONE);
+            mLoggingStartButton.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+    //endregion
+
+
+    //region Checkin
+
+    /**
+     * Start PoiConfirmationActivity
+     * @param cliecked
+     */
     @Click(R.id.checkInButton)
     public void onCheckedIn(View cliecked) {
 
@@ -254,6 +280,11 @@ public class RecordActivity extends FragmentActivity {
         startActivityForResult(intent, POICONFIRMATIONCODE);
     }
 
+    /**
+     * Called when finish executing
+     * @param resultCode
+     * @param data
+     */
     @OnActivityResult(POICONFIRMATIONCODE)
     void onCheckinResult(int resultCode, Intent data) {
 
@@ -275,8 +306,6 @@ public class RecordActivity extends FragmentActivity {
             final String placeName = data.getStringExtra("PlaceName");
             Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
 
-            Log.i(TAG, "onCheckinResult " + placeId);
-
             new Thread(new Runnable() {
 
                 @Override
@@ -292,36 +321,27 @@ public class RecordActivity extends FragmentActivity {
             final String placeName = data.getStringExtra(CheckinFreeFormEntry.PLACENAME);
             Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
 
-            Log.i(TAG, "onCheckinResult " + placeName);
-
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     mCheckinFreeFormSQLite.insert(tid, placeName);
                 }
-            });
+            }).start();
 
         }
 
-
     }
 
-    //ロギング中かどうかによってボタンの表示非表示の状態を制御する
-    private void setLoggingStateOnView() {
-
-        if (mServiceRunningConfirmation.isLogging()) {
-            mLoggingStartButton.setVisibility(View.GONE);
-            mLoggingStopButton.setVisibility(View.VISIBLE);
-            mCheckinButton.setVisibility(View.VISIBLE);
-        } else {
-            mLoggingStopButton.setVisibility(View.GONE);
-            mCheckinButton.setVisibility(View.GONE);
-            mLoggingStartButton.setVisibility(View.VISIBLE);
-        }
-    }
+    //endregion
 
 
+    //region Map
 
+
+    /**
+     * This is called when a trajectory entry is stored in the database
+     * @param intent
+     */
     @Receiver(actions = GPSLoggingService.ACTION)
     public void onPositionLogged(Intent intent) {
 
@@ -329,15 +349,10 @@ public class RecordActivity extends FragmentActivity {
             return;
         }
 
-        try {
+        float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
+        float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
+        mMapWorker.addMarker(latitude, longitude);
 
-            float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
-            float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
-            mMapWorker.addMarker(latitude, longitude);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
