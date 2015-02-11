@@ -4,7 +4,9 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -12,12 +14,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.identity.intents.AddressConstants;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -41,8 +39,11 @@ import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
 import geologger.saints.com.geologger.map.MapWorker;
+import geologger.saints.com.geologger.services.PositioningService;
+import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.utils.MyLocationListener;
 import geologger.saints.com.geologger.utils.Position;
+import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
 
 
 @EActivity
@@ -54,10 +55,9 @@ public class RecordActivity extends FragmentActivity {
 
     private String tid = null;
 
-    private MapWorker mMapWorker;
 
     @SystemService
-    ActivityManager mActivityManager;
+    LocationManager mLocationManager;
 
     @Bean
     CompanionSQLite mCompanionDbHandler;
@@ -71,6 +71,13 @@ public class RecordActivity extends FragmentActivity {
     @Bean
     CheckinFreeFormSQLite mCheckinFreeFormSQLite;
 
+    @Bean
+    ServiceRunningConfirmation mServiceRunningConfirmation;
+
+
+    @Bean
+    MapWorker mMapWorker;
+
     @ViewById(R.id.loggingStartButton)
     Button mLoggingStartButton;
 
@@ -79,6 +86,8 @@ public class RecordActivity extends FragmentActivity {
 
     @ViewById(R.id.checkInButton)
     Button mCheckinButton;
+
+    //region LifeCycle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,10 +105,63 @@ public class RecordActivity extends FragmentActivity {
         setUpMapIfNeeded();
     }
 
-    @Click(R.id.loggingStartButton)
-    public void onLoggingStart(View clicked) {
+    //endregion
 
-        Log.i(TAG, "onLoggingStart");
+    /**
+     * GPSの有効化を促す
+     * @return true: もともとGPSが有効な場合
+     */
+    private void startLoggingWithEncourageGpsOn() {
+
+        //もともとGPSがONの場合は何も行わない
+        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            startLogging();
+            return;
+        }
+
+        boolean isProviderAvailable = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(getResources().getString(R.string.Gps_confirmation));
+        dialog.setMessage(getResources().getString(R.string.Gps_confirmation_message));
+
+        String positiveButtonMessage = isProviderAvailable ? getResources().getString(R.string.yes) : getResources().getString(R.string.ok);
+        dialog.setPositiveButton(positiveButtonMessage, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent callGPSIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(callGPSIntent);
+            }
+        });
+
+        //NETWORKプロバイダが利用可能な場合はGPSの利用は強制しない
+        if (isProviderAvailable) {
+            dialog.setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                    startLogging();
+                }
+            });
+        }
+
+        dialog.show();
+    }
+
+
+    /**
+     * ロギングを開始する際の処理
+     * Companion入力のダイアログを表示し，OKが選択された際にロギングを行うサービスを開始する
+     */
+    private void startLogging() {
+
+        //Providerが更新された可能性があるのでPositionningServiceを再起動する
+        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+        if ( mServiceRunningConfirmation.isPositioning() ) {
+            stopService(intent);
+        }
+        startService(intent);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this, AddressConstants.Themes.THEME_DARK);
         builder.setTitle(getResources().getString(R.string.companion));
 
@@ -141,7 +203,7 @@ public class RecordActivity extends FragmentActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                       mCompanionDbHandler.insert(tid, companions.substring(0, companions.length() - 1));
+                        mCompanionDbHandler.insert(tid, companions.substring(0, companions.length() - 1));
                     }
                 }).start();
 
@@ -158,7 +220,12 @@ public class RecordActivity extends FragmentActivity {
         });
 
         builder.show();
+    }
 
+    @Click(R.id.loggingStartButton)
+    public void onLoggingStartButtonClicked(View clicked) {
+        Log.i(TAG, "onLoggingStart");
+        startLoggingWithEncourageGpsOn();
     }
 
     @Click(R.id.loggingStopButton)
@@ -172,7 +239,7 @@ public class RecordActivity extends FragmentActivity {
         setLoggingStateOnView();
         mMap.clear();
         float[] position = Position.getPosition(getApplicationContext());
-        mMapWorker.updateCurrentMarkerPosition(position[0], position[1]);
+        mMapWorker.updateCurrentPositionMarker(position[0], position[1]);
 
         String toastMessage = getResources().getString(R.string.stop_logging);
         Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
@@ -242,7 +309,7 @@ public class RecordActivity extends FragmentActivity {
     //ロギング中かどうかによってボタンの表示非表示の状態を制御する
     private void setLoggingStateOnView() {
 
-        if (isLogging()) {
+        if (mServiceRunningConfirmation.isLogging()) {
             mLoggingStartButton.setVisibility(View.GONE);
             mLoggingStopButton.setVisibility(View.VISIBLE);
             mCheckinButton.setVisibility(View.VISIBLE);
@@ -253,20 +320,6 @@ public class RecordActivity extends FragmentActivity {
         }
     }
 
-    //ロギング中かどうかを判定する
-    //ロギング中ならtrueを返す
-    private boolean isLogging() {
-
-        List<ActivityManager.RunningServiceInfo> runningServiceList = mActivityManager.getRunningServices(Integer.MAX_VALUE);
-        for (ActivityManager.RunningServiceInfo info : runningServiceList) {
-            String serviceName = info.service.getClassName();
-            if (serviceName.equals(GPSLoggingService.class.getName()) || serviceName.equals(GPSLoggingService_.class.getName())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
 
     @Receiver(actions = GPSLoggingService.ACTION)
@@ -287,6 +340,11 @@ public class RecordActivity extends FragmentActivity {
         }
     }
 
+    /**
+     * This is called when onLocationChanged in LocationListener is called.
+     * Update the marker's position that represents user's current position.
+     * @param intent
+     */
     @Receiver(actions = MyLocationListener.ACTION)
     public void onCurrentPositionUpdated(Intent intent) {
 
@@ -296,15 +354,10 @@ public class RecordActivity extends FragmentActivity {
             return;
         }
 
-        try {
+        float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
+        float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
+        mMapWorker.updateCurrentPositionMarker(latitude, longitude);
 
-            float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
-            float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
-            mMapWorker.updateCurrentMarkerPosition(latitude, longitude);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -343,14 +396,10 @@ public class RecordActivity extends FragmentActivity {
      */
     private void setUpMap() {
 
-        float[] position = Position.getPosition(getApplicationContext());
-        MarkerOptions currentPositionMarkerOption = new MarkerOptions();
-        currentPositionMarkerOption.position(new LatLng(position[0], position[1])).title("I'm here!");
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(position[0], position[1]), 15));
-
-        Marker currentPositionMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(position[0], position[1])).title("I'm here"));
-        mMapWorker = new MapWorker(mMap, currentPositionMarker);
+        if (mMap == null || mMapWorker == null) {
+            return;
+        }
+        mMapWorker.initMap(mMap);
     }
 
     //endregion

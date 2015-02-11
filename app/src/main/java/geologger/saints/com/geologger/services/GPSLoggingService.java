@@ -29,7 +29,7 @@ public class GPSLoggingService extends Service {
     @Bean
     TrajectorySpanSQLite mTrajectorySpanDbHandler;
 
-    private long mSamplingInterval = 20000L;
+    private long mSamplingInterval = 12000L;
     private String mTid = null;
     Timer mTimer = null;
 

@@ -16,7 +16,7 @@ import geologger.saints.com.geologger.utils.MyLocationListener;
 public class PositioningService extends Service {
 
     private final String TAG = getClass().getSimpleName();
-    private final long SAMPLINGINTERVAL = 10000l;
+    private final long SAMPLINGINTERVAL = 500L;
 
 
     @SystemService
@@ -48,7 +48,8 @@ public class PositioningService extends Service {
         }
 
         if (provider != null && mLocationManager.isProviderEnabled(provider)) {
-            mLocationManager.requestLocationUpdates(provider, SAMPLINGINTERVAL, 0, mLocationListener);
+            Log.i(TAG, "Start Positioning With " + provider);
+            mLocationManager.requestLocationUpdates(provider, SAMPLINGINTERVAL, 3, mLocationListener);
         }
 
         return START_REDELIVER_INTENT;
