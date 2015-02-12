@@ -2,7 +2,6 @@ package geologger.saints.com.geologger.map;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,6 +14,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
+
+import java.util.List;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.utils.Position;
@@ -47,6 +48,31 @@ public class BaseMapWorker {
      */
     public void initMap(GoogleMap map) {
 
+        init(map);
+
+        updateCurrentPositionMarker();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
+    }
+
+    /**
+     * Initialize this instance with GoogleMap Object
+     * A Marker is set on the designated position.
+     * @param map
+     * @param firstPosition
+     */
+    public void initMap(GoogleMap map, LatLng firstPosition, float markerColor, float alpha) {
+
+        init(map);
+
+        updateCurrentPositionMarker(firstPosition);
+        mCurrentPositionMarker.setIcon(BitmapDescriptorFactory.defaultMarker(markerColor));
+        mCurrentPositionMarker.setAlpha(alpha);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
+    }
+
+    // Clear Map and set ClickListener on Marker
+    private void init(GoogleMap map) {
+
         map.clear();
         setMap(map);
 
@@ -62,10 +88,7 @@ public class BaseMapWorker {
                 return false;
             }
         });
-
-        updateCurrentPositionMarker();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
-
+        
     }
 
     /**
@@ -203,6 +226,27 @@ public class BaseMapWorker {
         LatLng to = new LatLng(toLat, toLng);
 
         return drawLine(from, to);
+    }
+
+    /**
+     * Draw blue line connecting LatLngs in disignated list
+     * @param latLngList
+     * @return
+     */
+    public Polyline drawLine(List<LatLng> latLngList) {
+
+        if (mMap == null) {
+            return null;
+        }
+
+        PolylineOptions lineOptions = new PolylineOptions();
+        lineOptions.width(6.0F);
+        lineOptions.color(Color.BLUE);
+        for (LatLng point : latLngList) {
+            lineOptions.add(point);
+        }
+
+        return mMap.addPolyline(lineOptions);
     }
 
     //endregion

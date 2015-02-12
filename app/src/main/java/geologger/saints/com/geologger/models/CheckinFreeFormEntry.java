@@ -8,16 +8,22 @@ public class CheckinFreeFormEntry {
     public static final String TID = "t_id";
     public static final String PLACENAME = "place_name";
     public static final String TIMESTAMP = "timestamp";
+    public static final String LATITUDE = "latitude";
+    public static final String LONGITUDE = "longitude";
 
-    private String tid = null;
-    private String placeName = null;
-    private String timestamp = null;
+    protected String tid = null;
+    protected String placeName = null;
+    protected String timestamp = null;
+    protected float latitude;
+    protected float longitude;
 
     public CheckinFreeFormEntry(){}
-    public CheckinFreeFormEntry(String tid, String placeName, String timestamp) {
+    public CheckinFreeFormEntry(String tid, String placeName, String timestamp, float latitude, float longitude) {
         this.setTid(tid);
         this.setPlaceName(placeName);
         this.setTimestamp(timestamp);
+        this.setLatitude(latitude);
+        this.setLongitude(longitude);
     }
 
     public String getTid() {
@@ -42,5 +48,21 @@ public class CheckinFreeFormEntry {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(float latitude) {
+        this.latitude = latitude;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.longitude = longitude;
     }
 }

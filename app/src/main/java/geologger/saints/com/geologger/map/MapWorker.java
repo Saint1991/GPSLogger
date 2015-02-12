@@ -1,9 +1,24 @@
 package geologger.saints.com.geologger.map;
 
+
+import android.content.Intent;
+import android.net.Uri;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.androidannotations.annotations.EBean;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 
 /**
  * Created by Mizuno on 2015/01/31.
@@ -14,8 +29,47 @@ import org.androidannotations.annotations.EBean;
 public class MapWorker extends BaseMapWorker {
 
     private LatLng mPreviousPosition = null;
+    private HashMap<String, String> mCheckinMarkerIdMap;
 
-    public MapWorker() {}
+    private static final String FOURSQUARE_ROOT = "https://ja.foursquare.com/v/";
+
+    public MapWorker() {
+        mCheckinMarkerIdMap = new HashMap<String, String>();
+    }
+
+    /**
+     * Initializing map and set Click Event to infowindow of Checkin markre
+     * @param map
+     * @param firstPosition
+     * @param markerColor
+     * @param alpha
+     */
+    @Override
+    public void initMap(GoogleMap map, LatLng firstPosition, float markerColor, float alpha) {
+
+        super.initMap(map, firstPosition, markerColor, alpha);
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+
+                String id = marker.getId();
+                if (mCheckinMarkerIdMap.containsKey(id)) {
+                    String placeId = mCheckinMarkerIdMap.get(id);
+                    String url = FOURSQUARE_ROOT + placeId;
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    mContext.startActivity(intent);
+                }
+            }
+        });
+    }
+
+    /**
+     * Clear Checkin Marker's ID List
+     */
+    public void clearCheckinList() {
+        mCheckinMarkerIdMap.clear();
+    }
 
     /**
      * Clear recorded previous position.
@@ -55,6 +109,42 @@ public class MapWorker extends BaseMapWorker {
         mPreviousPosition = position;
 
         return ret;
+    }
+
+    /**
+     * Add Checkin Marker at the corresponding point to the entry
+     * @param entry
+     * @return
+     */
+    public Marker addCheckinMarker(CheckinFreeFormEntry entry) {
+
+        MarkerOptions marker = new MarkerOptions();
+        marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.checkin_pin));
+        marker.anchor(0.0F, 1.0F);
+        marker.position(new LatLng(entry.getLatitude(), entry.getLongitude()));
+        marker.title(entry.getPlaceName());
+
+        marker.snippet("time: " + entry.getTimestamp());
+
+        Marker ret = mMap.addMarker(marker);
+        if (entry instanceof CheckinEntry) {
+            mCheckinMarkerIdMap.put(ret.getId(), ((CheckinEntry) entry).getPlaceId());
+        }
+
+        return ret;
+
+    }
+
+    /**
+     * Add Checkin Markers at the corresponding points to the entry List
+     * @param checkinEntryList
+     */
+    public void addCheckinMarkers(List<? extends CheckinFreeFormEntry> checkinEntryList) {
+
+        for (CheckinFreeFormEntry entry : checkinEntryList) {
+            addCheckinMarker(entry);
+        }
+
     }
 
     //endregion

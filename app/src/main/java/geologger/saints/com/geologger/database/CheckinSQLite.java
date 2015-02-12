@@ -36,7 +36,7 @@ public class CheckinSQLite implements IRemoveByTid {
      * @param timestamp
      * @return 成功時true，失敗時false
      */
-    public boolean insert(String tid, String placeId, String categoryId, String timestamp) {
+    public boolean insert(String tid, String placeId, String categoryId, String timestamp, float latitude, float longitude, String placeName) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -45,6 +45,9 @@ public class CheckinSQLite implements IRemoveByTid {
         insertValues.put(CheckinEntry.PLACEID, placeId);
         insertValues.put(CheckinEntry.CATEGORYID, categoryId);
         insertValues.put(CheckinEntry.TIMESTAMP, timestamp);
+        insertValues.put(CheckinEntry.LATITUDE, latitude);
+        insertValues.put(CheckinEntry.LONGITUDE, longitude);
+        insertValues.put(CheckinEntry.PLACENAME, placeName);
 
         boolean result = db.insert(TABLENAME, null, insertValues) != -1;
         db.close();
@@ -63,8 +66,11 @@ public class CheckinSQLite implements IRemoveByTid {
         String placeId = entry.getPlaceId();
         String categoryId = entry.getCategoryId();
         String timestamp = entry.getTimestamp();
+        float latitude = entry.getLatitude();
+        float longitude = entry.getLongitude();
+        String placeName = entry.getPlaceName();
 
-        return this.insert(tid, placeId, categoryId, timestamp);
+        return this.insert(tid, placeId, categoryId, timestamp, latitude, longitude, placeName);
     }
 
     /**
@@ -75,9 +81,9 @@ public class CheckinSQLite implements IRemoveByTid {
      * @param categoryId
      * @return
      */
-    public boolean insert(String tid, String placeId, String categoryId) {
+    public boolean insert(String tid, String placeId, String categoryId, float latitude, float longitude, String placeName) {
         String timestamp = TimestampGenerator.getTimestamp();
-        return this.insert(tid, placeId, categoryId, timestamp);
+        return this.insert(tid, placeId, categoryId, timestamp, latitude, longitude, placeName );
     }
 
     /**
@@ -130,7 +136,11 @@ public class CheckinSQLite implements IRemoveByTid {
         String placeId = cursor.getString(cursor.getColumnIndex(CheckinEntry.PLACEID));
         String categoryId = cursor.getString(cursor.getColumnIndex(CheckinEntry.CATEGORYID));
         String timestamp = cursor.getString(cursor.getColumnIndex(CheckinEntry.TIMESTAMP));
-        CheckinEntry entry = new CheckinEntry(tid, placeId, categoryId, timestamp);
+        float latitude = cursor.getFloat(cursor.getColumnIndex(CheckinEntry.LATITUDE));
+        float longitude = cursor.getFloat(cursor.getColumnIndex(CheckinEntry.LONGITUDE));
+        String placeName = cursor.getString(cursor.getColumnIndex(CheckinEntry.PLACENAME));
+
+        CheckinEntry entry = new CheckinEntry(tid, placeId, categoryId, timestamp, latitude, longitude, placeName);
 
         return entry;
     }

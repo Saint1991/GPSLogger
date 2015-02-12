@@ -34,7 +34,7 @@ public class CheckinFreeFormSQLite implements IRemoveByTid {
      * @param timestamp
      * @return
      */
-    public boolean insert(String tid, String placeName, String timestamp) {
+    public boolean insert(String tid, String placeName, String timestamp, float latitude, float longitude) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -42,6 +42,8 @@ public class CheckinFreeFormSQLite implements IRemoveByTid {
         insertValues.put(CheckinFreeFormEntry.TID, tid);
         insertValues.put(CheckinFreeFormEntry.PLACENAME, placeName);
         insertValues.put(CheckinFreeFormEntry.TIMESTAMP, timestamp);
+        insertValues.put(CheckinFreeFormEntry.LATITUDE, latitude);
+        insertValues.put(CheckinFreeFormEntry.LONGITUDE, longitude);
 
         boolean result = db.insert(TABLENAME, null, insertValues) != -1;
         db.close();
@@ -59,8 +61,10 @@ public class CheckinFreeFormSQLite implements IRemoveByTid {
         String tid = entry.getTid();
         String placeName = entry.getPlaceName();
         String timestamp = entry.getTimestamp();
+        float latitude = entry.getLatitude();
+        float longitude = entry.getLongitude();
 
-        return this.insert(tid, placeName, timestamp);
+        return this.insert(tid, placeName, timestamp, latitude, longitude);
     }
 
     /**
@@ -70,9 +74,9 @@ public class CheckinFreeFormSQLite implements IRemoveByTid {
      * @param placeName
      * @return
      */
-    public boolean insert(String tid, String placeName) {
+    public boolean insert(String tid, String placeName, float latitude, float longitude) {
         String timestamp = TimestampGenerator.getTimestamp();
-        return this.insert(tid, placeName, timestamp);
+        return this.insert(tid, placeName, timestamp, latitude, longitude);
     }
 
     /**
@@ -124,7 +128,10 @@ public class CheckinFreeFormSQLite implements IRemoveByTid {
         String tid = cursor.getString(cursor.getColumnIndex(CheckinFreeFormEntry.TID));
         String placeName = cursor.getString(cursor.getColumnIndex(CheckinFreeFormEntry.PLACENAME));
         String timestamp = cursor.getString(cursor.getColumnIndex(CheckinFreeFormEntry.TIMESTAMP));
-        CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, timestamp);
+        float latitude = cursor.getFloat(cursor.getColumnIndex(CheckinFreeFormEntry.LATITUDE));
+        float longitude = cursor.getFloat(cursor.getColumnIndex(CheckinFreeFormEntry.LONGITUDE));
+
+        CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, timestamp, latitude, longitude);
 
         return entry;
     }

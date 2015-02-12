@@ -52,6 +52,9 @@ public class TableDefinitions {
             {put(CheckinEntry.PLACEID, "TEXT");}
             {put(CheckinEntry.CATEGORYID, "TEXT");}
             {put(CheckinEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
+            {put(CheckinEntry.LATITUDE, "REAL");}
+            {put(CheckinEntry.LONGITUDE, "REAL");}
+            {put(CheckinEntry.PLACENAME, "TEXT");}
             {put("PRIMARY KEY(" + CheckinEntry.TID + ", " + CheckinEntry.TIMESTAMP + ")", "");}
         };
         {put(CHECKIN, CHECKINTABLE);}
@@ -61,6 +64,8 @@ public class TableDefinitions {
             {put(CheckinFreeFormEntry.TID, "TEXT");}
             {put(CheckinFreeFormEntry.PLACENAME, "TEXT");}
             {put(CheckinFreeFormEntry.TIMESTAMP, "TEXT");}
+            {put(CheckinFreeFormEntry.LATITUDE, "REAL");}
+            {put(CheckinFreeFormEntry.LONGITUDE, "REAL");}
             {put("PRIMARY KEY (" + CheckinFreeFormEntry.TID + ", " + CheckinFreeFormEntry.TIMESTAMP + ")" , "");}
         };
         {put(CHECKIN_FREE_FORM, CHECKINFREEFORMTABLE);}

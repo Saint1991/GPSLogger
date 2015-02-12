@@ -1,23 +1,230 @@
 package geologger.saints.com.geologger.activities;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.SeekBar;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.Click;
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
+import org.androidannotations.annotations.ViewById;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
+import geologger.saints.com.geologger.database.CheckinSQLite;
+import geologger.saints.com.geologger.database.TrajectorySQLite;
+import geologger.saints.com.geologger.map.MapWorker;
+import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
+import geologger.saints.com.geologger.models.TrajectoryEntry;
+import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 
+@EActivity
 public class LogActivity extends FragmentActivity {
 
+    private final String TAG = getClass().getSimpleName();
+    private final long PLAYINTERVAL = 700L;
+
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private Timer mTimer;
+    private ProgressDialog mProgress;
+    private boolean isPlaying = false;
+
+    private List<TrajectoryEntry> mTrajectoryEntryList;
+    private List<CheckinEntry> mCheckinEntryList;
+    private List<CheckinFreeFormEntry> mCheckinFreeFormEntryList;
+    private List<LatLng> mLatLngList;
+    private List<String> mTimestampList;
+
+    @Bean
+    CheckinSQLite mCheckinDbHandler;
+
+    @Bean
+    CheckinFreeFormSQLite mCheckinFreeFormDbHandler;
+
+    @Bean
+    TrajectorySQLite mTrajectoryDbHandler;
+
+    @Bean
+    MapWorker mMapWorker;
+
+
+    @ViewById(R.id.playButton)
+    Button mPlayButton;
+
+    @ViewById(R.id.pauseButton)
+    Button mPauseButton;
+
+    @ViewById(R.id.playSlider)
+    SeekBar mPlaySlider;
+
+
+    //region PlayerControls
+
+    @Click(R.id.toBeginButton)
+    public void toBegin() {
+        mPlaySlider.setProgress(0);
+    }
+
+    @Click(R.id.playButton)
+    public void play() {
+
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+
+                try {
+
+                    int progress = mPlaySlider.getProgress();
+                    progress++;
+
+                    if (mPlaySlider.getMax() < progress) {
+                        pause();
+                        return;
+                    }
+
+                    mPlaySlider.setProgress(progress);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    pause();
+                    toBegin();
+                }
+
+            }
+
+        }, 0L, PLAYINTERVAL);
+
+        isPlaying = true;
+        switchPlayerButton();
+    }
+
+    @Click(R.id.pauseButton)
+    public void pause() {
+
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
+
+        isPlaying = false;
+        switchPlayerButton();
+    }
+
+    @UiThread
+    void switchPlayerButton() {
+
+        try {
+
+            if (isPlaying) {
+
+                mPauseButton.setVisibility(View.VISIBLE);
+                mPlayButton.setVisibility(View.GONE);
+
+            } else {
+
+                mPlayButton.setVisibility(View.VISIBLE);
+                mPauseButton.setVisibility(View.GONE);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //endregion
+
+
+    private boolean loadDatas() {
+
+        Intent intent = getIntent();
+        String tid = intent.getStringExtra(TrajectorySpanEntry.TID);
+
+        mTrajectoryEntryList = mTrajectoryDbHandler.getTrajectory(tid);
+        mCheckinEntryList = mCheckinDbHandler.getCheckinList(tid);
+        mCheckinFreeFormEntryList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
+
+        mLatLngList = new ArrayList<LatLng>();
+        mTimestampList = new ArrayList<String>();
+        for (TrajectoryEntry entry : mTrajectoryEntryList) {
+            LatLng position = new LatLng(entry.getLatitude(), entry.getLongitude());
+            mLatLngList.add(position);
+            mTimestampList.add(entry.getTimestamp());
+        }
+
+        return (mTimestampList.size() == mLatLngList.size() && mLatLngList.size() > 0);
+
+    }
+
+    private void initSlider() {
+        mPlaySlider.setMax(mTrajectoryEntryList.size() - 1);
+        mPlaySlider.setProgress(0);
+    }
+
+    @UiThread
+    public void dismissProgress() {
+        if (mProgress != null) {
+            mProgress.dismiss();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
+
+        mProgress = new ProgressDialog(this);
+        mProgress.setMessage(getResources().getString(R.string.loading));
+        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgress.show();
+
+        if (!loadDatas()) {
+            dismissProgress();
+            return;
+        }
+
+        mPlaySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                LatLng position = mLatLngList.get(progress);
+                mMapWorker.updateCurrentPositionMarker(position);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
+        });
+
         setUpMapIfNeeded();
     }
 
@@ -55,13 +262,15 @@ public class LogActivity extends FragmentActivity {
         }
     }
 
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
+
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+
+        LatLng firstPosition = mLatLngList.get(0);
+        mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F);
+        mMapWorker.drawLine(mLatLngList);
+        mMapWorker.addCheckinMarkers(mCheckinEntryList);
+
+        initSlider();
+        dismissProgress();
     }
 }

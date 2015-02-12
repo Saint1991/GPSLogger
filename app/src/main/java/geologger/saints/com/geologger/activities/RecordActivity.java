@@ -297,20 +297,25 @@ public class RecordActivity extends FragmentActivity {
             return;
         }
 
+        float[] position = Position.getPosition(getApplicationContext());
+        final float latitude = position[0];
+        final float longitude = position[1];
+
         //Confirm whether result is by free form.
         boolean isFreeform = data.getBooleanExtra("IsFreeForm", false);
         if (!isFreeform) {
 
             final String placeId = data.getStringExtra(CheckinEntry.PLACEID);
             final String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
-            final String placeName = data.getStringExtra("PlaceName");
+            final String placeName = data.getStringExtra(CheckinEntry.PLACENAME);
+
             Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
 
             new Thread(new Runnable() {
 
                 @Override
                 public void run() {
-                    mCheckinSQLite.insert(tid, placeId, categoryId);
+                    mCheckinSQLite.insert(tid, placeId, categoryId, latitude, longitude, placeName);
                 }
             }).start();
         }
@@ -324,7 +329,7 @@ public class RecordActivity extends FragmentActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    mCheckinFreeFormSQLite.insert(tid, placeName);
+                    mCheckinFreeFormSQLite.insert(tid, placeName, latitude, longitude);
                 }
             }).start();
 
