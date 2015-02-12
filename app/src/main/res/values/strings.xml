@@ -3,6 +3,9 @@
 
     <string name="app_name">GeoLogger</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_poi_confirmation">PoiConfirmation</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="cancel">CANCEL</string>
@@ -36,6 +39,9 @@
     <string name="timestamp">Timestamp</string>
     <string name="searching">Searching...</string>
     <string name="loading">Loading...</string>
+    <string name="positioning_interval">Position Update Interval</string>
+    <string name="positioning_distance">Position Update Distance</string>
+    <string name="logging_interval">Logging Interval</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
@@ -45,7 +51,45 @@
         <item>Pet</item>
     </string-array>
 
-    <string name="title_activity_poi_confirmation">PoiConfirmationActivity</string>
-    <string name="hello_world">Hello world!</string>
+    <string-array name="interval">
+        <item>1 Sec</item>
+        <item>2 Sec</item>
+        <item>5 Sec</item>
+        <item>10 Sec</item>
+        <item>20 Sec</item>
+        <item>60 Sec</item>
+    </string-array>
+
+    <string-array name="interval_values">
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>20000</item>
+        <item>60000</item>
+    </string-array>
+
+    <string-array name="distance">
+        <item>1 m</item>
+        <item>2 m</item>
+        <item>3 m</item>
+        <item>5 m</item>
+        <item>10 m</item>
+        <item>20 m</item>
+        <item>50 m</item>
+        <item>100 m</item>
+    </string-array>
+
+    <string-array name="distance_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+        <item>20</item>
+        <item>50</item>
+        <item>100</item>
+    </string-array>
+
 
 </resources>

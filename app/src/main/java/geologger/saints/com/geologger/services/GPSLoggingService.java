@@ -2,7 +2,9 @@ package geologger.saints.com.geologger.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.androidannotations.annotations.Bean;
@@ -11,6 +13,7 @@ import org.androidannotations.annotations.EService;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import geologger.saints.com.geologger.activities.SettingsActivity;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
@@ -22,6 +25,7 @@ public class GPSLoggingService extends Service {
 
     private final String TAG = getClass().getSimpleName();
     public static final String ACTION = "GpsLogged";
+    private final String DEFAULTSAMPLINGINTERVAL = "10000";
 
     @Bean
     TrajectorySQLite mTrajectoryDbHandler;
@@ -29,7 +33,6 @@ public class GPSLoggingService extends Service {
     @Bean
     TrajectorySpanSQLite mTrajectorySpanDbHandler;
 
-    private long mSamplingInterval = 12000L;
     private String mTid = null;
     Timer mTimer = null;
 
@@ -62,6 +65,12 @@ public class GPSLoggingService extends Service {
             mTimer = new Timer();
         }
 
+        //Get Logging Interval From SharedPreference
+        SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
+        String loggingIntervalStr = preference.getString(SettingsActivity.LOGGINGINTERVAL, DEFAULTSAMPLINGINTERVAL);
+        final long loggingInterval = Long.parseLong(loggingIntervalStr);
+        Log.i(TAG, "Logging with interval " + loggingIntervalStr + "msec");
+
         mTimer.schedule(new TimerTask() {
 
             //mSamplingIntervalごとに緯度経度情報を取得しデータベースに格納する
@@ -82,7 +91,7 @@ public class GPSLoggingService extends Service {
 
             }
 
-        },0L, mSamplingInterval);
+        },0L, loggingInterval);
 
         return START_REDELIVER_INTENT;
     }
