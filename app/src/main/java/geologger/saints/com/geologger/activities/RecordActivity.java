@@ -216,6 +216,8 @@ public class RecordActivity extends FragmentActivity {
                         return;
                     }
 
+<<<<<<< HEAD
+=======
 
                     //Generate Unique tid
                     String tidCandidate;
@@ -225,6 +227,7 @@ public class RecordActivity extends FragmentActivity {
                             break;
                         }
                     }
+>>>>>>> parent of 4bc013d... Merge branch 'master' of https://github.com/Saint1991/GPSLogger
 
                     //Insert companions into DB in the other thread
                     final String tid = tidCandidate;
@@ -329,9 +332,7 @@ public class RecordActivity extends FragmentActivity {
 
                 @Override
                 public void run() {
-                    if (!mCheckinSQLite.insert(entry)) {
-                        Log.i(TAG, "CHECHIN INSERT FAILED");
-                    }
+                    mCheckinSQLite.insert(entry);
                 }
             }).start();
 
