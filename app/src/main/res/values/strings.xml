@@ -42,6 +42,7 @@
     <string name="positioning_interval">Position Update Interval</string>
     <string name="positioning_distance">Position Update Distance</string>
     <string name="logging_interval">Logging Interval</string>
+    <string name="Poi_result_count">The number of POI searching result</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
@@ -89,6 +90,14 @@
         <item>20</item>
         <item>50</item>
         <item>100</item>
+    </string-array>
+
+    <string-array name="poi_count">
+        <item>25</item>
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>200</item>
     </string-array>
 
 

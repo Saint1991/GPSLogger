@@ -30,4 +30,13 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"/>
 
+    <ListPreference
+        android:key="poi_result_count"
+        android:title="@string/Poi_result_count"
+        android:defaultValue="100"
+        android:entries="@array/poi_count"
+        android:entryValues="@array/poi_count"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"/>
+
 </PreferenceScreen>

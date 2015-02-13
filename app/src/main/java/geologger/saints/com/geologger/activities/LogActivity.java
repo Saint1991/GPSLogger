@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -74,6 +75,9 @@ public class LogActivity extends FragmentActivity {
     @ViewById(R.id.playSlider)
     SeekBar mPlaySlider;
 
+    @ViewById(R.id.timestampIndicator)
+    TextView mTimestampIndicator;
+
 
     //region PlayerControls
 
@@ -101,6 +105,7 @@ public class LogActivity extends FragmentActivity {
                         return;
                     }
 
+
                     mPlaySlider.setProgress(progress);
 
                 } catch (Exception e) {
@@ -118,15 +123,21 @@ public class LogActivity extends FragmentActivity {
     }
 
     @Click(R.id.pauseButton)
-    public void pause() {
+        public void pause() {
 
-        if (mTimer != null) {
+            if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
         }
 
         isPlaying = false;
         switchPlayerButton();
+    }
+
+    @UiThread
+    void setTimestamp(int progress) {
+        String timestamp = mTimestampList.get(progress);
+        mTimestampIndicator.setText(timestamp);
     }
 
     @UiThread
@@ -210,6 +221,7 @@ public class LogActivity extends FragmentActivity {
 
                 LatLng position = mLatLngList.get(progress);
                 mMapWorker.updateCurrentPositionMarker(position);
+                setTimestamp(progress);
 
             }
 
@@ -232,6 +244,12 @@ public class LogActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        pause();
     }
 
     /**

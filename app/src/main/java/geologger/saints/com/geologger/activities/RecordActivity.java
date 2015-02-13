@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +25,7 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
@@ -44,6 +46,7 @@ import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
 import geologger.saints.com.geologger.utils.MyLocationListener;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
+import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 
 @EActivity
@@ -311,13 +314,17 @@ public class RecordActivity extends FragmentActivity {
 
             Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
 
+            final CheckinEntry entry = new CheckinEntry(tid, placeId, categoryId, TimestampGenerator.getTimestamp(), latitude, longitude, placeName);
+
             new Thread(new Runnable() {
 
                 @Override
                 public void run() {
-                    mCheckinSQLite.insert(tid, placeId, categoryId, latitude, longitude, placeName);
+                    mCheckinSQLite.insert(entry);
                 }
             }).start();
+
+            mMapWorker.addCheckinMarker(entry);
         }
 
         //By Free Form Result
@@ -333,7 +340,11 @@ public class RecordActivity extends FragmentActivity {
                 }
             }).start();
 
+            CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, TimestampGenerator.getTimestamp(), latitude, longitude);
+            mMapWorker.addCheckinMarker(entry);
         }
+
+
 
     }
 

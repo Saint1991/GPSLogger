@@ -32,6 +32,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String POSITIONINGINTERVAL = "positioning_interval";
     public static final String POSITIONINGDISTANCE = "positioning_distance";
     public static final String LOGGINGINTERVAL = "logging_interval";
+    public static final String POICOUNT = "poi_result_count";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,9 @@ public class SettingsActivity extends PreferenceActivity {
 
             ListPreference loggingIntervalPreference = (ListPreference)findPreference(LOGGINGINTERVAL);
             bindPreferenceSummaryToValue(loggingIntervalPreference);
+
+            ListPreference poiCountPreference = (ListPreference)findPreference(POICOUNT);
+            bindPreferenceSummaryToValue(poiCountPreference);
         }
 
     }
