@@ -125,7 +125,7 @@ public class RecordActivity extends FragmentActivity {
         Log.i(TAG, "onLoggingStart");
 
         startLoggingWithEncourageGpsOn();
-        mMapWorker.initMap(mMap, true);
+        mMapWorker.initMap(mMap);
     }
 
     /**
@@ -226,15 +226,6 @@ public class RecordActivity extends FragmentActivity {
                         }
                     }
 
-                    //Generate Unique tid
-                    String tidCandidate;
-                    while (true) {
-                        tidCandidate = UUID.randomUUID().toString();
-                        if (!mTrajectorySpanDbHandler.isExistTid(tidCandidate)) {
-                            break;
-                        }
-                    }
->>>>>>> parent of 4bc013d... Merge branch 'master' of https://github.com/Saint1991/GPSLogger
 
                     //Insert companions into DB in the other thread
                     final String tid = tidCandidate;
@@ -410,17 +401,6 @@ public class RecordActivity extends FragmentActivity {
 
     }
 
-    /**
-     * Let Map reRender InfoWindow if loaded image curresponds to shown infoWindow
-     * @param intent
-     */
-    @Receiver(actions = FourSquarePhotoLoaderImageView.ACTION)
-    public void imageLoaded(Intent intent){
-        String placeId = intent.getStringExtra(CheckinEntry.PLACEID);
-        if (mMapWorker != null) {
-            mMapWorker.reRenderInfoWindowIfNeeded(placeId);
-        }
-    }
 
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
@@ -461,7 +441,7 @@ public class RecordActivity extends FragmentActivity {
         if (mMap == null || mMapWorker == null) {
             return;
         }
-        mMapWorker.initMap(mMap, true);
+        mMapWorker.initMap(mMap);
     }
 
     //endregion

@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
-import geologger.saints.com.geologger.foursquare.FourSquareClient;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 
@@ -30,106 +29,46 @@ import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 public class MapWorker extends BaseMapWorker {
 
     private LatLng mPreviousPosition = null;
-    private Marker mCurrentInfoOpenMarker = null;
-    private String mUpdateFinishInfoOpenMarkerId = null;
     private HashMap<String, String> mCheckinMarkerIdMap;
-    private List<String> mCheckinFreeFormMarkerIdList;
+
+    private static final String FOURSQUARE_ROOT = "https://ja.foursquare.com/v/";
 
     public MapWorker() {
         mCheckinMarkerIdMap = new HashMap<String, String>();
-        mCheckinFreeFormMarkerIdList = new ArrayList<String>();
     }
 
     /**
-     * Initializing map and set Click Event to infowindow of Checkin marker
+     * Initializing map and set Click Event to infowindow of Checkin markre
      * @param map
      * @param firstPosition
      * @param markerColor
      * @param alpha
      */
-    public void initMap(GoogleMap map, LatLng firstPosition, float markerColor, float alpha, boolean isCheckinMarkerDeletable) {
+    @Override
+    public void initMap(GoogleMap map, LatLng firstPosition, float markerColor, float alpha) {
+
         super.initMap(map, firstPosition, markerColor, alpha);
-        clearCheckinList();
-        clearPrevious();
-        setMapListeners(isCheckinMarkerDeletable);
-    }
 
-    public void initMap(GoogleMap map, float markerColor, float alpha, boolean isCheckinMarkerDeletable) {
-        super.initMap(map, markerColor, alpha);
-        clearCheckinList();
-        clearPrevious();
-        setMapListeners(isCheckinMarkerDeletable);
-    }
-
-    public void initMap(GoogleMap map, boolean isCheckInMarkerDeletable) {
-        super.initMap(map);
-        clearCheckinList();
-        clearPrevious();
-        setMapListeners(isCheckInMarkerDeletable);
-    }
-
-    private void setMapListeners(final boolean isCheckinMarkerDeletable) {
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
+            public void onInfoWindowClick(Marker marker) {
 
                 String id = marker.getId();
-                String placeId = isCheckinMarker(id) ? mCheckinMarkerIdMap.get(id) : null;
-
-                if (!isNormalMarker(id)) {
-                    mMap.setInfoWindowAdapter(new CheckinInfoWindowAdapter(mActivity, null, isCheckinMarkerDeletable));
+                if (mCheckinMarkerIdMap.containsKey(id)) {
+                    String placeId = mCheckinMarkerIdMap.get(id);
+                    String url = FOURSQUARE_ROOT + placeId;
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    mActivity.startActivity(intent);
                 }
-
-                mCurrentInfoOpenMarker = marker;
-                marker.showInfoWindow();
-
-                return true;
             }
         });
-
-        if (!isCheckinMarkerDeletable) {
-            mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                @Override
-                public void onInfoWindowClick(Marker marker) {
-
-                    String id = marker.getId();
-                    if (isCheckinMarker(id)) {
-                        String placeId = mCheckinMarkerIdMap.get(id);
-                        String url = FourSquareClient.FOURSQUARE_ROOT + placeId;
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        mActivity.startActivity(intent);
-                    }
-                }
-
-            });
-        }
-
     }
-
-    /**
-     *
-     */
-    public void reRenderInfoWindowIfNeeded(String placeId) {
-
-        boolean isUpdateNeeded = !mCurrentInfoOpenMarker.getId().equals(mUpdateFinishInfoOpenMarkerId);
-
-        if (isUpdateNeeded) {
-            mCurrentInfoOpenMarker.hideInfoWindow();
-            mCurrentInfoOpenMarker.showInfoWindow();
-            mUpdateFinishInfoOpenMarkerId = mCurrentInfoOpenMarker.getId();
-        }
-    }
-
-
 
     /**
      * Clear Checkin Marker's ID List
      */
     public void clearCheckinList() {
         mCheckinMarkerIdMap.clear();
-        mCheckinFreeFormMarkerIdList.clear();
     }
 
     /**
@@ -140,14 +79,6 @@ public class MapWorker extends BaseMapWorker {
     }
 
     //region Marker
-
-    public boolean isCheckinMarker(String markerId) {
-        return mCheckinMarkerIdMap.containsKey(markerId);
-    }
-
-    public boolean isNormalMarker(String markerId) {
-        return !(isCheckinMarker(markerId) || mCheckinFreeFormMarkerIdList.contains(markerId));
-    }
 
     /**
      * Draw Marker at the disginated point and connect with the previous point with blue line
@@ -193,16 +124,15 @@ public class MapWorker extends BaseMapWorker {
         marker.position(new LatLng(entry.getLatitude(), entry.getLongitude()));
         marker.title(entry.getPlaceName());
 
-        marker.snippet(entry.getTimestamp());
+        marker.snippet("time: " + entry.getTimestamp());
 
         Marker ret = mMap.addMarker(marker);
         if (entry instanceof CheckinEntry) {
             mCheckinMarkerIdMap.put(ret.getId(), ((CheckinEntry) entry).getPlaceId());
-        } else if (entry instanceof CheckinFreeFormEntry) {
-            mCheckinFreeFormMarkerIdList.add(ret.getId());
         }
 
         return ret;
+
     }
 
     /**

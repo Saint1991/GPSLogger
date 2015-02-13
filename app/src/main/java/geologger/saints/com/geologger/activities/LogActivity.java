@@ -167,17 +167,6 @@ public class LogActivity extends FragmentActivity {
 
     //endregion
 
-    /**
-     * Let Map reRender InfoWindow if loaded image curresponds to shown infoWindow
-     * @param intent
-     */
-    @Receiver(actions = FourSquarePhotoLoaderImageView.ACTION)
-    public void imageLoaded(Intent intent){
-        String placeId = intent.getStringExtra(CheckinEntry.PLACEID);
-        if (mMapWorker != null) {
-            mMapWorker.reRenderInfoWindowIfNeeded(placeId);
-        }
-    }
 
     private boolean loadDatas() {
 
@@ -300,7 +289,7 @@ public class LogActivity extends FragmentActivity {
     private void setUpMap() {
 
         LatLng firstPosition = mLatLngList.get(0);
-        mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F, false);
+        mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F);
         mMapWorker.drawLine(mLatLngList);
         mMapWorker.addCheckinMarkers(mCheckinEntryList);
 
