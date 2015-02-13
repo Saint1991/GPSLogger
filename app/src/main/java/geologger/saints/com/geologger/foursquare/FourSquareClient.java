@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +33,10 @@ import geologger.saints.com.geologger.utils.Position;
 public class FourSquareClient extends BaseHttpClient {
 
     private final String TAG = getClass().getSimpleName();
+    public static final String FOURSQUARE_ROOT = "https://ja.foursquare.com/v/";
+
     private static final String ENDPOINT_POISEARCH = "https://api.foursquare.com/v2/venues/search?";
+    private static final String ENDPOINT_PHOTOSEARCH ="https://api.foursquare.com/v2/venues/";
     private static final String LANGUAGE = Locale.getDefault().toString();
     private static final String DEFAULTPOICOUNT = "100";
 
@@ -42,8 +46,8 @@ public class FourSquareClient extends BaseHttpClient {
     @RootContext
     Context mContext;
 
-    public FourSquareClient() {
-
+    public FourSquareClient(Context context) {
+        mContext = context;
     }
 
     public List<FourSquarePoi> searchPoi(String term) {
@@ -65,37 +69,75 @@ public class FourSquareClient extends BaseHttpClient {
         query.append("&client_secret=" + CLIENT_SECRET);
         query.append("&ll=" + latitude + "," + longitude);
         query.append("&limit=" + poiCount);
+        query.append("&locale=" + LANGUAGE);
         query.append("&intent=checkin");
         query.append("&m=foursquare");
         query.append("&v=20150126");
         if (term != null && term.length() > 0) {
             query.append("&query=" + term);
         }
-        String result  = this.sendHttpGetRequest(query.toString());
-        ret = parsePoiSearchResult(result);
+
+        try {
+
+            String result  = this.sendHttpGetRequest(query.toString());
+            ret = FourSquareParser.parsePoiSearchResult(result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         Log.i(TAG, query.toString());
 
         return ret;
     }
 
-    private List<FourSquarePoi> parsePoiSearchResult(String json) {
 
-        List<FourSquarePoi> ret = null;
+    /**
+     * Searching Photos of the corresponding placeId
+     * @param placeId
+     * @param width
+     * @param height
+     * @return
+     */
+    public List<String> searchPhotos(String placeId, int resultCount, int width, int height) {
+
+        List<String> urlList = new ArrayList<String>();
+
+        StringBuilder query = new StringBuilder();
+        query.append(ENDPOINT_PHOTOSEARCH);
+        query.append(placeId + "/");
+        query.append("photos");
+        query.append("?limit=" + resultCount);
+        query.append("&client_id=" + CLIENT_ID);
+        query.append("&client_secret=" + CLIENT_SECRET);
+        query.append("&m=foursquare");
+        query.append("&v=20150126");
+        Log.i(TAG, query.toString());
 
         try {
-            JSONObject root = new JSONObject(json);
-            JSONObject response = root.getJSONObject("response");
-            JSONArray venues = response.getJSONArray("venues");
 
-            Gson gson = new Gson();
-            Type collectionType = new TypeToken<Collection<FourSquarePoi>>(){}.getType();
-            ret = gson.fromJson(venues.toString(), collectionType);
+            String result = this.sendHttpGetRequest(query.toString());
+            urlList = FourSquareParser.parsePhotoSearchResult(result, width, height);
 
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        return urlList;
+
+    }
+
+    public String searchPhoto(String placeId, int width, int height) {
+
+        String ret = null;
+
+        List<String> result = searchPhotos(placeId, 1, width, height);
+        if (result != null && result.size() > 0) {
+            ret = result.get(0);
         }
 
         return ret;
     }
+
 }

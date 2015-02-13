@@ -29,6 +29,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_log_list">LogListActivity</string>
     <string name="delete">DELETE</string>
+    <string name="u_delete"><u>REMOVE</u></string>
     <string name="companion">Companion</string>
     <string name="companion_alert">Please check at least one</string>
     <string name="freeform">Free Form</string>

@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -19,7 +18,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class CompanionSQLite implements IRemoveByTid {
+public class CompanionSQLite {
 
     private final String TABLENAME = TableDefinitions.COMPANION;
 

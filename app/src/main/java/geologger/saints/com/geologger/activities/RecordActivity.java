@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -25,7 +25,6 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
@@ -41,9 +40,10 @@ import geologger.saints.com.geologger.services.GPSLoggingService_;
 import geologger.saints.com.geologger.map.MapWorker;
 
 import geologger.saints.com.geologger.services.PositioningService_;
+import geologger.saints.com.geologger.uicomponents.FourSquarePhotoLoaderImageView;
 import geologger.saints.com.geologger.utils.EncourageGpsOn;
 import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
-import geologger.saints.com.geologger.utils.MyLocationListener;
+import geologger.saints.com.geologger.sensors.MyLocationListener;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
@@ -95,6 +95,7 @@ public class RecordActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
         setUpMapIfNeeded();
@@ -124,7 +125,7 @@ public class RecordActivity extends FragmentActivity {
         Log.i(TAG, "onLoggingStart");
 
         startLoggingWithEncourageGpsOn();
-        mMapWorker.initMap(mMap);
+        mMapWorker.initMap(mMap, true);
     }
 
     /**
@@ -216,9 +217,17 @@ public class RecordActivity extends FragmentActivity {
                         return;
                     }
 
+                    //Make Unique TID
+                    String tidCandidate = null;
+                    while ( true ) {
+                        tidCandidate = UUID.randomUUID().toString();
+                        if (!mTrajectorySpanDbHandler.isExistTid(tidCandidate)) {
+                            break;
+                        }
+                    }
 
                     //Insert companions into DB in the other thread
-                    final String tid = UUID.randomUUID().toString();
+                    final String tid = tidCandidate;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -392,6 +401,18 @@ public class RecordActivity extends FragmentActivity {
     }
 
     /**
+     * Let Map reRender InfoWindow if loaded image curresponds to shown infoWindow
+     * @param intent
+     */
+    @Receiver(actions = FourSquarePhotoLoaderImageView.ACTION)
+    public void imageLoaded(Intent intent){
+        String placeId = intent.getStringExtra(CheckinEntry.PLACEID);
+        if (mMapWorker != null) {
+            mMapWorker.reRenderInfoWindowIfNeeded(placeId);
+        }
+    }
+
+    /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
      * call {@link #setUpMap()} once when {@link #mMap} is not null.
@@ -430,7 +451,7 @@ public class RecordActivity extends FragmentActivity {
         if (mMap == null || mMapWorker == null) {
             return;
         }
-        mMapWorker.initMap(mMap);
+        mMapWorker.initMap(mMap, true);
     }
 
     //endregion

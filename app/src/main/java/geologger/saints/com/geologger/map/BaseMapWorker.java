@@ -1,6 +1,6 @@
 package geologger.saints.com.geologger.map;
 
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.Color;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,7 +36,7 @@ public class BaseMapWorker {
     protected Marker mCurrentPositionMarker;
 
     @RootContext
-    Context mContext;
+    Activity mActivity;
 
 
     public BaseMapWorker() {}
@@ -55,6 +55,25 @@ public class BaseMapWorker {
     }
 
     /**
+     * Initialize this instance with GoogleMap Object with designating the Marker Color that represents user's current position
+     * @param map
+     * @param markerColor
+     * @param alpha
+     */
+    public void initMap(GoogleMap map, float markerColor, float alpha) {
+
+        initMap(map);
+        mCurrentPositionMarker.setIcon(BitmapDescriptorFactory.defaultMarker(markerColor));
+        mCurrentPositionMarker.setAlpha(alpha);
+    }
+
+    public void initMap(GoogleMap map, LatLng firstPosition) {
+        init(map);
+        updateCurrentPositionMarker(firstPosition);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
+    }
+
+    /**
      * Initialize this instance with GoogleMap Object
      * A Marker is set on the designated position.
      * @param map
@@ -62,12 +81,10 @@ public class BaseMapWorker {
      */
     public void initMap(GoogleMap map, LatLng firstPosition, float markerColor, float alpha) {
 
-        init(map);
+        initMap(map, firstPosition);
 
-        updateCurrentPositionMarker(firstPosition);
         mCurrentPositionMarker.setIcon(BitmapDescriptorFactory.defaultMarker(markerColor));
         mCurrentPositionMarker.setAlpha(alpha);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
     }
 
     // Clear Map and set ClickListener on Marker
@@ -76,19 +93,7 @@ public class BaseMapWorker {
         map.clear();
         setMap(map);
 
-        if (mCurrentPositionMarker != null) {
-            mCurrentPositionMarker = null;
-        }
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                marker.showInfoWindow();
-                return false;
-            }
-        });
-        
+        mCurrentPositionMarker = null;
     }
 
     /**
@@ -106,11 +111,13 @@ public class BaseMapWorker {
     //region Marker
 
     /**
-     * Draw a marker at the designated position
+     * Add Marker with the disignated color
      * @param position
-     * @return Marker Object that is drawn on the map. If map hasn't set, this returns null.
+     * @param color
+     * @param alpha
+     * @return
      */
-    public Marker addMarker(LatLng position) {
+    public Marker addMarker(LatLng position, float color, float alpha) {
 
         if (mMap == null) {
             return null;
@@ -118,13 +125,37 @@ public class BaseMapWorker {
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(position);
-        marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-        marker.title(mContext.getResources().getString(R.string.timestamp));
+        marker.icon(BitmapDescriptorFactory.defaultMarker(color));
+        marker.title(mActivity.getResources().getString(R.string.timestamp));
         marker.snippet(TimestampGenerator.getTimestamp());
-        marker.alpha(0.4F);
+        marker.alpha(alpha);
 
         return mMap.addMarker(marker);
+
     }
+
+    /**
+     * dd Marker with the disignated color
+     * @param latitude
+     * @param longitude
+     * @param color
+     * @param alpha
+     * @return
+     */
+    public Marker addMarker(float latitude, float longitude, float color, float alpha) {
+        LatLng position = new LatLng(latitude, longitude);
+        return addMarker(position, color, alpha);
+    }
+
+    /**
+     * Draw a marker at the designated position
+     * @param position
+     * @return Marker Object that is drawn on the map. If map hasn't set, this returns null.
+     */
+    public Marker addMarker(LatLng position) {
+        return addMarker(position, BitmapDescriptorFactory.HUE_BLUE, 0.4F);
+    }
+
 
     /**
      * Draw a marker at the designated position
@@ -154,7 +185,7 @@ public class BaseMapWorker {
 
         if (mCurrentPositionMarker == null) {
             MarkerOptions marker = new MarkerOptions();
-            marker.position(position).title(mContext.getResources().getString(R.string.imhere));
+            marker.position(position).title(mActivity.getResources().getString(R.string.imhere));
             mCurrentPositionMarker = mMap.addMarker(marker);
             return;
         }
@@ -179,7 +210,7 @@ public class BaseMapWorker {
      */
     public void updateCurrentPositionMarker() {
 
-        float[] position = Position.getPosition(mContext);
+        float[] position = Position.getPosition(mActivity);
         LatLng currentPosition = new LatLng(position[0], position[1]);
 
         updateCurrentPositionMarker(currentPosition);

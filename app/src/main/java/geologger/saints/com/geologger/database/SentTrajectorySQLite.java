@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -18,7 +17,7 @@ import geologger.saints.com.geologger.models.TableDefinitions;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class SentTrajectorySQLite implements IRemoveByTid {
+public class SentTrajectorySQLite {
 
     private final String TABLENAME = TableDefinitions.SENTTRAJECTORY;
 

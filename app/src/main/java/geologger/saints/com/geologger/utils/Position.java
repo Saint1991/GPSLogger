@@ -14,7 +14,7 @@ public class Position {
     public static final String LONGITUDE = "longitude";
 
     public static void savePosition(Context context, float latitude, float longitude) {
-        Log.i("Position", "savePosition");
+        Log.i(PREFNAME, "savePosition");
         SharedPreferences preference = context.getSharedPreferences(PREFNAME, Context.MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = preference.edit();
         editor.putFloat(LATITUDE, latitude);
@@ -23,7 +23,7 @@ public class Position {
     }
 
     public static float[] getPosition(Context context) {
-        Log.i("Position", "getPosition");
+        Log.i(PREFNAME, "getPosition");
         SharedPreferences preference = context.getSharedPreferences(PREFNAME, Context.MODE_MULTI_PROCESS);
         float[] position = new float[2];
         position[0] = preference.getFloat(LATITUDE, 0.0f);

@@ -1,6 +1,7 @@
 package geologger.saints.com.geologger.database;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -18,14 +19,16 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/30.
  */
 @EBean
-public class CheckinFreeFormSQLite implements IRemoveByTid {
+public class CheckinFreeFormSQLite implements IRemoveBy {
 
     private final String TABLENAME = TableDefinitions.CHECKIN_FREE_FORM;
 
     @Bean
     BaseSQLiteOpenHelper mDbHelper;
 
-    public CheckinFreeFormSQLite() {}
+    public CheckinFreeFormSQLite(Context context) {
+        mDbHelper = new BaseSQLiteOpenHelper(context);
+    }
 
     /**
      * チェックインの自由入力欄のエントリを格納する
@@ -91,6 +94,19 @@ public class CheckinFreeFormSQLite implements IRemoveByTid {
         db.close();
 
         return removedCount;
+    }
+
+    /**
+     * 指定したtimestampに対応するエントリを削除する
+     * @param timestamp
+     * @return
+     */
+    public int removeByTimestamp(String timestamp) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removeCount = db.delete(TABLENAME, CheckinFreeFormEntry.TIMESTAMP + "=?", new String[]{timestamp});
+        db.close();
+
+        return removeCount;
     }
 
     /**

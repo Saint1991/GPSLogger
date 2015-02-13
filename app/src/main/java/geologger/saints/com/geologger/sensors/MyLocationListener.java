@@ -1,6 +1,5 @@
-package geologger.saints.com.geologger.utils;
+package geologger.saints.com.geologger.sensors;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -11,16 +10,18 @@ import android.util.Log;
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
 
+import geologger.saints.com.geologger.utils.Position;
+
 /**
  * Created by Seiya on 2015/01/01.
  */
-@EBean
-public class MyLocationListener implements LocationListener{
+@EBean(scope = EBean.Scope.Singleton)
+public class MyLocationListener implements LocationListener {
 
     public static final String ACTION = "CurrentPositionUpdated";
 
     @RootContext
-    Service mService;
+    public Context mContext;
 
     public MyLocationListener() {}
 
@@ -31,14 +32,15 @@ public class MyLocationListener implements LocationListener{
         float latitude = (float)location.getLatitude();
         float longitude = (float)location.getLongitude();
 
-        Position.savePosition(mService, latitude, longitude);
+        if (mContext == null) {
+            Log.i("LocationListener", "mContext is null");
+        }
+        Position.savePosition(mContext.getApplicationContext(), latitude, longitude);
 
         Intent broadcastIntent = new Intent(ACTION);
         broadcastIntent.putExtra(Position.LATITUDE, latitude);
         broadcastIntent.putExtra(Position.LONGITUDE, longitude);
-        mService.sendBroadcast(broadcastIntent);
-
-        Log.i("MyLocationListener", ACTION);
+        mContext.sendBroadcast(broadcastIntent);
     }
 
     @Override
