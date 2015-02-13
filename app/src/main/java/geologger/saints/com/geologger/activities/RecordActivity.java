@@ -217,8 +217,17 @@ public class RecordActivity extends FragmentActivity {
                     }
 
 
+                    //Generate Unique tid
+                    String tidCandidate;
+                    while (true) {
+                        tidCandidate = UUID.randomUUID().toString();
+                        if (!mTrajectorySpanDbHandler.isExistTid(tidCandidate)) {
+                            break;
+                        }
+                    }
+
                     //Insert companions into DB in the other thread
-                    final String tid = UUID.randomUUID().toString();
+                    final String tid = tidCandidate;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -320,7 +329,9 @@ public class RecordActivity extends FragmentActivity {
 
                 @Override
                 public void run() {
-                    mCheckinSQLite.insert(entry);
+                    if (!mCheckinSQLite.insert(entry)) {
+                        Log.i(TAG, "CHECHIN INSERT FAILED");
+                    }
                 }
             }).start();
 

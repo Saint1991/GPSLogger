@@ -119,6 +119,22 @@ public class TrajectorySpanSQLite implements IRemoveByTid {
     }
 
     /**
+     * 既存のTIDか確認する
+     * @param tid
+     * @return
+     */
+    public boolean isExistTid(String tid) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
+
+        boolean isExist = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+
+        return isExist;
+    }
+
+    /**
      * 現在ロギング中のトラジェクトリのTIDを取得
      * @return ロギング中のものがない場合はnullを返す
      */
