@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -155,8 +156,10 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
     protected void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate");
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_poi_confirmation);
+
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage(getResources().getString(R.string.searching));

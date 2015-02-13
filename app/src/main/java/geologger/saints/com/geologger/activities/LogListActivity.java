@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -73,8 +74,10 @@ public class LogListActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate");
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
+
 
         initLogList();
     }

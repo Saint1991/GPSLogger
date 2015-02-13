@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
@@ -34,6 +36,7 @@ import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
+import geologger.saints.com.geologger.uicomponents.FourSquarePhotoLoaderImageView;
 
 @EActivity
 public class LogActivity extends FragmentActivity {
@@ -164,6 +167,17 @@ public class LogActivity extends FragmentActivity {
 
     //endregion
 
+    /**
+     * Let Map reRender InfoWindow if loaded image curresponds to shown infoWindow
+     * @param intent
+     */
+    @Receiver(actions = FourSquarePhotoLoaderImageView.ACTION)
+    public void imageLoaded(Intent intent){
+        String placeId = intent.getStringExtra(CheckinEntry.PLACEID);
+        if (mMapWorker != null) {
+            mMapWorker.reRenderInfoWindowIfNeeded(placeId);
+        }
+    }
 
     private boolean loadDatas() {
 
@@ -202,7 +216,9 @@ public class LogActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_log);
+
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage(getResources().getString(R.string.loading));
@@ -284,7 +300,7 @@ public class LogActivity extends FragmentActivity {
     private void setUpMap() {
 
         LatLng firstPosition = mLatLngList.get(0);
-        mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F);
+        mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F, false);
         mMapWorker.drawLine(mLatLngList);
         mMapWorker.addCheckinMarkers(mCheckinEntryList);
 
