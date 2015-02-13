@@ -19,14 +19,16 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class CheckinSQLite implements IRemoveByTid {
+public class CheckinSQLite implements IRemoveBy {
 
     private final String TABLENAME = TableDefinitions.CHECKIN;
 
     @Bean
     BaseSQLiteOpenHelper mDbHelper;
 
-    public CheckinSQLite() {}
+    public CheckinSQLite(Context context) {
+        mDbHelper = new BaseSQLiteOpenHelper(context);
+    }
 
     /**
      * チェックイン情報のエントリを格納する
@@ -98,6 +100,19 @@ public class CheckinSQLite implements IRemoveByTid {
         db.close();
 
         return removedCount;
+    }
+
+    /**
+     * 指定したtimestampに対応するエントリを削除する
+     * @param timestamp
+     * @return
+     */
+    public int removeByTimestamp(String timestamp) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removeCount = db.delete(TABLENAME, CheckinEntry.TIMESTAMP + "=?", new String[]{timestamp});
+        db.close();
+
+        return removeCount;
     }
 
     /**

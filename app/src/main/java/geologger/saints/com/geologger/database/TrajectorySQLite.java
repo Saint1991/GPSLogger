@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
@@ -22,7 +21,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Trajectoryテーブルに対するデータの操作を扱うクラス
  */
 @EBean
-public class TrajectorySQLite implements IRemoveByTid {
+public class TrajectorySQLite {
 
     private final String TABLENAME = TableDefinitions.TRAJECTORY;
 

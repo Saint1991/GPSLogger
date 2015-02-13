@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -19,7 +18,7 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
  * Created by Mizuno on 2015/01/29.
  */
 @EBean
-public class TrajectorySpanSQLite implements IRemoveByTid {
+public class TrajectorySpanSQLite  {
 
     private final String TABLENAME = TableDefinitions.TRAJECTORY_SPAN;
 
@@ -119,12 +118,12 @@ public class TrajectorySpanSQLite implements IRemoveByTid {
     }
 
     /**
-     * 既存のTIDか確認する
+     * 指定したTID既存のものかチェックする
      * @param tid
      * @return
      */
     public boolean isExistTid(String tid) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
 
         boolean isExist = cursor.getCount() > 0;

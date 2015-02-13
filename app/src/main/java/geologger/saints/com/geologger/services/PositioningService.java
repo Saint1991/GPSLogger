@@ -13,7 +13,7 @@ import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
 
 import geologger.saints.com.geologger.activities.SettingsActivity;
-import geologger.saints.com.geologger.utils.MyLocationListener;
+import geologger.saints.com.geologger.sensors.MyLocationListener;
 
 @EService
 public class PositioningService extends Service {
