@@ -1,6 +1,8 @@
 package geologger.saints.com.geologger.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import geologger.saints.com.geologger.foursquare.models.FourSquareLocation;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoiCategory;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoiStates;
+import geologger.saints.com.geologger.uicomponents.FourSquarePhotoLoaderImageView_;
 
 /**
  * Created by Mizuno on 2015/01/27.
@@ -23,7 +26,6 @@ public class PoiListAdapter extends ArrayAdapter<FourSquarePoi> {
 
     private List<FourSquarePoi> mFourSquarePois;
     private Context mContext;
-
 
     public PoiListAdapter(Context context, List<FourSquarePoi> datas) {
         super(context, R.layout.poi_list_entry, datas);
@@ -71,6 +73,14 @@ public class PoiListAdapter extends ArrayAdapter<FourSquarePoi> {
         ((TextView) poiListEntry.findViewById(R.id.poi_address)).setText(address.toString());
 
         ((TextView) poiListEntry.findViewById(R.id.poi_distance)).setText(location.getDistance() + "m");
+
+        FourSquarePhotoLoaderImageView_ photo =  (FourSquarePhotoLoaderImageView_)poiListEntry.findViewById(R.id.poi_photo);
+        photo.setPlaceId(fourSquarePoi.getId());
+
+        if (mContext instanceof Activity) {
+            Loader loader = ((Activity)mContext).getLoaderManager().initLoader(position, null, photo);
+            loader.forceLoad();
+        }
 
         return poiListEntry;
     }

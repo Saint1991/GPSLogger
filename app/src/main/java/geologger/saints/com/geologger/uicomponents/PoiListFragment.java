@@ -63,8 +63,7 @@ public class PoiListFragment extends ListFragment {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        // TODO: Change Adapter to display your content
-        setListAdapter(new PoiListAdapter(getActivity().getApplicationContext(), new ArrayList<FourSquarePoi>()));
+        setListAdapter(new PoiListAdapter(getActivity(), new ArrayList<FourSquarePoi>()));
     }
 
     @Override
