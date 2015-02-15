@@ -25,12 +25,14 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
+import java.util.List;
 import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
+import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
@@ -40,7 +42,6 @@ import geologger.saints.com.geologger.services.GPSLoggingService_;
 import geologger.saints.com.geologger.map.MapWorker;
 
 import geologger.saints.com.geologger.services.PositioningService_;
-import geologger.saints.com.geologger.uicomponents.FourSquarePhotoLoaderImageView;
 import geologger.saints.com.geologger.utils.EncourageGpsOn;
 import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
@@ -56,6 +57,7 @@ public class RecordActivity extends FragmentActivity {
     private final int POICONFIRMATIONCODE = 1;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private String mCurrentTid;
 
     @SystemService
     LocationManager mLocationManager;
@@ -64,13 +66,16 @@ public class RecordActivity extends FragmentActivity {
     CompanionSQLite mCompanionDbHandler;
 
     @Bean
+    TrajectorySQLite mTrajectoryDbHandler;
+
+    @Bean
     TrajectorySpanSQLite mTrajectorySpanDbHandler;
 
     @Bean
-    CheckinSQLite mCheckinSQLite;
+    CheckinSQLite mCheckinDbHandler;
 
     @Bean
-    CheckinFreeFormSQLite mCheckinFreeFormSQLite;
+    CheckinFreeFormSQLite mCheckinFreeFormDbHandler;
 
     @Bean
     ServiceRunningConfirmation mServiceRunningConfirmation;
@@ -100,6 +105,11 @@ public class RecordActivity extends FragmentActivity {
         setContentView(R.layout.activity_record);
         setUpMapIfNeeded();
         setLoggingStateOnView();
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(TrajectoryEntry.TID)) {
+            mCurrentTid = savedInstanceState.getString(TrajectoryEntry.TID);
+        }
+
     }
 
     @Override
@@ -108,6 +118,32 @@ public class RecordActivity extends FragmentActivity {
         super.onResume();
         setUpMapIfNeeded();
         restartPositioningServiceIfRunning();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(TAG, "onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.i(TAG, "onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(TrajectoryEntry.TID, mCurrentTid);
+        Log.i(TAG, "onSaveInstanceState " + mCurrentTid);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentTid = savedInstanceState.getString(TrajectoryEntry.TID);
+        Log.i(TAG, mCurrentTid);
     }
 
     //endregion]
@@ -228,17 +264,17 @@ public class RecordActivity extends FragmentActivity {
 
 
                     //Insert companions into DB in the other thread
-                    final String tid = tidCandidate;
+                    mCurrentTid = tidCandidate;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            mCompanionDbHandler.insert(tid, companions.substring(0, companions.length() - 1));
+                            mCompanionDbHandler.insert(mCurrentTid, companions.substring(0, companions.length() - 1));
                         }
                     }).start();
 
                     //Start GpsLoggingService with TID
                     Intent intent = new Intent(getApplicationContext(), GPSLoggingService_.class);
-                    intent.putExtra(TrajectoryEntry.TID, tid);
+                    intent.putExtra(TrajectoryEntry.TID, mCurrentTid);
                     startService(intent);
 
                     //Update View and show the message
@@ -330,7 +366,7 @@ public class RecordActivity extends FragmentActivity {
 
                 @Override
                 public void run() {
-                    mCheckinSQLite.insert(entry);
+                    mCheckinDbHandler.insert(entry);
                 }
             }).start();
 
@@ -346,7 +382,7 @@ public class RecordActivity extends FragmentActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    mCheckinFreeFormSQLite.insert(tid, placeName, latitude, longitude);
+                    mCheckinFreeFormDbHandler.insert(tid, placeName, latitude, longitude);
                 }
             }).start();
 
@@ -441,7 +477,23 @@ public class RecordActivity extends FragmentActivity {
         if (mMap == null || mMapWorker == null) {
             return;
         }
+
         mMapWorker.initMap(mMap);
+
+        //restore map state
+        String tid = mTrajectorySpanDbHandler.getLoggingTid();
+        Log.i(TAG, "restore map state logging tid " + tid);
+        Log.i(TAG, "mCurrentTid " + mCurrentTid);
+        if (tid != null && tid.equals(mCurrentTid)) {
+            Log.i(TAG, "restore map state");
+            List<CheckinEntry> checkinList = mCheckinDbHandler.getCheckinList(tid);
+            List<CheckinFreeFormEntry> checkinFreeFormList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
+            List<TrajectoryEntry> positionList = mTrajectoryDbHandler.getTrajectory(tid);
+            mMapWorker.addMarkers(positionList);
+            mMapWorker.addCheckinMarkers(checkinList);
+            mMapWorker.addCheckinMarkers(checkinFreeFormList);
+        }
+
     }
 
     //endregion

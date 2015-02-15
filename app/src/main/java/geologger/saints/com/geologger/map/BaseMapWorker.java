@@ -15,9 +15,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
@@ -107,11 +110,10 @@ public class BaseMapWorker {
     //endregion
 
 
-
     //region Marker
 
     /**
-     * Add Marker with the disignated color
+     * Add Marker with the designated color
      * @param position
      * @param color
      * @param alpha
@@ -168,6 +170,15 @@ public class BaseMapWorker {
         return addMarker(position);
     }
 
+    /**
+     * add Markers at the designated position list
+     * @param positionList
+     */
+    public void addMarkers(List<TrajectoryEntry> positionList) {
+        for (TrajectoryEntry entry : positionList) {
+            addMarker(entry.getLatitude(), entry.getLongitude());
+        }
+    }
     //endregion
 
 

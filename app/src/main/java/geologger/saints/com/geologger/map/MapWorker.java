@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.androidannotations.annotations.EBean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,13 +66,6 @@ public class MapWorker extends BaseMapWorker {
     }
 
     /**
-     * Clear Checkin Marker's ID List
-     */
-    public void clearCheckinList() {
-        mCheckinMarkerIdMap.clear();
-    }
-
-    /**
      * Clear recorded previous position.
      */
     public void clearPrevious() {
@@ -118,10 +112,12 @@ public class MapWorker extends BaseMapWorker {
      */
     public Marker addCheckinMarker(CheckinFreeFormEntry entry) {
 
+        LatLng position = new LatLng(entry.getLatitude(), entry.getLongitude());
+
         MarkerOptions marker = new MarkerOptions();
         marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.checkin_pin));
         marker.anchor(0.0F, 1.0F);
-        marker.position(new LatLng(entry.getLatitude(), entry.getLongitude()));
+        marker.position(position);
         marker.title(entry.getPlaceName());
 
         marker.snippet("time: " + entry.getTimestamp());
