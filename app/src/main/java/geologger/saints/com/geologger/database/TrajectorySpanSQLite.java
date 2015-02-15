@@ -140,7 +140,7 @@ public class TrajectorySpanSQLite  {
     public String getLoggingTid() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, null);
+        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
 
         if (!cursor.moveToFirst()) {
             return null;

@@ -189,6 +189,10 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
         FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
         PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
         ListView poiList = fragment.getListView();
+        if (poiList == null) {
+            return;
+        }
+
         PoiListAdapter adapter = (PoiListAdapter)poiList.getAdapter();
         adapter.addAll(mFourSquarePoiList);
         poiList.setAdapter(adapter);

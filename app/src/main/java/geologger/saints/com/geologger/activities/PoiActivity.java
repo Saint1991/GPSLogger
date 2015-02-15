@@ -77,6 +77,10 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
         FragmentManager fManager = PoiActivity.this.getFragmentManager();
         PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_search_result);
         ListView poiList = fragment.getListView();
+        if (poiList == null) {
+            return;
+        }
+
         PoiListAdapter adapter = (PoiListAdapter)poiList.getAdapter();
         adapter.addAll(mFourSquarePoiList);
         poiList.setAdapter(adapter);

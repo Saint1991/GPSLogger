@@ -107,6 +107,7 @@ public class RecordActivity extends FragmentActivity {
         Log.i(TAG, "onResume");
         super.onResume();
         setUpMapIfNeeded();
+        restartPositioningServiceIfRunning();
     }
 
     //endregion]
@@ -156,19 +157,18 @@ public class RecordActivity extends FragmentActivity {
         mEncourageGpsOn.encourageGpsOn(new StartLoggingTask(), false);
     }
 
+    //Restart PositioningService if it is running
+    private void restartPositioningServiceIfRunning() {
+
+        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+        if ( mServiceRunningConfirmation.isPositioning() ) {
+            stopService(intent);
+        }
+        startService(intent);
+
+    }
 
     class StartLoggingTask implements IEncourageGpsOnAlertDialogCallback {
-
-        //Restart PositioningService if it is running
-        private void restartPositioningServiceIfRunning() {
-
-            Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
-            if ( mServiceRunningConfirmation.isPositioning() ) {
-                stopService(intent);
-            }
-            startService(intent);
-
-        }
 
         @Override
         public void executeTaskIfProviderIsEnabled() {

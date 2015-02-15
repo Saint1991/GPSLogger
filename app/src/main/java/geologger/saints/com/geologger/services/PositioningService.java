@@ -14,6 +14,7 @@ import org.androidannotations.annotations.SystemService;
 
 import geologger.saints.com.geologger.activities.SettingsActivity;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
+import geologger.saints.com.geologger.sensors.MyLocationListener2;
 
 @EService
 public class PositioningService extends Service {
@@ -28,6 +29,8 @@ public class PositioningService extends Service {
     @Bean
     MyLocationListener mLocationListener;
 
+    @Bean
+    MyLocationListener2 mLocationListener2;
 
     //Constructor
     public PositioningService() {
@@ -52,14 +55,18 @@ public class PositioningService extends Service {
 
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         String positioningIntervalStr = preference.getString(SettingsActivity.POSITIONINGINTERVAL, DEFAULTSAMPLINGINTERVAL);
-        String positioningDistanceStr = preference.getString(SettingsActivity.POSITIONINGDISTANCE, DEFAULTSAMPLINGDISTANCE);
         long positioningInterval = Long.parseLong(positioningIntervalStr);
+        String positioningDistanceStr = preference.getString(SettingsActivity.POSITIONINGDISTANCE, DEFAULTSAMPLINGDISTANCE);
         long positioningDistance = Long.parseLong(positioningDistanceStr);
 
 
         if (provider != null && mLocationManager.isProviderEnabled(provider)) {
             Log.i(TAG, "Start Positioning With " + provider + " interval: " + positioningIntervalStr + " distance: " + positioningDistanceStr);
             mLocationManager.requestLocationUpdates(provider, positioningInterval, positioningDistance, mLocationListener);
+
+            if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, positioningInterval, positioningDistance, mLocationListener2);
+            }
         }
 
         return START_REDELIVER_INTENT;
