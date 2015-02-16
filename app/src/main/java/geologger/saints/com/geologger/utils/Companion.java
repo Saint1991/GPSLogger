@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import org.androidannotations.annotations.sharedpreferences.SharedPref;
 
 /**
  * Created by Mizuno on 2015/01/30.

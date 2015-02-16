@@ -6,7 +6,6 @@ import android.content.Loader;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 import org.androidannotations.annotations.EView;

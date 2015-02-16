@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.services;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.util.Log;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EService;
-import org.androidannotations.annotations.SystemService;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -81,16 +79,8 @@ public class GPSLoggingService extends Service {
         final long loggingInterval = Long.parseLong(loggingIntervalStr);
         Log.i(TAG, "Logging with interval " + loggingIntervalStr + "msec");
 
-        Notification notification = new NotificationCompat.Builder(this)
-        .setSmallIcon(R.drawable.ic_launcher)
-        .setTicker(getResources().getString(R.string.start_logging))
-        .setContentText(getResources().getString(R.string.now_logging))
-        .setContentTitle(TAG)
-        .setWhen(System.currentTimeMillis())
-        .setContentIntent(PendingIntent.getActivity(getApplicationContext(), RecordActivity.RECORDNOTIFICATIONCODE, new Intent(getApplicationContext(), RecordActivity_.class), PendingIntent.FLAG_UPDATE_CURRENT))
-        .build();
-
-        startForeground(LOGGING_NOTIFICATION_ID, notification);
+        //Make This service foreground
+        makeForegroundService();
 
         mTimer.schedule(new TimerTask() {
 
@@ -132,6 +122,20 @@ public class GPSLoggingService extends Service {
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    private void makeForegroundService() {
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setTicker(getResources().getString(R.string.start_logging))
+                .setContentText(getResources().getString(R.string.now_logging))
+                .setContentTitle(TAG)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), RecordActivity.RECORDNOTIFICATIONCODE, new Intent(getApplicationContext(), RecordActivity_.class), PendingIntent.FLAG_UPDATE_CURRENT))
+                .build();
+
+        startForeground(LOGGING_NOTIFICATION_ID, notification);
     }
 
 }

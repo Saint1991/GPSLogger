@@ -2,10 +2,8 @@ package geologger.saints.com.geologger.foursquare;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

@@ -18,7 +18,6 @@ import com.google.android.gms.maps.model.LatLng;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
@@ -36,7 +35,6 @@ import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
-import geologger.saints.com.geologger.uicomponents.FourSquarePhotoLoaderImageView;
 
 @EActivity
 public class LogActivity extends FragmentActivity {

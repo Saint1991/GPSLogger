@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import geologger.saints.com.geologger.models.CheckinEntry;
-import geologger.saints.com.geologger.models.CompanionEntry;
-import geologger.saints.com.geologger.models.SentTrajectoryEntry;
-import geologger.saints.com.geologger.models.TrajectoryEntry;
-import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 
 /**
  * Created by Seiya on 2015/01/01.

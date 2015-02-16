@@ -7,7 +7,6 @@ import android.util.Log;
 
 import org.androidannotations.annotations.EBean;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import geologger.saints.com.geologger.models.TableDefinitions;

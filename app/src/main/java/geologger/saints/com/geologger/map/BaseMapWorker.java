@@ -15,8 +15,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
