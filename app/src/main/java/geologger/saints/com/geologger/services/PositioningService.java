@@ -69,7 +69,7 @@ public class PositioningService extends Service {
             }
         }
 
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Override

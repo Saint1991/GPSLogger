@@ -54,7 +54,9 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
 public class RecordActivity extends FragmentActivity {
 
     private final String TAG = getClass().getSimpleName();
+
     private final int POICONFIRMATIONCODE = 1;
+    public static final int RECORDNOTIFICATIONCODE = 2;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private String mCurrentTid;
