@@ -3,40 +3,62 @@
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
     <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
-    <ListPreference
-        android:key="positioning_interval"
-        android:title="@string/positioning_interval"
-        android:defaultValue="2000"
-        android:entries="@array/interval"
-        android:entryValues="@array/interval_values"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null" />
 
-    <ListPreference
-        android:key="positioning_distance"
-        android:title="@string/positioning_distance"
-        android:defaultValue="3"
-        android:entries="@array/distance"
-        android:entryValues="@array/distance_values"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"/>
+    <PreferenceCategory
+        android:title="@string/positioning">
 
-    <ListPreference
-        android:key="logging_interval"
-        android:title="@string/logging_interval"
-        android:defaultValue="10000"
-        android:entries="@array/interval"
-        android:entryValues="@array/interval_values"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"/>
+        <ListPreference
+            android:key="positioning_interval"
+            android:title="@string/positioning_interval"
+            android:defaultValue="2000"
+            android:entries="@array/interval"
+            android:entryValues="@array/interval_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
 
-    <ListPreference
-        android:key="poi_result_count"
-        android:title="@string/Poi_result_count"
-        android:defaultValue="100"
-        android:entries="@array/poi_count"
-        android:entryValues="@array/poi_count"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"/>
+        <ListPreference
+            android:key="positioning_distance"
+            android:title="@string/positioning_distance"
+            android:defaultValue="3"
+            android:entries="@array/distance"
+            android:entryValues="@array/distance_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"/>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/logging">
+
+        <ListPreference
+            android:key="logging_interval"
+            android:title="@string/logging_interval"
+            android:defaultValue="10000"
+            android:entries="@array/interval"
+            android:entryValues="@array/interval_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"/>
+
+        <ListPreference
+            android:key="poi_result_count"
+            android:title="@string/Poi_result_count"
+            android:defaultValue="100"
+            android:entries="@array/poi_count"
+            android:entryValues="@array/poi_count"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/user_id"
+        android:key="user_id_category">
+
+        <Preference
+            android:key="user_id"
+            android:title="Hasn't set yet"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

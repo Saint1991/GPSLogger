@@ -45,6 +45,9 @@
     <string name="positioning_distance">Position Update Distance</string>
     <string name="logging_interval">Logging Interval</string>
     <string name="Poi_result_count">The number of POI searching result</string>
+    <string name="positioning">Positioning</string>
+    <string name="logging">Logging</string>
+    <string name="user_id">User ID</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>

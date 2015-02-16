@@ -59,7 +59,7 @@ public class SendDataService extends Service {
 
         ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add( new BasicNameValuePair("data", data) );
-        params.add( new BasicNameValuePair("uuid", UserID.getUserID(getApplicationContext())));
+        params.add( new BasicNameValuePair("uuid", UserID.getUserId(getApplicationContext())));
 
         try {
             UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");

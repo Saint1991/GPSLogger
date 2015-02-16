@@ -10,10 +10,12 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.view.Window;
+import android.widget.Toast;
 
 import org.androidannotations.annotations.EActivity;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.utils.UserId;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -33,6 +35,8 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String POSITIONINGDISTANCE = "positioning_distance";
     public static final String LOGGINGINTERVAL = "logging_interval";
     public static final String POICOUNT = "poi_result_count";
+    public static final String USERID = "user_id";
+    public static final String USERIDCATEGORY = "user_id_category";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +54,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static class ParameterSettingFragment extends PreferenceFragment  {
 
-                @Override
+        @Override
         public void onCreate(Bundle savedInstanceState) {
 
             super.onCreate(savedInstanceState);
@@ -67,6 +71,23 @@ public class SettingsActivity extends PreferenceActivity {
 
             ListPreference poiCountPreference = (ListPreference)findPreference(POICOUNT);
             bindPreferenceSummaryToValue(poiCountPreference);
+
+            Preference userIdPreference = findPreference(USERID);
+            String userId = UserId.getUserId(getActivity().getApplicationContext());
+            if (userId != null) {
+                userIdPreference.setTitle(userId);
+            }
+
+            userIdPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    String title = preference.getTitle().toString();
+                    if (title != null) {
+                        Toast.makeText(getActivity(), title, Toast.LENGTH_LONG).show();
+                    }
+                    return true;
+                }
+            });
         }
 
     }
