@@ -103,13 +103,25 @@ public class RecordActivity extends FragmentActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
-        setUpMapIfNeeded();
         setLoggingStateOnView();
+
+        //This activity newly created
+        if (savedInstanceState == null) {
+            Log.i(TAG, "onCreate: savedInstanceState is null");
+        }
 
         if (savedInstanceState != null && savedInstanceState.containsKey(TrajectoryEntry.TID)) {
             mCurrentTid = savedInstanceState.getString(TrajectoryEntry.TID);
         }
 
+        setUpMapIfNeeded();
+
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(TAG, "onStart");
+        super.onStart();
     }
 
     @Override
@@ -133,17 +145,25 @@ public class RecordActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        Log.i(TAG, "onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(TrajectoryEntry.TID, mCurrentTid);
-        Log.i(TAG, "onSaveInstanceState " + mCurrentTid);
+        if (mCurrentTid != null) {
+            outState.putString(TrajectoryEntry.TID, mCurrentTid);
+            Log.i(TAG, "onSaveInstanceState " + mCurrentTid);
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentTid = savedInstanceState.getString(TrajectoryEntry.TID);
-        Log.i(TAG, mCurrentTid);
+        Log.i(TAG, "onRestoreInstanceState " + mCurrentTid);
     }
 
     //endregion]
@@ -482,9 +502,7 @@ public class RecordActivity extends FragmentActivity {
 
         //restore map state
         String tid = mTrajectorySpanDbHandler.getLoggingTid();
-        Log.i(TAG, "restore map state logging tid " + tid);
-        Log.i(TAG, "mCurrentTid " + mCurrentTid);
-        if (tid != null && tid.equals(mCurrentTid)) {
+        if (tid != null && mServiceRunningConfirmation.isLogging()) {
             Log.i(TAG, "restore map state");
             List<CheckinEntry> checkinList = mCheckinDbHandler.getCheckinList(tid);
             List<CheckinFreeFormEntry> checkinFreeFormList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
