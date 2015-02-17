@@ -39,8 +39,12 @@
             android:entryValues="@array/interval_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"/>
+    </PreferenceCategory>
 
-        <ListPreference
+    <PreferenceCategory
+        android:title="@string/checkin">
+
+    <ListPreference
             android:key="poi_result_count"
             android:title="@string/Poi_result_count"
             android:defaultValue="100"

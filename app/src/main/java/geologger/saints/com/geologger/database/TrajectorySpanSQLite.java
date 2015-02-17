@@ -143,11 +143,15 @@ public class TrajectorySpanSQLite  {
         Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
 
         if (!cursor.moveToFirst()) {
+            cursor.close();
+            db.close();
             return null;
         }
 
         String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
         if (tid.length() == 0 || tid == null) {
+            cursor.close();
+            db.close();
             return null;
         }
 
