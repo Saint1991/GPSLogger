@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -36,7 +37,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String LOGGINGINTERVAL = "logging_interval";
     public static final String POICOUNT = "poi_result_count";
     public static final String USERID = "user_id";
-    public static final String USERIDCATEGORY = "user_id_category";
+    public static final String SECONDURL = "second_url";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,11 +73,16 @@ public class SettingsActivity extends PreferenceActivity {
             ListPreference poiCountPreference = (ListPreference)findPreference(POICOUNT);
             bindPreferenceSummaryToValue(poiCountPreference);
 
+            EditTextPreference secondUrlPreference = (EditTextPreference)findPreference(SECONDURL);
+            bindPreferenceSummaryToValue(secondUrlPreference);
+
             Preference userIdPreference = findPreference(USERID);
             String userId = UserId.getUserId(getActivity().getApplicationContext());
             if (userId != null) {
                 userIdPreference.setTitle(userId);
             }
+
+
 
             userIdPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -113,7 +119,6 @@ public class SettingsActivity extends PreferenceActivity {
                         index >= 0
                                 ? listPreference.getEntries()[index]
                                 : null);
-
             } else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.

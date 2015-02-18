@@ -18,7 +18,7 @@ public class Route {
 
     private static HashMap<String, Class> routeMap = new HashMap<String, Class>() {
         {
-            put(WifiManager.WIFI_STATE_CHANGED_ACTION, SendDataService_.class);
+            put(WifiManager.NETWORK_STATE_CHANGED_ACTION, SendDataService_.class);
             put(Intent.ACTION_BOOT_COMPLETED, PositioningService_.class);
         }
     };

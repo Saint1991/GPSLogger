@@ -169,12 +169,23 @@ public class BaseMapWorker {
     }
 
     /**
+     * Draw a marker which corresponds to the designated entry
+     * @param entry
+     * @return
+     */
+    public Marker addMarker(TrajectoryEntry entry) {
+        Marker marker = addMarker(entry.getLatitude(), entry.getLongitude());
+        marker.setSnippet(entry.getTimestamp());
+        return marker;
+    }
+
+    /**
      * add Markers at the designated position list
      * @param positionList
      */
     public void addMarkers(List<TrajectoryEntry> positionList) {
         for (TrajectoryEntry entry : positionList) {
-            addMarker(entry.getLatitude(), entry.getLongitude());
+            addMarker(entry);
         }
     }
     //endregion

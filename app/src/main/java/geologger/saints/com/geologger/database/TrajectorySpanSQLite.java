@@ -192,7 +192,29 @@ public class TrajectorySpanSQLite  {
     public List<String> getTidList() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
+        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, null, null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
+
+        List<String> ret = new ArrayList<String>();
+        boolean isEOF = cursor.moveToFirst();
+        while (isEOF) {
+            String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
+            ret.add(tid);
+            isEOF = cursor.moveToNext();
+        }
+        cursor.close();
+        db.close();
+
+        return ret;
+    }
+
+    /**
+     * ロギングが終了しているTIDの一覧を取得する
+     * @return
+     */
+    public List<String> getLoggingFinishedTidList() {
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NOT NULL", null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
 
         List<String> ret = new ArrayList<String>();
         boolean isEOF = cursor.moveToFirst();

@@ -56,8 +56,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/user_id"
-        android:key="user_id_category">
+        android:title="@string/data_sending">
+
+        <EditTextPreference
+            android:key="second_url"
+            android:title="@string/server_url"
+            android:inputType="textUri"
+            android:defaultValue="http://"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/user_id">
 
         <Preference
             android:key="user_id"

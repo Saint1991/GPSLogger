@@ -3,6 +3,8 @@ package geologger.saints.com.geologger.routes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import org.androidannotations.annotations.EReceiver;
@@ -21,11 +23,11 @@ public class RouteReceiver extends BroadcastReceiver {
 
         Class startService = Route.route(intent);
         if (startService == null) {
-            Log.d(TAG, intent.getAction());
+            Log.i(TAG, intent.getAction());
             return;
         }
 
-        Intent serviceIntent = new Intent(context, startService);
-        context.startService(serviceIntent);
+        intent.setClass(context, startService);
+        context.startService(intent);
     }
 }

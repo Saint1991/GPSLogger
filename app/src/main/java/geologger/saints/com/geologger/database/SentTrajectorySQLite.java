@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import geologger.saints.com.geologger.models.SentTrajectoryEntry;
@@ -96,25 +98,27 @@ public class SentTrajectorySQLite {
     }
 
     /**
-     * tid => issentのハッシュマップを取得する
+     * 送信済みのTIDリストを取得する
      * @return
      */
-    public Map<String, Boolean> getSentTrajectoryList() {
+    public List<String> getSentTrajectoryList() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLENAME, null, null, null, null, null, null);
 
-        Map<String, Boolean> sentTable = new HashMap<String, Boolean>();
+        List<String> sentList = new ArrayList<String>();
         boolean isEOF = cursor.moveToFirst();
         while (isEOF) {
             SentTrajectoryEntry entry = getEntryFromCursor(cursor);
-            sentTable.put(entry.getTid(), entry.getIsSent());
+            if (entry.getIsSent()) {
+                sentList.add(entry.getTid());
+            }
             isEOF = cursor.moveToNext();
         }
         cursor.close();
         db.close();
 
-        return sentTable;
+        return sentList;
     }
 
     //カーソルの現在位置からエントリを取得する

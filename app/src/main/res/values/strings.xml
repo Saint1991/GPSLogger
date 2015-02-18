@@ -48,11 +48,13 @@
     <string name="positioning">Positioning</string>
     <string name="logging">Logging</string>
     <string name="user_id">User ID</string>
+    <string name="data_sending">DATA SENDING</string>
+    <string name="server_url">Server URL to send log data</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
         <item>Boyfriend / Girlfriend</item>
-        <item>Famiry</item>
+        <item>Family</item>
         <item>Friend(s)</item>
         <item>Pet</item>
     </string-array>
