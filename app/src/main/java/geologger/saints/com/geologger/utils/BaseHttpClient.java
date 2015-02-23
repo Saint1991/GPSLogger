@@ -4,8 +4,11 @@ import android.content.Context;
 
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -14,6 +17,10 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.List;
 
 /**
  * Created by Mizuno on 2015/01/25.
@@ -25,8 +32,9 @@ public class BaseHttpClient {
     protected Context mContext;
 
     public BaseHttpClient() {}
+    public BaseHttpClient(Context context) {mContext = context;}
 
-    protected String sendHttpGetRequest(String query) {
+    public String sendHttpGetRequest(String query) {
 
         String ret = null;
 
@@ -52,7 +60,7 @@ public class BaseHttpClient {
         return ret;
     }
 
-    protected String sendHttpPostRequest(String url, String params) {
+    public String sendHttpPostRequest(String url, String params) {
 
         String ret = null;
 
@@ -77,6 +85,47 @@ public class BaseHttpClient {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param url
+     * @param params
+     * @return
+     */
+    public String sendHttpPostRequest(String url, List<NameValuePair> params) {
+
+        String ret = null;
+
+        try {
+
+            URI uri = new URI(url);
+            HttpPost post = new HttpPost(uri);
+            post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+            DefaultHttpClient client = new DefaultHttpClient();
+            HttpResponse response = client.execute(post);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                return null;
+            }
+
+            HttpEntity entity = response.getEntity();
+            ret = EntityUtils.toString(entity);
+
+            entity.consumeContent();
+            client.getConnectionManager().shutdown();
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

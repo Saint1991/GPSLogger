@@ -15,6 +15,8 @@ import com.google.gson.Gson;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,9 +36,9 @@ import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.CompanionEntry;
-import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.BaseHttpClient;
+import geologger.saints.com.geologger.utils.SendDataUtil;
 
 
 @EService
@@ -92,42 +94,40 @@ public class SendDataService extends Service {
         JSONArray sendData = new JSONArray();
         List<String> tidListToSend = makeTidListToSend();
         for (String tid : tidListToSend) {
-            JSONObject entry = makeJsonToSend(tid);
+            JSONObject entry = makeJsonEntry(tid);
             if (entry != null) {
                 sendData.put(entry);
             }
-        }
-
-        String sendDataStr = null;
-        try {
-            sendDataStr = sendData.toString(4);
-            Log.i(TAG, "[Send Data] " + sendData.toString(4));
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
         if (sendData == null) {
             return START_NOT_STICKY;
         }
 
+        Log.i(TAG, "[Send Data] " + sendData.toString());
+        List<NameValuePair> sendParams = new ArrayList<>();
+        sendParams.add(new BasicNameValuePair("Data", sendData.toString()));
+
 
         /**
          * TODO 要実装
-         * Data送信部
-         * 返信がOKならsent Dataに格納する
+         * サーバセットアップ後URL設定
          */
+        //まずはPreferenceで設定されたSecond URLに対する送信
+        //設定されていなければスキップ
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String secondUrl = preference.getString(SettingsActivity.SECONDURL, null);
-
         if (secondUrl != null && secondUrl.length() > 7) {
-
-            try {
-                URL url = new URL(secondUrl);
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            mHttpClient.sendHttpPostRequest(secondUrl, sendParams);
         }
+
+        //送信済みのTIDを記録する
+        String result = mHttpClient.sendHttpPostRequest(SERVERURL, sendParams);
+        if (result != null) {
+            mSentTrajectoryDbHandler.insertSentTidList(tidListToSend);
+        }
+
+        Log.i(TAG,"response: " + result);
 
         return START_NOT_STICKY;
     }
@@ -167,6 +167,20 @@ public class SendDataService extends Service {
     }
 
 
+    private JSONArray prepareJsonDataToSend() {
+
+        //Prepare the data to send as a JSONArray
+        JSONArray sendData = new JSONArray();
+        List<String> tidListToSend = makeTidListToSend();
+        for (String tid : tidListToSend) {
+            JSONObject entry = makeJsonEntry(tid);
+            if (entry != null) {
+                sendData.put(entry);
+            }
+        }
+
+        return sendData;
+    }
 
     // Get TID List to send whose trajectory is finished logging and has not been sent
     private List<String> makeTidListToSend() {
@@ -185,24 +199,14 @@ public class SendDataService extends Service {
         return ret;
     }
 
-    private JSONObject makeJsonToSend(String tid) {
+    private JSONObject makeJsonEntry(String tid) {
 
         List<TrajectoryEntry> trajectory = mTrajectoryDbHandler.getTrajectory(tid);
         List<CheckinFreeFormEntry> checkinFreeForm = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
         List<CheckinEntry> checkin = mCheckinDbHandler.getCheckinList(tid);
         List<CompanionEntry> companion = mCompanionDbHandler.getCompanionList(tid);
 
-        JSONObject entry = null;
-        try {
-            Gson gson = new Gson();
-            entry = new JSONObject();
-            entry.put(TableDefinitions.TRAJECTORY, new JSONArray(gson.toJson(trajectory)));
-            entry.put(TableDefinitions.CHECKIN_FREE_FORM, new JSONArray(gson.toJson(checkinFreeForm)));
-            entry.put(TableDefinitions.CHECKIN, new JSONArray(gson.toJson(checkin)));
-            entry.put(TableDefinitions.COMPANION, new JSONArray(gson.toJson(companion)));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        JSONObject entry = SendDataUtil.makeJsonData(trajectory, checkinFreeForm, checkin, companion);
 
         return entry;
     }

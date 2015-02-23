@@ -42,7 +42,7 @@ public class SentTrajectorySQLite {
         insertValues.put(SentTrajectoryEntry.TID, tid);
         insertValues.put(SentTrajectoryEntry.ISSENT, isSent);
 
-        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
+        boolean result = db.insertWithOnConflict(TABLENAME, null, insertValues, SQLiteDatabase.CONFLICT_REPLACE) != -1;
         db.close();
 
         return result;
@@ -59,6 +59,25 @@ public class SentTrajectorySQLite {
         boolean isSent = entry.getIsSent();
 
         return this.insert(tid, isSent);
+    }
+
+    /**
+     * 送信済みTIDリストを記録する
+     * @param sentTidList
+     * @return
+     */
+    public void insertSentTidList(List<String> sentTidList) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        for (String tid : sentTidList) {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(SentTrajectoryEntry.TID, tid);
+            insertValues.put(SentTrajectoryEntry.ISSENT, true);
+            db.insertWithOnConflict(TABLENAME, null, insertValues, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+
+        db.close();
     }
 
     /**
