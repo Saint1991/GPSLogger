@@ -5,7 +5,13 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_poi_confirmation">PoiConfirmation</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_poi_search">PoiSearchActivity</string>
+    <string name="title_activity_log">LogActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
+    <string name="title_activity_poi">PoiActivity</string>
+    <string name="title_activity_log_list">LogListActivity</string>
+
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="cancel">CANCEL</string>
@@ -13,24 +19,19 @@
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="ok">OK</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="title_activity_poi_search">PoiSearchActivity</string>
-    <string name="title_activity_log">LogActivity</string>
-    <string name="title_activity_setting">SettingActivity</string>
-    <string name="poi_search_hint">place name</string>
     <string name="send">send</string>
-    <string name="title_activity_poi">PoiActivity</string>
+    <string name="delete">DELETE</string>
+    <string name="u_delete"><u>REMOVE</u></string>
+
+    <string name="poi_search_hint">place name</string>
+
     <string name="start_logging">Start Logging...</string>
     <string name="now_logging">Now Logging</string>
     <string name="stop_logging">Finish Logging!</string>
     <string name="action_settings">Settings</string>
     <string name="search">SEARCH</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_log_list">LogListActivity</string>
-    <string name="delete">DELETE</string>
-    <string name="u_delete"><u>REMOVE</u></string>
+
     <string name="companion">Companion</string>
     <string name="companion_alert">Please check at least one</string>
     <string name="freeform">Free Form</string>
