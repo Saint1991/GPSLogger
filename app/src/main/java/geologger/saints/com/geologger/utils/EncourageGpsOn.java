@@ -54,8 +54,8 @@ public class EncourageGpsOn {
         AlertDialog.Builder dialog = new AlertDialog.Builder(mActivity);
 
         Resources resources = mActivity.getResources();
-        dialog.setTitle(resources.getString(R.string.Gps_confirmation));
-        dialog.setMessage(resources.getString(R.string.Gps_confirmation_message));
+        dialog.setTitle(resources.getString(R.string.gps_confirmation));
+        dialog.setMessage(resources.getString(R.string.gps_confirmation_message));
 
         String positiveButtonMessage = isNetworkEnabled ? resources.getString(R.string.yes) : resources.getString(R.string.ok);
         dialog.setPositiveButton(positiveButtonMessage, new DialogInterface.OnClickListener() {

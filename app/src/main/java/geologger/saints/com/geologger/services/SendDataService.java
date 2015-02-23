@@ -34,6 +34,7 @@ import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.BaseHttpClient;
 import geologger.saints.com.geologger.utils.SendDataUtil;
+import geologger.saints.com.geologger.utils.UserId;
 
 
 @EService
@@ -110,6 +111,7 @@ public class SendDataService extends Service {
                 Log.i(TAG, "[Send Data] " + sendData.toString());
                 List<NameValuePair> sendParams = new ArrayList<>();
                 sendParams.add(new BasicNameValuePair("Data", sendData.toString()));
+                sendParams.add(new BasicNameValuePair("UserID", UserId.getUserId(getApplicationContext())));
 
                 //2nd URLに対する送信
                 if (secondUrl != null && secondUrl.length() > 7) {

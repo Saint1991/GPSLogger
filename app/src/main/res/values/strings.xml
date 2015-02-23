@@ -36,8 +36,8 @@
     <string name="companion_alert">Please check at least one</string>
     <string name="freeform">Free Form</string>
     <string name="freeform_hint">Input checking in place name here</string>
-    <string name="Gps_confirmation">GPS Confirmation</string>
-    <string name="Gps_confirmation_message">GPS is currently not ON. \n Turn on the GPS?</string>
+    <string name="gps_confirmation">GPS Confirmation</string>
+    <string name="gps_confirmation_message">GPS is currently not ON. \n Turn on the GPS?</string>
     <string name="imhere">I\'m here</string>
     <string name="timestamp">Timestamp</string>
     <string name="searching">Searching...</string>

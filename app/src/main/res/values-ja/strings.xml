@@ -34,8 +34,8 @@
     <string name="companion_alert">最低1項目選択してください</string>
     <string name="freeform">自由入力</string>
     <string name="freeform_hint">チェックインする場所の名前を入力</string>
-    <string name="Gps_confirmation">GPS設定</string>
-    <string name="Gps_confirmation_message">GPSがONになっていません. \n GPSをONにしますか?</string>
+    <string name="gps_confirmation">GPS設定</string>
+    <string name="gps_confirmation_message">GPSがONになっていません. \n GPSをONにしますか?</string>
     <string name="imhere">現在地</string>
     <string name="timestamp">日時</string>
     <string name="searching">検索中...</string>
@@ -47,7 +47,7 @@
     <string name="positioning">ポジショニング</string>
     <string name="logging">ロギング</string>
     <string name="user_id">ユーザID</string>
-    <string name="data_sending">データ送信中...</string>
+    <string name="data_sending">データ送信</string>
     <string name="server_url">データ送信先のサーバ</string>
 
     <string-array name="companion_candidate_list">
