@@ -28,7 +28,6 @@ import geologger.saints.com.geologger.uicomponents.PoiListFragment;
 public class PoiActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener{
 
     private final String TAG = getClass().getSimpleName();
-    private static final String FOURSQUARE_ROOT = "https://ja.foursquare.com/v/";
     private ProgressDialog mProgress;
 
     private List<FourSquarePoi> mFourSquarePoiList;
@@ -82,6 +81,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
         }
 
         PoiListAdapter adapter = (PoiListAdapter)poiList.getAdapter();
+        adapter.clear();
         adapter.addAll(mFourSquarePoiList);
         poiList.setAdapter(adapter);
 
@@ -100,7 +100,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
     @Override
     public void onFragmentInteraction(ListView parent, View called, int position, long id) {
         FourSquarePoi entry = (FourSquarePoi)parent.getAdapter().getItem(position);
-        String url = FOURSQUARE_ROOT + entry.getId();
+        String url = FourSquareClient.FOURSQUARE_ROOT + entry.getId();
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browserIntent);
     }

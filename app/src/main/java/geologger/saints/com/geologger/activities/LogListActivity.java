@@ -1,5 +1,6 @@
 package geologger.saints.com.geologger.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -33,7 +34,7 @@ import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 import static android.view.Window.FEATURE_NO_TITLE;
 
 @EActivity
-public class LogListActivity extends ActionBarActivity {
+public class LogListActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
 
