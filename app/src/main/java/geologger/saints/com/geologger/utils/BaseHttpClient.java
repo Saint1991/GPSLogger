@@ -32,7 +32,6 @@ public class BaseHttpClient {
     protected Context mContext;
 
     public BaseHttpClient() {}
-    public BaseHttpClient(Context context) {mContext = context;}
 
     public String sendHttpGetRequest(String query) {
 

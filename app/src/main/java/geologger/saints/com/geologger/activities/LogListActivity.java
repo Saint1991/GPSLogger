@@ -30,6 +30,8 @@ import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 
+import static android.view.Window.FEATURE_NO_TITLE;
+
 @EActivity
 public class LogListActivity extends ActionBarActivity {
 
@@ -74,9 +76,10 @@ public class LogListActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate");
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
+
 
 
         initLogList();
