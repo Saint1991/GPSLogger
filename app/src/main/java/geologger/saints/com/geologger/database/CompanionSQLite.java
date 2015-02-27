@@ -121,7 +121,8 @@ public class CompanionSQLite {
 
         String tid = cursor.getString(cursor.getColumnIndex(CompanionEntry.TID));
         String companion = cursor.getString(cursor.getColumnIndex(CompanionEntry.COMPANION));
-        CompanionEntry entry = new CompanionEntry(tid, companion);
+        String timestamp = cursor.getString(cursor.getColumnIndex(CompanionEntry.TIMESTAMP));
+        CompanionEntry entry = new CompanionEntry(tid, companion, timestamp);
 
         return entry;
     }

@@ -43,11 +43,9 @@ public class SendDataService extends Service {
 
     /**
      * TODO 要実装
-     * サーバセットアップ後URL設定
      */
-
     private final String TAG = getClass().getSimpleName();
-    private final String SERVERURL = "http://";
+    private final String SERVERURL = "http://133.1.244.46/mizuno/geologger/server.php";
 
     @SystemService
     ConnectivityManager mConnectivityManager;
