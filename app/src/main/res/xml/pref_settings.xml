@@ -10,7 +10,7 @@
         <ListPreference
             android:key="positioning_interval"
             android:title="@string/positioning_interval"
-            android:defaultValue="2000"
+            android:defaultValue="1000"
             android:entries="@array/interval"
             android:entryValues="@array/interval_values"
             android:negativeButtonText="@null"
@@ -19,7 +19,7 @@
         <ListPreference
             android:key="positioning_distance"
             android:title="@string/positioning_distance"
-            android:defaultValue="3"
+            android:defaultValue="2"
             android:entries="@array/distance"
             android:entryValues="@array/distance_values"
             android:negativeButtonText="@null"

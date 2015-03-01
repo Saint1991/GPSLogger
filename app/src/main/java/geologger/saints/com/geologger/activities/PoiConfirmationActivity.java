@@ -77,8 +77,10 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
                 Intent intent = new Intent();
                 intent.putExtra(CheckinEntry.PLACEID, placeId);
-                intent.putExtra(CheckinEntry.CATEGORYID, categoryId.substring(0, categoryId.length() - 1));
                 intent.putExtra(CheckinEntry.PLACENAME, placeName);
+                if (categoryId != null && categoryId.length() > 1) {
+                    intent.putExtra(CheckinEntry.CATEGORYID, categoryId.substring(0, categoryId.length() - 1));
+                }
 
                 setResult(RESULT_OK, intent);
                 finish();
