@@ -102,7 +102,7 @@ public class SendDataService extends Service {
                 List<String> tidListToSend = makeTidListToSend();
                 JSONArray sendData = makeSendData(tidListToSend);
 
-                if (sendData == null) {
+                if (sendData == null || sendData.toString().equals("[]")) {
                     return;
                 }
 

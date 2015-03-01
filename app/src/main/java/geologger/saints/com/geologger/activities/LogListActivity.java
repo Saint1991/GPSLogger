@@ -81,8 +81,6 @@ public class LogListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
 
-
-
         initLogList();
     }
 
@@ -159,6 +157,8 @@ public class LogListActivity extends Activity {
             return;
         }
 
+        String loggingTid = mTrajectorySpanDbHandler.getLoggingTid();
+
         //Remove Item From End.
         LogListAdapter adapter = (LogListAdapter)mLogList.getAdapter();
         int removedItemCount = 0;
@@ -172,6 +172,11 @@ public class LogListActivity extends Activity {
             TrajectorySpanEntry entry = adapter.getItem(position);
             String tid = entry.getTid();
 
+            if (loggingTid != null && loggingTid.equals(tid)) {
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.could_not_remove_entry_message) , Toast.LENGTH_SHORT).show();
+                continue;
+            }
+
             //Removing from DB and View
             mTrajectoryDbHander.removeByTid(tid);
             mCheckinFreeFormDbHandler.removeByTid(tid);
@@ -179,7 +184,7 @@ public class LogListActivity extends Activity {
             mCompanionDbHandler.removeByTid(tid);
             mSentTrajectoryDbHandler.removeByTid(tid);
             if (mTrajectorySpanDbHandler.removeByTid(tid) < 1) {
-                Toast.makeText(getApplicationContext(), "Couldn't Remove", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.could_not_remove), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -189,7 +194,7 @@ public class LogListActivity extends Activity {
 
         adapter.notifyDataSetChanged();
 
-        Toast.makeText(getApplicationContext(), removedItemCount + "items removed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), removedItemCount + getResources().getString(R.string.items_removed), Toast.LENGTH_SHORT).show();
         switchMode(MODE.NORMAL);
 
         //If List becomes empty, show message

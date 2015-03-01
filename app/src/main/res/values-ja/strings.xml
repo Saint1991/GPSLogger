@@ -49,6 +49,9 @@
     <string name="user_id">ユーザID</string>
     <string name="data_sending">データ送信</string>
     <string name="server_url">データ送信先のサーバ</string>
+    <string name="could_not_remove_entry_message">ロギング中のエントリは削除できません</string>
+    <string name="could_not_remove">削除できませんでした．</string>
+    <string name="items_removed">個の項目を削除しました．</string>
 
     <string-array name="companion_candidate_list">
         <item>同伴者なし</item>

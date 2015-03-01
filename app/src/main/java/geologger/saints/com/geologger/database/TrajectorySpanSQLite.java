@@ -80,10 +80,33 @@ public class TrajectorySpanSQLite  {
     public boolean setEnd(String tid, String end) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        ContentValues updateValues = new ContentValues();
-        updateValues.put(TrajectorySpanEntry.END, end);
 
-        boolean result = db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
+        Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
+        TrajectorySpanEntry entry = null;
+        if (cursor.moveToFirst()) {
+            entry = getEntryFromCursor(cursor);
+        }
+
+        String target = null;
+        if (entry == null) {
+            target = getLoggingTid();
+        }
+
+        if (target == null && entry == null) {
+            return false;
+        }
+
+        boolean result = false;
+        ContentValues updateValues = new ContentValues();
+        if (entry != null) {
+            updateValues.put(TrajectorySpanEntry.END, end);
+            result = db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
+        } else if (target != null) {
+            updateValues.put(TrajectorySpanEntry.TID, target);
+            updateValues.put(TrajectorySpanEntry.END, end);
+            result = db.insert(TABLENAME, null, updateValues) != -1;
+        }
+
         db.close();
 
         return result;
@@ -233,7 +256,7 @@ public class TrajectorySpanSQLite  {
     //取得できない場合はnullを返す
     private TrajectorySpanEntry getEntryFromCursor(Cursor cursor) {
 
-        if(cursor.isNull(cursor.getColumnIndex(TrajectorySpanEntry.TID))) {
+        if(cursor.getCount() == 0 || cursor.isNull(cursor.getColumnIndex(TrajectorySpanEntry.TID))) {
             return null;
         }
 

@@ -51,6 +51,9 @@
     <string name="user_id">User ID</string>
     <string name="data_sending">DATA SENDING</string>
     <string name="server_url">Server URL to send log data</string>
+    <string name="could_not_remove_entry_message">Could not Remove onLogging Entry</string>
+    <string name="could_not_remove">Could not remove.</string>
+    <string name="items_removed"> items removed.</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>

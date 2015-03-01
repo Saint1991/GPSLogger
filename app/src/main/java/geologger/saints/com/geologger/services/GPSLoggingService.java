@@ -77,7 +77,7 @@ public class GPSLoggingService extends Service {
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(this);
         String loggingIntervalStr = preference.getString(SettingsActivity.LOGGINGINTERVAL, DEFAULTSAMPLINGINTERVAL);
         final long loggingInterval = Long.parseLong(loggingIntervalStr);
-        Log.i(TAG, "Logging with interval " + loggingIntervalStr + "msec");
+        Log.i(TAG, "Logging with interval " + loggingIntervalStr + "msec Tid: " + mTid);
 
         //Make This service foreground
         makeForegroundService();
@@ -98,7 +98,6 @@ public class GPSLoggingService extends Service {
                     broadcastIntent.putExtra(Position.LONGITUDE, longitude);
                     sendBroadcast(broadcastIntent);
                 }
-
 
             }
 
