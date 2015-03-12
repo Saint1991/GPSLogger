@@ -3,6 +3,7 @@ apply plugin: 'android-apt'
 
 def AAVersion = '3.2'
 
+
 dependencies {
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
@@ -23,12 +24,13 @@ android {
         applicationId "geologger.saints.com.geologger"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
     }
     buildTypes {
         release {
-            minifyEnabled true
+            //ほんとはproguard-rules.proをちゃんと設定して有効にするべき
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -43,6 +45,10 @@ android {
     }
 }
 
+
+configurations {
+    all*.exclude group: 'commons-logging', module: 'commons-logging'
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.gms:play-services:6.5.87'
@@ -53,21 +59,7 @@ dependencies {
     compile 'com.android.support:support-v4:21.+'
 }
 dependencies {
-    compile 'com.android.support:support-v4:21.+'
-}
-dependencies {
-    compile 'com.android.support:support-v4:21.+'
-}
-dependencies {
-    compile 'com.android.support:support-v4:21.+'
-}
-dependencies {
-    compile 'com.android.support:support-v4:21.+'
-}
-dependencies {
-    compile 'com.android.support:support-v4:21.+'
-}
-dependencies {
     compile 'com.google.android.gms:play-services:4.2.42'
     compile 'com.android.support:appcompat-v7:21.+'
 }
+
