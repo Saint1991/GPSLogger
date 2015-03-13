@@ -54,6 +54,7 @@
     <string name="could_not_remove_entry_message">Could not Remove onLogging Entry</string>
     <string name="could_not_remove">Could not remove.</string>
     <string name="items_removed"> items removed.</string>
+    <string name="position_updating">Position Updatinig...</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>

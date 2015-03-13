@@ -150,6 +150,11 @@ public class RecordActivity extends FragmentActivity {
     protected void onDestroy() {
         Log.i(TAG, "onDestroy");
         super.onDestroy();
+
+        if ( mServiceRunningConfirmation.isPositioning() && !mServiceRunningConfirmation.isLogging() ) {
+            Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+            stopService(intent);
+        }
     }
 
     @Override

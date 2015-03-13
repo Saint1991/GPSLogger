@@ -72,7 +72,6 @@ public class FourSquareClient extends BaseHttpClient {
         try {
 
             String result  = this.sendHttpGetRequest(query.toString());
-            Log.i(TAG, result);
             ret = FourSquareParser.parsePoiSearchResult(result);
 
         } catch (Exception e) {

@@ -4,8 +4,11 @@ import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -13,6 +16,7 @@ import android.widget.ListView;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
@@ -22,18 +26,52 @@ import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.adapters.PoiListAdapter;
 import geologger.saints.com.geologger.foursquare.FourSquareClient;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
+import geologger.saints.com.geologger.sensors.MyLocationListener;
+import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
+import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
 
-@EActivity(R.layout.activity_poi)
+@EActivity
 public class PoiActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener{
 
     private final String TAG = getClass().getSimpleName();
     private ProgressDialog mProgress;
 
     private List<FourSquarePoi> mFourSquarePoiList;
+    private boolean mIsPositionUpdated = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_poi);
+
+        mProgress = new ProgressDialog(this);
+        mProgress.setMessage(getResources().getString(R.string.position_updating));
+        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgress.show();
+
+        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+        if ( mServiceRunningConfirmation.isPositioning() ) {
+            stopService(intent);
+        }
+        startService(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if ( mServiceRunningConfirmation.isPositioning() && !mServiceRunningConfirmation.isLogging() ) {
+            Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+            stopService(intent);
+        }
+    }
 
     @Bean
     FourSquareClient mFourSquareClient;
+
+    @Bean
+    ServiceRunningConfirmation mServiceRunningConfirmation;
 
     @ViewById(R.id.search_text)
     EditText mSearchText;
@@ -62,6 +100,18 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
            }
         }).start();
 
+    }
+
+    /**
+     * wait until the first positiin update is occurred
+     * @param intent
+     */
+    @Receiver(actions = MyLocationListener.ACTION)
+    public void onCurrentPositionUpdated(Intent intent) {
+        if (!mIsPositionUpdated) {
+            dismissProgress();
+            mIsPositionUpdated = true;
+        }
     }
 
     //Initializing ListView

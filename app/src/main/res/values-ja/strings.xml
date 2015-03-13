@@ -40,6 +40,7 @@
     <string name="timestamp">日時</string>
     <string name="searching">検索中...</string>
     <string name="loading">読み込み中...</string>
+    <string name="position_updating">位置情報更新中...</string>
     <string name="positioning_interval">現在地の更新頻度</string>
     <string name="positioning_distance">現在地の更新を行う距離の粒度</string>
     <string name="logging_interval">ロギングの記録間隔</string>
