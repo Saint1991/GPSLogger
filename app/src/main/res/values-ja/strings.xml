@@ -52,6 +52,7 @@
     <string name="could_not_remove_entry_message">ロギング中のエントリは削除できません</string>
     <string name="could_not_remove">削除できませんでした．</string>
     <string name="items_removed">個の項目を削除しました．</string>
+    <string name="data_sent">データを送信しました</string>
 
     <string-array name="companion_candidate_list">
         <item>同伴者なし</item>

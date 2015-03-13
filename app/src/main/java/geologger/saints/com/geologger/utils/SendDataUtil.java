@@ -8,6 +8,10 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
+import geologger.saints.com.geologger.database.CheckinSQLite;
+import geologger.saints.com.geologger.database.CompanionSQLite;
+import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.CompanionEntry;
@@ -32,6 +36,34 @@ public class SendDataUtil {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        return entry;
+    }
+
+    // 送信データのJSONArrayを作成
+    public static JSONArray makeSendData(List<String> tidListToSend, TrajectorySQLite trajectoryDbHandler, CheckinFreeFormSQLite checkinFreeFormDbHandler, CheckinSQLite checkinDbHandler, CompanionSQLite companionDbHandler) {
+
+        JSONArray sendData = new JSONArray();
+        for (String tid : tidListToSend) {
+            JSONObject entry = makeJsonEntryByTid(tid, trajectoryDbHandler, checkinFreeFormDbHandler, checkinDbHandler, companionDbHandler);
+            if (entry != null) {
+                sendData.put(entry);
+            }
+        }
+
+        return sendData;
+    }
+
+
+    // TIDに対応するエントリのリストをJSONObjectで取得する
+    private static JSONObject makeJsonEntryByTid(String tid, TrajectorySQLite trajectoryDbHandler, CheckinFreeFormSQLite checkinFreeFormDbHandler, CheckinSQLite checkinDbHandler, CompanionSQLite companionDbHandler) {
+
+        List<TrajectoryEntry> trajectory = trajectoryDbHandler.getTrajectory(tid);
+        List<CheckinFreeFormEntry> checkinFreeForm = checkinFreeFormDbHandler.getCheckinFreeFormList(tid);
+        List<CheckinEntry> checkin = checkinDbHandler.getCheckinList(tid);
+        List<CompanionEntry> companion = companionDbHandler.getCompanionList(tid);
+
+        JSONObject entry = SendDataUtil.makeJsonData(trajectory, checkinFreeForm, checkin, companion);
 
         return entry;
     }

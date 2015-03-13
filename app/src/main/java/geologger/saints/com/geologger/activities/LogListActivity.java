@@ -2,12 +2,10 @@ package geologger.saints.com.geologger.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -18,7 +16,11 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
@@ -30,6 +32,9 @@ import geologger.saints.com.geologger.database.SentTrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
+import geologger.saints.com.geologger.utils.SendDataTask;
+import geologger.saints.com.geologger.utils.SendDataUtil;
+import geologger.saints.com.geologger.utils.UserId;
 
 import static android.view.Window.FEATURE_NO_TITLE;
 
@@ -38,7 +43,7 @@ public class LogListActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
 
-    private enum MODE {NORMAL, DELETE};
+    private enum MODE {NORMAL, SELECTION};
     private MODE mode = MODE.NORMAL;
 
     @Bean
@@ -59,6 +64,8 @@ public class LogListActivity extends Activity {
     @Bean
     SentTrajectorySQLite mSentTrajectoryDbHandler;
 
+    @Bean
+    SendDataTask mSendDataTask;
 
     @ViewById(R.id.log_list)
     ListView mLogList;
@@ -68,6 +75,9 @@ public class LogListActivity extends Activity {
 
     @ViewById(R.id.log_delete_button)
     Button mLogDeleteButton;
+
+    @ViewById(R.id.data_resend_button)
+    Button mSendDataButton;
 
     @ViewById(R.id.log_delete_cancel_button)
     Button mLogDeleteCancelButton;
@@ -112,7 +122,7 @@ public class LogListActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (mode.equals(MODE.DELETE)) {
+                if (mode.equals(MODE.SELECTION)) {
                     return;
                 }
 
@@ -131,7 +141,7 @@ public class LogListActivity extends Activity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                switchMode(MODE.DELETE);
+                switchMode(MODE.SELECTION);
                 return true;
             }
         });
@@ -139,15 +149,15 @@ public class LogListActivity extends Activity {
 
     //endregion
 
-    //region DELETE
+    //region SELECTION
 
-    //This is called when the DELETE Button is Clicked
+    //This is called when the SELECTION Button is Clicked
     //Remove Selected entries from view and DB
     @Click(R.id.log_delete_button)
     public void deleteSelectedLog() {
 
-        //If not DELETE mode, finish
-        if (!mode.equals(MODE.DELETE) || mLogList == null) {
+        //If not SELECTION mode, finish
+        if (!mode.equals(MODE.SELECTION) || mLogList == null) {
             return;
         }
 
@@ -202,6 +212,48 @@ public class LogListActivity extends Activity {
         mTextNoRecord.setVisibility(visibility);
     }
 
+    @Click(R.id.data_resend_button)
+    public void sendData() {
+
+        //If not SELECTION mode, finish
+        if (!mode.equals(MODE.SELECTION) || mLogList == null) {
+            return;
+        }
+
+        //Getting Checked entries
+        SparseBooleanArray checkedPositions = mLogList.getCheckedItemPositions();
+        if (checkedPositions == null) {
+            return;
+        }
+
+        //Remove Item From End.
+        LogListAdapter adapter = (LogListAdapter)mLogList.getAdapter();
+        final List<String> tidList = new ArrayList<>();
+        for (int position = mLogList.getCount() - 1; 0 <= position; position--) {
+
+            if (!checkedPositions.get(position)) {
+                continue;
+            }
+
+            //Getting corresponding TID to the entry
+            TrajectorySpanEntry entry = adapter.getItem(position);
+            String tid = entry.getTid();
+
+            tidList.add(tid);
+        }
+
+
+        //Sending Data in the other thread
+        mSendDataTask.setTidList(tidList);
+        new Thread(mSendDataTask).start();
+
+        Toast.makeText(getApplicationContext(), getResources().getString(R.string.data_sent), Toast.LENGTH_SHORT).show();
+        switchMode(MODE.NORMAL);
+
+        //If List becomes empty, show message
+        int visibility = mLogList.getCount() == 0 ? View.VISIBLE : View.GONE;
+        mTextNoRecord.setVisibility(visibility);
+    }
 
     @Click(R.id.log_delete_cancel_button)
     public void cancelLogDeleteMode() {
@@ -229,11 +281,12 @@ public class LogListActivity extends Activity {
 
                 mLogDeleteButton.setVisibility(View.GONE);
                 mLogDeleteCancelButton.setVisibility(View.GONE);
+                mSendDataButton.setVisibility(View.GONE);
 
                 this.mode = MODE.NORMAL;
                 break;
 
-            case DELETE:
+            case SELECTION:
 
                 LogListAdapter adapterWithCheckBox = ((LogListAdapter)mLogList.getAdapter()).cloneInOtherLayout(R.layout.log_list_entry_with_checkbox);
                 mLogList.setAdapter(adapterWithCheckBox);
@@ -241,8 +294,9 @@ public class LogListActivity extends Activity {
 
                 mLogDeleteButton.setVisibility(View.VISIBLE);
                 mLogDeleteCancelButton.setVisibility(View.VISIBLE);
+                mSendDataButton.setVisibility(View.VISIBLE);
 
-                this.mode = MODE.DELETE;
+                this.mode = MODE.SELECTION;
                 break;
         }
     }

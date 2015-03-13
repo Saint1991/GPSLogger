@@ -46,6 +46,12 @@
             android:visibility="gone"/>
 
         <Button
+            android:id="@+id/data_resend_button"
+            style="@style/LogListButtons"
+            android:text="@string/send"
+            android:visibility="gone"/>
+
+        <Button
             android:id="@+id/log_delete_cancel_button"
             style="@style/LogListButtons"
             android:text="@string/cancel"

@@ -33,6 +33,7 @@ import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.BaseHttpClient;
+import geologger.saints.com.geologger.utils.SendDataTask;
 import geologger.saints.com.geologger.utils.SendDataUtil;
 import geologger.saints.com.geologger.utils.UserId;
 
@@ -40,15 +41,13 @@ import geologger.saints.com.geologger.utils.UserId;
 @EService
 public class SendDataService extends Service {
 
-
-    /**
-     * TODO 要実装
-     */
     private final String TAG = getClass().getSimpleName();
-    private final String SERVERURL = "http://133.1.244.46/mizuno/geologger/server.php";
 
     @SystemService
     ConnectivityManager mConnectivityManager;
+
+    @Bean
+    SendDataTask mSendDataTask;
 
     @Bean
     BaseHttpClient mHttpClient;
@@ -89,46 +88,11 @@ public class SendDataService extends Service {
             return START_NOT_STICKY;
         }
 
-        //Preferenceで設定された2nd ServerのURLを取得
-        SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        final String secondUrl = preference.getString(SettingsActivity.SECONDURL, null);
+        List<String> tidListToSend = makeTidListToSend();
+        mSendDataTask.setTidList(tidListToSend);
 
         Log.i(TAG, "onStartCommand");
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                List<String> tidListToSend = makeTidListToSend();
-                JSONArray sendData = makeSendData(tidListToSend);
-
-                if (sendData == null || sendData.toString().equals("[]")) {
-                    return;
-                }
-
-                Log.i(TAG, "[Send Data] " + sendData.toString());
-                List<NameValuePair> sendParams = new ArrayList<>();
-                sendParams.add(new BasicNameValuePair("Data", sendData.toString()));
-                sendParams.add(new BasicNameValuePair("UserID", UserId.getUserId(getApplicationContext())));
-
-                //2nd URLに対する送信
-                if (secondUrl != null && secondUrl.length() > 7) {
-                    mHttpClient.sendHttpPostRequest(secondUrl, sendParams);
-                    Log.i(TAG, "Sent to the second Server " + secondUrl);
-                }
-
-                //1st URLに対する送信
-                //成功時に送信済みのTIDを記録する
-                String result = mHttpClient.sendHttpPostRequest(SERVERURL, sendParams);
-                if (result != null) {
-                    mSentTrajectoryDbHandler.insertSentTidList(tidListToSend);
-                }
-
-                Log.i(TAG,"response: " + result);
-
-            }
-
-        }).start();
+        new Thread(mSendDataTask).start();
 
         return START_NOT_STICKY;
     }
@@ -186,31 +150,6 @@ public class SendDataService extends Service {
     }
 
 
-    // 送信データのJSONArrayを作成
-    private JSONArray makeSendData(List<String> tidListToSend) {
 
-        JSONArray sendData = new JSONArray();
-        for (String tid : tidListToSend) {
-            JSONObject entry = makeJsonEntryByTid(tid);
-            if (entry != null) {
-                sendData.put(entry);
-            }
-        }
-
-        return sendData;
-    }
-
-    // TIDに対応するエントリのリストをJSONObjectで取得する
-    private JSONObject makeJsonEntryByTid(String tid) {
-
-        List<TrajectoryEntry> trajectory = mTrajectoryDbHandler.getTrajectory(tid);
-        List<CheckinFreeFormEntry> checkinFreeForm = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
-        List<CheckinEntry> checkin = mCheckinDbHandler.getCheckinList(tid);
-        List<CompanionEntry> companion = mCompanionDbHandler.getCompanionList(tid);
-
-        JSONObject entry = SendDataUtil.makeJsonData(trajectory, checkinFreeForm, checkin, companion);
-
-        return entry;
-    }
 
 }

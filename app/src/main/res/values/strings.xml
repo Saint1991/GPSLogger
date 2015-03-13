@@ -19,9 +19,10 @@
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="ok">OK</string>
-    <string name="send">send</string>
+    <string name="send">SEND</string>
     <string name="delete">DELETE</string>
     <string name="u_delete"><u>REMOVE</u></string>
+    <string name="data_sent">Datas have been sent</string>
 
     <string name="poi_search_hint">place name</string>
 
