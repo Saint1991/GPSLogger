@@ -18,6 +18,8 @@
     <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
     <string name="checkin">チェックイン</string>
+    <string name="detail">詳細</string>
+
 
     <string name="poi_search_hint">検索したい場所の名前</string>
     <string name="send">送信</string>
@@ -27,6 +29,8 @@
     <string name="stop_logging">ロギングを終了しました!</string>
     <string name="action_settings">設定</string>
     <string name="search">検索</string>
+
+    <string name="search_route">ルート検索中...</string>
 
     <string name="delete">削除</string>
     <string name="u_delete"><u>削除</u></string>
@@ -54,6 +58,8 @@
     <string name="could_not_remove">削除できませんでした．</string>
     <string name="items_removed">個の項目を削除しました．</string>
     <string name="data_sent">データを送信しました</string>
+    <string name="go_here">ここへ行く</string>
+    <string name="action_selection">選択</string>
 
     <string-array name="companion_candidate_list">
         <item>同伴者なし</item>
