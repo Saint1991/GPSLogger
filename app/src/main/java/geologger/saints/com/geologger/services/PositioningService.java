@@ -20,8 +20,9 @@ import geologger.saints.com.geologger.sensors.MyLocationListener2;
 public class PositioningService extends Service {
 
     private final String TAG = getClass().getSimpleName();
-    private static final String DEFAULTSAMPLINGINTERVAL = "10000";
-    private static final String DEFAULTSAMPLINGDISTANCE = "3";
+    private static final String DEFAULTSAMPLINGINTERVAL = "1000";
+    private static final String DEFAULTSAMPLINGDISTANCE = "2";
+    private static final int POSITIONING_NOTIFICATION_ID = 2;
 
     @SystemService
     LocationManager mLocationManager;

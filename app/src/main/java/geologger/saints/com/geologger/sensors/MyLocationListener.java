@@ -44,7 +44,7 @@ public class MyLocationListener implements LocationListener {
             Log.i(TAG, "mContext is null");
         }
         Position.savePosition(mContext.getApplicationContext(), latitude, longitude);
-
+        Log.i(TAG, "onLocationChanged: " + "(" + latitude + ", " + longitude + ")");
         Intent broadcastIntent = new Intent(ACTION);
         broadcastIntent.putExtra(Position.LATITUDE, latitude);
         broadcastIntent.putExtra(Position.LONGITUDE, longitude);

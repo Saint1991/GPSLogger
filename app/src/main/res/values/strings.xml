@@ -55,6 +55,8 @@
     <string name="could_not_remove">Could not remove.</string>
     <string name="items_removed"> items removed.</string>
     <string name="position_updating">Position Updatinig...</string>
+    <string name="now_positioning">Now Positioning...</string>
+    <string name="start_positioning">Start Positioning</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
