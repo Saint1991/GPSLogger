@@ -7,6 +7,8 @@ import com.google.android.gms.maps.model.LatLng;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 
+import java.util.Locale;
+
 import geologger.saints.com.geologger.utils.BaseHttpClient;
 
 /**
@@ -26,10 +28,10 @@ public class MapsApiClient {
 
     }
 
-    public String query(LatLng origin, LatLng destination) {
+    public String query(LatLng origin, LatLng destination, String language) {
 
         String travelMode = "walking";
-        String query = BASEURL + "origin=" + origin.latitude + "," + origin.longitude + "&" + "destination=" + destination.latitude + "," + destination.longitude + "&mode=" + travelMode;
+        String query = BASEURL + "origin=" + origin.latitude + "," + origin.longitude + "&" + "destination=" + destination.latitude + "," + destination.longitude + "&mode=" + travelMode + "&language=" + language;
         String response = mHttpClient.sendHttpGetRequest(query);
         Log.i(TAG, query);
         return response;

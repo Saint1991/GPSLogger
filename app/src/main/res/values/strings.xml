@@ -62,6 +62,7 @@
     <string name="destination">Destination</string>
     <string name="distance">Distance</string>
     <string name="duration">Duration</string>
+    <string name="guide">Navigation</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>

@@ -64,6 +64,7 @@
     <string name="destination">目的地</string>
     <string name="distance">距離</string>
     <string name="duration">時間</string>
+    <string name="guide">ルート案内</string>
 
     <string-array name="companion_candidate_list">
         <item>同伴者なし</item>
