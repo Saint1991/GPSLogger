@@ -1,5 +1,6 @@
 package geologger.saints.com.geologger.activities;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -9,9 +10,12 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -26,6 +30,8 @@ import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.adapters.PoiListAdapter;
 import geologger.saints.com.geologger.foursquare.FourSquareClient;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
+import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
 import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
@@ -149,10 +155,44 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
     //Show Corresponding POI Detail to clicked Entry By Browser
     @Override
     public void onFragmentInteraction(ListView parent, View called, int position, long id) {
-        FourSquarePoi entry = (FourSquarePoi)parent.getAdapter().getItem(position);
-        String url = FourSquareClient.FOURSQUARE_ROOT + entry.getId();
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(browserIntent);
+
+        final FourSquarePoi entry = (FourSquarePoi)parent.getAdapter().getItem(position);
+
+        //ListView For Dialog
+        ListView selectActionView = new ListView(this);
+        String[] selection = new String[]{getResources().getString(R.string.go_here), getResources().getString(R.string.detail)};
+        selectActionView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, selection));
+        selectActionView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                switch (position) {
+
+                    case 0:
+                        double latitude = entry.getLocation().getLat();
+                        double longitude = entry.getLocation().getLng();
+                        Intent navigatorIntent = new Intent(getApplicationContext(), NavigationActivity_.class);
+                        navigatorIntent.putExtra(TrajectoryEntry.LATITUDE, latitude);
+                        navigatorIntent.putExtra(TrajectoryEntry.LONGITUDE, longitude);
+                        navigatorIntent.putExtra(CheckinEntry.PLACENAME, entry.getName());
+                        navigatorIntent.putExtra("Address", entry.getLocation().getAddress());
+                        startActivity(navigatorIntent);
+                        break;
+
+                    case 1:
+                        String url = FourSquareClient.FOURSQUARE_ROOT + entry.getId();
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(browserIntent);
+                        break;
+                }
+            }
+        });
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(getResources().getString(R.string.action_selection));
+        dialog.setView(selectActionView);
+        dialog.show();
+
     }
 
 }

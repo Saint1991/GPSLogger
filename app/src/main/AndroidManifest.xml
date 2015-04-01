@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="geologger.saints.com.geologger"
     android:versionCode="4"
-    android:versionName="1.0.3">
+    android:versionName="1.0.3" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -78,6 +78,11 @@
             android:label="@string/title_activity_poi_confirmation"
             android:screenOrientation="sensorPortrait" >
         </activity>
+        <activity
+            android:name=".activities.NavigationActivity_"
+            android:label="@string/title_activity_navigation"
+            android:screenOrientation="sensorPortrait">
+        </activity>
 
         <service
             android:name=".services.PositioningService_"
@@ -110,6 +115,7 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
+
 
     </application>
 
