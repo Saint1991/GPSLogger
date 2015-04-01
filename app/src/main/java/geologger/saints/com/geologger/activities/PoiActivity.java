@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -29,6 +30,7 @@ import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.adapters.PoiListAdapter;
 import geologger.saints.com.geologger.foursquare.FourSquareClient;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
+import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
 import geologger.saints.com.geologger.services.PositioningService_;
@@ -169,9 +171,11 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
                     case 0:
                         double latitude = entry.getLocation().getLat();
                         double longitude = entry.getLocation().getLng();
-                        Intent navigatorIntent = new Intent(getApplicationContext(), NavigationActivity.class);
+                        Intent navigatorIntent = new Intent(getApplicationContext(), NavigationActivity_.class);
                         navigatorIntent.putExtra(TrajectoryEntry.LATITUDE, latitude);
                         navigatorIntent.putExtra(TrajectoryEntry.LONGITUDE, longitude);
+                        navigatorIntent.putExtra(CheckinEntry.PLACENAME, entry.getName());
+                        navigatorIntent.putExtra("Address", entry.getLocation().getAddress());
                         startActivity(navigatorIntent);
                         break;
 

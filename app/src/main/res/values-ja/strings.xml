@@ -60,6 +60,10 @@
     <string name="data_sent">データを送信しました</string>
     <string name="go_here">ここへ行く</string>
     <string name="action_selection">選択</string>
+    <string name="network_connectivity_alert">ネットワークに接続していません</string>
+    <string name="destination">目的地</string>
+    <string name="distance">距離</string>
+    <string name="duration">時間</string>
 
     <string-array name="companion_candidate_list">
         <item>同伴者なし</item>

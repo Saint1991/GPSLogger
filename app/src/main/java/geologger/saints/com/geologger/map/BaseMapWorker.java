@@ -1,10 +1,13 @@
 package geologger.saints.com.geologger.map;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -13,12 +16,14 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.androidannotations.annotations.EBean;
+import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.RootContext;
 
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
+import geologger.saints.com.geologger.utils.Direction;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
@@ -35,6 +40,8 @@ public class BaseMapWorker {
 
     protected GoogleMap mMap;
     protected Marker mCurrentPositionMarker;
+    protected boolean mOrientationEnabled = false;
+    protected boolean mUseMyLocation = false;
 
     @RootContext
     Activity mActivity;
@@ -53,6 +60,49 @@ public class BaseMapWorker {
 
         updateCurrentPositionMarker();
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
+        setMyLocationButtonListner();
+    }
+
+    /**
+     * Initialize this instance with GoogleMap Object
+     * If useDefaultCurrentPositionMarker is true setMyLocationEnabled will be set true
+     * @param map
+     * @param useMyLocation
+     */
+    public void initMap(GoogleMap map, boolean useMyLocation, boolean orientationEnabled) {
+
+        init(map);
+        mOrientationEnabled = orientationEnabled;
+        mUseMyLocation = useMyLocation;
+
+        if (mUseMyLocation) {
+            mMap.setMyLocationEnabled(true);
+        } else {
+            updateCurrentPositionMarker();
+        }
+
+        animateCameraToCurrentPosition();
+
+        if (mOrientationEnabled) {
+            UiSettings settings = mMap.getUiSettings();
+            settings.setCompassEnabled(true);
+        }
+
+        setMyLocationButtonListner();
+    }
+
+    /**
+     * animateCamera To The CurrentPosition
+     */
+    protected void animateCameraToCurrentPosition() {
+
+        float[] position = Position.getPosition(mActivity.getApplicationContext());
+        LatLng moveTo = new LatLng(position[0], position[1]);
+
+
+        if (moveTo != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveTo, 15));
+        }
     }
 
     /**
@@ -72,6 +122,7 @@ public class BaseMapWorker {
         init(map);
         updateCurrentPositionMarker(firstPosition);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
+        setMyLocationButtonListner();
     }
 
     /**
@@ -94,7 +145,20 @@ public class BaseMapWorker {
         map.clear();
         setMap(map);
 
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mCurrentPositionMarker = null;
+    }
+
+    private void setMyLocationButtonListner() {
+        if (mMap != null) {
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    animateCameraToCurrentPosition();
+                    return true;
+                }
+            });
+        }
     }
 
     /**
@@ -299,6 +363,9 @@ public class BaseMapWorker {
 
         return mMap.addPolyline(lineOptions);
     }
+
+
+
 
     //endregion
 

@@ -24,7 +24,7 @@ public class MyDirectionListener implements SensorEventListener {
 
     private final String TAG = getClass().getSimpleName();
     public final String ACTION = "CurrentDirectionUpdated";
-    private static final int DEMENSION = 3;
+    private static final int DIMENSION = 3;
     private static final int MATRIX_SIZE = 16;
 
     private float[] mAccelerometerValues = null;
@@ -41,11 +41,15 @@ public class MyDirectionListener implements SensorEventListener {
     @AfterInject
     public void init() {
 
-        mAccelerometerValues = new float[DEMENSION];
-        mGeoMagneticValues = new float[DEMENSION];
+        mAccelerometerValues = new float[DIMENSION];
+        mGeoMagneticValues = new float[DIMENSION];
 
         Sensor magneticSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mSensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_UI);
+
+        Sensor accelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI);
+
     }
 
     @Override
@@ -82,6 +86,10 @@ public class MyDirectionListener implements SensorEventListener {
 
     private void onDirectionChanged() {
 
+        if (mGeoMagneticValues == null || mAccelerometerValues == null) {
+            return;
+        }
+
         float[] r = new float[MATRIX_SIZE];
         float[] i = new float[MATRIX_SIZE];
 
@@ -93,14 +101,15 @@ public class MyDirectionListener implements SensorEventListener {
         float[] temp = new float[MATRIX_SIZE];
         SensorManager.remapCoordinateSystem(r, SensorManager.AXIS_X, SensorManager.AXIS_Y, temp);
 
-        float[] direction = new float[16];
+        float[] direction = new float[DIMENSION];
         SensorManager.getOrientation(temp, direction);
 
-        Log.i(TAG, "onDirectionChanged: " + direction[0]);
-        Direction.saveDirection(mContext.getApplicationContext(), direction[0]);
+        float orientation = ((float)(direction[0] * 180.0f / Math.PI) + 360.0f) % 360;
+        Log.i(TAG, "onDirectionChanged: " + orientation);
+        Direction.saveDirection(mContext.getApplicationContext(), orientation);
 
         Intent broadcastIntent = new Intent(ACTION);
-        broadcastIntent.putExtra(Direction.DIRECTION, direction[0]);
+        broadcastIntent.putExtra(Direction.DIRECTION, orientation);
         mContext.sendBroadcast(broadcastIntent);
     }
 
@@ -109,6 +118,7 @@ public class MyDirectionListener implements SensorEventListener {
      */
     public void stopRegisteredListener() {
         mSensorManager.unregisterListener(this);
+        Log.i(TAG, "unregisterDirectionListener");
     }
 
 }

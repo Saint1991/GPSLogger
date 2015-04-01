@@ -37,7 +37,7 @@ public class MapWorker extends BaseMapWorker {
     }
 
     /**
-     * Initializing map and set Click Event to infowindow of Checkin markre
+     * Initializing map and set Click Event to infowindow of Checkin marker
      * @param map
      * @param firstPosition
      * @param markerColor
@@ -139,6 +139,24 @@ public class MapWorker extends BaseMapWorker {
             addCheckinMarker(entry);
         }
 
+    }
+
+    public Marker addDistinationMarker(LatLng position, String placeName, String address) {
+
+        if (position == null) {
+            return null;
+        }
+
+        MarkerOptions marker = new MarkerOptions();
+        marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        marker.position(position);
+        if (placeName != null && address != null) {
+            marker.title(placeName);
+            marker.snippet(address);
+        }
+
+        Marker ret = mMap.addMarker(marker);
+        return ret;
     }
 
     //endregion

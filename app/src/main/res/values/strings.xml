@@ -58,6 +58,10 @@
     <string name="position_updating">Position Updatinig...</string>
     <string name="action_selection">Select Action</string>
     <string name="search_route">Searhing Route...</string>
+    <string name="network_connectivity_alert">Please check your network connectivity</string>
+    <string name="destination">Destination</string>
+    <string name="distance">Distance</string>
+    <string name="duration">Duration</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>

@@ -1,5 +1,7 @@
 package geologger.saints.com.geologger.mapsapi;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.androidannotations.annotations.Bean;
@@ -11,21 +13,25 @@ import geologger.saints.com.geologger.utils.BaseHttpClient;
  * Created by Seiya on 2015/03/17.
  */
 @EBean
-public class MapApiClient {
+public class MapsApiClient {
 
+    private String TAG = getClass().getSimpleName();
     private static final String BASEURL = "https://maps.googleapis.com/maps/api/directions/json?";
 
     @Bean
     BaseHttpClient mHttpClient;
 
 
-    public MapApiClient() {
+    public MapsApiClient() {
 
     }
 
     public String query(LatLng origin, LatLng destination) {
-        String query = BASEURL + "origin=" + origin.latitude + "," + origin.longitude + "&" + "destination=" + destination.latitude + "," + destination.longitude;
+
+        String travelMode = "walking";
+        String query = BASEURL + "origin=" + origin.latitude + "," + origin.longitude + "&" + "destination=" + destination.latitude + "," + destination.longitude + "&mode=" + travelMode;
         String response = mHttpClient.sendHttpGetRequest(query);
+        Log.i(TAG, query);
         return response;
     }
 
