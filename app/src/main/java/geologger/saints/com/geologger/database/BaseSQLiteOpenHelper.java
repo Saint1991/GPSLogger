@@ -22,7 +22,7 @@ public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
     private final String TAG = getClass().getSimpleName();
 
     public BaseSQLiteOpenHelper(Context context) {
-        super(context, TableDefinitions.DBNAME, null, 1);
+        super(context, TableDefinitions.DBNAME, null, 2);
     }
 
     //TableDefinitionsに記述されている全テーブルを作成
@@ -40,7 +40,6 @@ public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.i(TAG, "onUpgrade");
-        dropTable(db);
         onCreate(db);
     }
 

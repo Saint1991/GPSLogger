@@ -116,18 +116,21 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
      */
     public List<CheckinFreeFormEntry> getCheckinFreeFormList(String tid) {
 
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, CheckinFreeFormEntry.TID + "=?", new String[]{tid}, null, null, CheckinFreeFormEntry.TIMESTAMP + " ASC");
-
         List<CheckinFreeFormEntry> ret = new ArrayList<CheckinFreeFormEntry>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            CheckinFreeFormEntry entry = getEntryFromCursor(cursor);
-            ret.add(entry);
-            isEOF = cursor.moveToNext();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        if (db.isOpen()) {
+            Cursor cursor = db.query(TABLENAME, null, CheckinFreeFormEntry.TID + "=?", new String[]{tid}, null, null, CheckinFreeFormEntry.TIMESTAMP + " ASC");
+
+
+            boolean isEOF = cursor.moveToFirst();
+            while (isEOF) {
+                CheckinFreeFormEntry entry = getEntryFromCursor(cursor);
+                ret.add(entry);
+                isEOF = cursor.moveToNext();
+            }
+            cursor.close();
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return ret;
 

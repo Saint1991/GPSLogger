@@ -111,6 +111,28 @@ public class CompanionSQLite {
         return ret;
     }
 
+    /**
+     * 指定したtidに対応するcompanionの最初の要素を返します
+     * 見つからない場合はnullを返します
+     * @param tid
+     * @return
+     */
+    public CompanionEntry getCompanion(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLENAME, null, CompanionEntry.TID + "=?", new String[]{tid}, null, null, null, "1");
+
+        CompanionEntry ret = null;
+        if (cursor.moveToFirst()) {
+            ret = getEntryFromCursor(cursor);
+        }
+
+        cursor.close();
+        db.close();
+
+        return ret;
+    }
+
     //カーソルの現在位置からエントリを取得する
     //取得できない場合はnullを返す
     private CompanionEntry getEntryFromCursor(Cursor cursor) {

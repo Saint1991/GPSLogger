@@ -19,6 +19,9 @@
     <string name="cancel">キャンセル</string>
     <string name="checkin">チェックイン</string>
     <string name="detail">詳細</string>
+    <string name="title">タイトル</string>
+    <string name="memo">メモ</string>
+
 
 
     <string name="poi_search_hint">検索したい場所の名前</string>
@@ -67,10 +70,14 @@
     <string name="distance">距離</string>
     <string name="duration">時間</string>
     <string name="guide">ルート案内</string>
+    <string name="list_initializing">項目を取得中...</string>
+    <string name="no_companion">同伴者なし</string>
+    <string name="not_alone">同伴者有り</string>
+    <string name="title_alert">タイトルは必須項目です</string>
+
 
 
     <string-array name="companion_candidate_list">
-        <item>同伴者なし</item>
         <item>恋人</item>
         <item>家族</item>
         <item>友人</item>

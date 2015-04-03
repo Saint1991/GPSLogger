@@ -1,6 +1,7 @@
 package geologger.saints.com.geologger.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,10 +17,8 @@ import android.widget.Toast;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +29,14 @@ import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
 import geologger.saints.com.geologger.database.SentTrajectorySQLite;
+import geologger.saints.com.geologger.database.TrajectoryPropertySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
+import geologger.saints.com.geologger.models.CompanionEntry;
+import geologger.saints.com.geologger.models.LogListEntry;
+import geologger.saints.com.geologger.models.TrajectoryPropertyEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 import geologger.saints.com.geologger.utils.SendDataTask;
-import geologger.saints.com.geologger.utils.SendDataUtil;
-import geologger.saints.com.geologger.utils.UserId;
 
 import static android.view.Window.FEATURE_NO_TITLE;
 
@@ -42,6 +44,7 @@ import static android.view.Window.FEATURE_NO_TITLE;
 public class LogListActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
+    private ProgressDialog mProgress;
 
     private enum MODE {NORMAL, SELECTION};
     private MODE mode = MODE.NORMAL;
@@ -65,7 +68,11 @@ public class LogListActivity extends Activity {
     SentTrajectorySQLite mSentTrajectoryDbHandler;
 
     @Bean
+    TrajectoryPropertySQLite mTrajectoryPropertyDbHandler;
+
+    @Bean
     SendDataTask mSendDataTask;
+
 
     @ViewById(R.id.log_list)
     ListView mLogList;
@@ -91,7 +98,14 @@ public class LogListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
 
-        initLogList();
+        beginProgress();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                initLogList();
+                dismissProgress();
+            }
+        }).run();
     }
 
     //region Init
@@ -110,8 +124,22 @@ public class LogListActivity extends Activity {
             return;
         }
 
+        List<LogListEntry> logList = new ArrayList<>();
+        for (TrajectorySpanEntry spanEntry : spanList) {
+            String tid = spanEntry.getTid();
+
+            CompanionEntry companionEntry = mCompanionDbHandler.getCompanion(tid);
+            TrajectoryPropertyEntry trajectoryPropertyEntry = mTrajectoryPropertyDbHandler.getEntry(tid);
+
+            String companion = companionEntry == null ? null : companionEntry.getCompanion();
+            String title = trajectoryPropertyEntry == null ? null : trajectoryPropertyEntry.getTitle();
+            String description = trajectoryPropertyEntry == null ? null : trajectoryPropertyEntry.getDescription();
+
+            logList.add(new LogListEntry(tid, title, spanEntry.getBegin(), spanEntry.getEnd(), companion, description));
+        }
+
         //Registering Items to ListView
-        LogListAdapter adapter = new LogListAdapter(getApplicationContext(), spanList);
+        LogListAdapter adapter = new LogListAdapter(getApplicationContext(), logList);
         mLogList.setAdapter(adapter);
 
         // Click Event
@@ -123,10 +151,12 @@ public class LogListActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 if (mode.equals(MODE.SELECTION)) {
+                    CheckBox checkBox = (CheckBox)view.findViewById(R.id.selected);
+                    checkBox.setChecked(mLogList.getCheckedItemPositions().get(position));
                     return;
                 }
 
-                TrajectorySpanEntry entry = (TrajectorySpanEntry)mLogList.getAdapter().getItem(position);
+                LogListEntry entry = (LogListEntry)mLogList.getAdapter().getItem(position);
                 String tid = entry.getTid();
 
                 Intent intent = new Intent(getApplicationContext(), LogActivity_.class);
@@ -145,6 +175,7 @@ public class LogListActivity extends Activity {
                 return true;
             }
         });
+
     }
 
     //endregion
@@ -179,7 +210,7 @@ public class LogListActivity extends Activity {
             }
 
             //Getting corresponding TID to the entry
-            TrajectorySpanEntry entry = adapter.getItem(position);
+            LogListEntry entry = adapter.getItem(position);
             String tid = entry.getTid();
 
             if (loggingTid != null && loggingTid.equals(tid)) {
@@ -188,12 +219,7 @@ public class LogListActivity extends Activity {
             }
 
             //Removing from DB and View
-            mTrajectoryDbHander.removeByTid(tid);
-            mCheckinFreeFormDbHandler.removeByTid(tid);
-            mCheckinDbHandler.removeByTid(tid);
-            mCompanionDbHandler.removeByTid(tid);
-            mSentTrajectoryDbHandler.removeByTid(tid);
-            if (mTrajectorySpanDbHandler.removeByTid(tid) < 1) {
+            if (!removeDatasFromDB(tid)) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.could_not_remove), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -236,7 +262,7 @@ public class LogListActivity extends Activity {
             }
 
             //Getting corresponding TID to the entry
-            TrajectorySpanEntry entry = adapter.getItem(position);
+            LogListEntry entry = adapter.getItem(position);
             String tid = entry.getTid();
 
             tidList.add(tid);
@@ -303,5 +329,50 @@ public class LogListActivity extends Activity {
 
 
     //endregion
+
+    //region utility
+    private boolean removeDatasFromDB(String tid) {
+        mTrajectoryDbHander.removeByTid(tid);
+        mCheckinFreeFormDbHandler.removeByTid(tid);
+        mCheckinDbHandler.removeByTid(tid);
+        mCompanionDbHandler.removeByTid(tid);
+        mSentTrajectoryDbHandler.removeByTid(tid);
+        mTrajectoryPropertyDbHandler.removeByTid(tid);
+
+        return mTrajectorySpanDbHandler.removeByTid(tid) > 0;
+    }
+    //endregion
+
+    @UiThread
+    public void beginProgress() {
+
+        if (mProgress == null) {
+            mProgress = new ProgressDialog(this);
+        }
+
+        mProgress.setMessage(getResources().getString(R.string.list_initializing));
+        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgress.show();
+    }
+
+    @UiThread
+    public void dismissProgress() {
+
+        if (mProgress != null) {
+            mProgress.dismiss();
+        }
+    }
+
+    private List<Integer> getCheckedPositionList(SparseBooleanArray checkedPositions) {
+
+        List<Integer> checkedIndexList = new ArrayList<Integer>();
+        for (int i = 0; i < checkedPositions.size(); i++) {
+            if (checkedPositions.get(i)) {
+                checkedIndexList.add(i);
+            }
+        }
+
+        return checkedIndexList;
+    }
 
 }

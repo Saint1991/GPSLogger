@@ -18,6 +18,7 @@ public class TableDefinitions {
     public static final String TRAJECTORY_SPAN = "trajectory_span";
     public static final String SENTTRAJECTORY = "sent_trajectory";
     public static final String CHECKIN_FREE_FORM = "checkin_free_form";
+    public static final String TRAJECTORY_PROPERTIES = "trajectory_property";
 
     public static final HashMap <String, LinkedHashMap<String, String>> tables = new HashMap<String, LinkedHashMap<String, String>>() {
 
@@ -80,6 +81,13 @@ public class TableDefinitions {
         };
         {put(SENTTRAJECTORY, SENTTABLE);}
 
+        //トラジェクトリの付随情報
+        final LinkedHashMap<String, String> TRAJECTORY_PROPERTIES_TABLE = new LinkedHashMap<String, String>() {
+            {put(TrajectoryPropertyEntry.TID, "TEXT PRIMARY KEY");}
+            {put(TrajectoryPropertyEntry.TITLE, "TEXT NOT NULL");}
+            {put(TrajectoryPropertyEntry.DESCRIPTION, "TEXT DEFAULT NULL");}
+        };
+        {put(TRAJECTORY_PROPERTIES, TRAJECTORY_PROPERTIES_TABLE);}
     };
 
     public static Set<String> tables() {

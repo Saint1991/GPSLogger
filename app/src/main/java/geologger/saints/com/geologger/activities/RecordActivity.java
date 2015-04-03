@@ -13,7 +13,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.identity.intents.AddressConstants;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
@@ -32,11 +31,14 @@ import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
+import geologger.saints.com.geologger.database.TrajectoryPropertySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
+import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
+import geologger.saints.com.geologger.models.TrajectoryPropertyEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
 import geologger.saints.com.geologger.services.GPSLoggingService_;
 import geologger.saints.com.geologger.map.MapWorker;
@@ -57,6 +59,7 @@ public class RecordActivity extends FragmentActivity {
 
     private final int POICONFIRMATIONCODE = 1;
     public static final int RECORDNOTIFICATIONCODE = 2;
+    private final int BEGINRECORDINGCODE = 3;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private String mCurrentTid;
@@ -72,6 +75,9 @@ public class RecordActivity extends FragmentActivity {
 
     @Bean
     TrajectorySpanSQLite mTrajectorySpanDbHandler;
+
+    @Bean
+    TrajectoryPropertySQLite mTrajectoryPropertyDbHandler;
 
     @Bean
     CheckinSQLite mCheckinDbHandler;
@@ -239,82 +245,44 @@ public class RecordActivity extends FragmentActivity {
             //Restart PositioningService because provider for the locationListener is possibly changed
             restartPositioningServiceIfRunning();
 
-            //Definitions of Companion Selection Dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(RecordActivity.this, AddressConstants.Themes.THEME_DARK);
-            builder.setTitle(getResources().getString(R.string.companion));
-
-            final String[] candidates = getResources().getStringArray(R.array.companion_candidate_list);
-            final boolean[] checks = new boolean[candidates.length];
-            checks[0] = true;
-            builder.setMultiChoiceItems(R.array.companion_candidate_list, checks, new DialogInterface.OnMultiChoiceClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                    checks[which] = isChecked;
-                }
-
-            });
-
-
-            //Define the process when OK is clicked
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-                    Resources resources = getResources();
-
-                    //make companions string
-                    boolean isValid = false;
-                    final StringBuilder companions = new StringBuilder();
-                    for (int i = 0; i < checks.length; i++) {
-                        if (checks[i]) {
-                            isValid = true;
-                            companions.append(candidates[i] + ",");
-                        }
-                    }
-
-                    // If no option is selected, show Toast to alert and finish
-                    if (!isValid) {
-                        Toast.makeText(getApplicationContext(), resources.getString(R.string.companion_alert), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    //Make Unique TID
-                    String tidCandidate = null;
-                    while ( true ) {
-                        tidCandidate = UUID.randomUUID().toString();
-                        if (!mTrajectorySpanDbHandler.isExistTid(tidCandidate)) {
-                            break;
-                        }
-                    }
-
-
-                    //Insert companions into DB in the other thread
-                    mCurrentTid = tidCandidate;
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mCompanionDbHandler.insert(mCurrentTid, companions.substring(0, companions.length() - 1));
-                        }
-                    }).start();
-
-                    //Start GpsLoggingService with TID
-                    Intent intent = new Intent(getApplicationContext(), GPSLoggingService_.class);
-                    intent.putExtra(TrajectoryEntry.TID, mCurrentTid);
-                    startService(intent);
-
-                    //Update View and show the message
-                    setLoggingStateOnView();
-                    Toast.makeText(getApplicationContext(), resources.getString(R.string.start_logging), Toast.LENGTH_SHORT).show();
-                }
-
-            });
-
-            builder.show();
+            Intent intent = new Intent(getApplicationContext(), BeginRecordingActivity_.class);
+            startActivityForResult(intent, BEGINRECORDINGCODE);
         }
     }
 
+    @OnActivityResult(BEGINRECORDINGCODE)
+    public void onBeginingResult(int resultCode, Intent data) {
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        final String title = data.getStringExtra(TrajectoryPropertyEntry.TITLE);
+        final String memo = data.getStringExtra(TrajectoryPropertyEntry.DESCRIPTION);
+        final String companion = data.getStringExtra(CompanionEntry.COMPANION);
+
+        mCurrentTid = generateUniqueTid();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mCompanionDbHandler.insert(mCurrentTid, companion);
+                mTrajectoryPropertyDbHandler.insert(mCurrentTid, title, memo);
+            }
+        }).start();
+
+        if (mCurrentTid != null && mCurrentTid.length() > 1) {
+
+            //Start GpsLoggingService with TID
+            Intent intent = new Intent(getApplicationContext(), GPSLoggingService_.class);
+            intent.putExtra(TrajectoryEntry.TID, mCurrentTid);
+            startService(intent);
+
+            //Update View and show the message
+            setLoggingStateOnView();
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.start_logging), Toast.LENGTH_SHORT).show();
+        }
+
+    }
     //endregion
 
 
@@ -502,5 +470,21 @@ public class RecordActivity extends FragmentActivity {
     }
 
     //endregion
+
+    //region utility
+    private String generateUniqueTid() {
+
+        String tidCandidate = null;
+        while ( true ) {
+            tidCandidate = UUID.randomUUID().toString();
+            if (!mTrajectorySpanDbHandler.isExistTid(tidCandidate)) {
+                break;
+            }
+        }
+
+        return tidCandidate;
+    }
+    //endregion
+
 
 }

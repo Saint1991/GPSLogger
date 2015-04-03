@@ -24,6 +24,8 @@
     <string name="u_delete"><u>REMOVE</u></string>
     <string name="data_sent">Datas have been sent</string>
     <string name="go_here">Go Here</string>
+    <string name="title">Title</string>
+    <string name="memo">Memo</string>
 
     <string name="poi_search_hint">place name</string>
     <string name="detail">Details</string>
@@ -65,6 +67,10 @@
     <string name="distance">Distance</string>
     <string name="duration">Duration</string>
     <string name="guide">Navigation</string>
+    <string name="list_initializing">Initializing...</string>
+    <string name="no_companion">No Companion</string>
+    <string name="not_alone">With Someone</string>
+    <string name="title_alert">Title must not be empty!</string>
 
     <string-array name="companion_candidate_list">
         <item>No Companion</item>
@@ -122,6 +128,18 @@
         <item>200</item>
     </string-array>
     <string name="title_activity_navigation">Navigation</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_tab">TabActivity</string>
+
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_begin_recording">BeginRecordingActivity</string>
 
 
 </resources>
