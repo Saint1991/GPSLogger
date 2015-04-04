@@ -1,15 +1,11 @@
 package geologger.saints.com.geologger.activities;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -25,7 +21,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.List;
-import java.util.UUID;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
@@ -45,10 +40,12 @@ import geologger.saints.com.geologger.map.MapWorker;
 
 import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.utils.EncourageGpsOn;
-import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
+import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
 import geologger.saints.com.geologger.utils.Position;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
+import geologger.saints.com.geologger.utils.TidGenerator;
 import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 
@@ -61,7 +58,7 @@ public class RecordActivity extends FragmentActivity {
     public static final int RECORDNOTIFICATIONCODE = 2;
     private final int BEGINRECORDINGCODE = 3;
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private GoogleMap mMap;
     private String mCurrentTid;
 
     @SystemService
@@ -94,6 +91,12 @@ public class RecordActivity extends FragmentActivity {
     @Bean
     MapWorker mMapWorker;
 
+    @Bean
+    ProgressDialogUtility mProgressUtility;
+
+    @Bean
+    TidGenerator mTidGenerator;
+
     @ViewById(R.id.loggingStartButton)
     Button mLoggingStartButton;
 
@@ -107,29 +110,20 @@ public class RecordActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         Log.i(TAG, "onCreate");
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record);
+
+        //Change Buttons considering if logging is going
         setLoggingStateOnView();
 
-        //This activity newly created
-        if (savedInstanceState == null) {
-            Log.i(TAG, "onCreate: savedInstanceState is null");
-        }
-
+        //Get TID from savedInstance state if available
         if (savedInstanceState != null && savedInstanceState.containsKey(TrajectoryEntry.TID)) {
             mCurrentTid = savedInstanceState.getString(TrajectoryEntry.TID);
         }
 
         setUpMapIfNeeded();
-
-    }
-
-    @Override
-    protected void onStart() {
-        Log.i(TAG, "onStart");
-        super.onStart();
     }
 
     @Override
@@ -137,19 +131,7 @@ public class RecordActivity extends FragmentActivity {
         Log.i(TAG, "onResume");
         super.onResume();
         setUpMapIfNeeded();
-        restartPositioningServiceIfRunning();
-    }
-
-    @Override
-    protected void onPause() {
-        Log.i(TAG, "onPause");
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.i(TAG, "onStop");
-        super.onStop();
+        restartPositioningService();
     }
 
     @Override
@@ -168,7 +150,6 @@ public class RecordActivity extends FragmentActivity {
         super.onSaveInstanceState(outState);
         if (mCurrentTid != null) {
             outState.putString(TrajectoryEntry.TID, mCurrentTid);
-            Log.i(TAG, "onSaveInstanceState " + mCurrentTid);
         }
     }
 
@@ -176,11 +157,44 @@ public class RecordActivity extends FragmentActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentTid = savedInstanceState.getString(TrajectoryEntry.TID);
-        Log.i(TAG, "onRestoreInstanceState " + mCurrentTid);
     }
 
-    //endregion]
+    //endregion
 
+    //region initialize
+
+    private void setUpMapIfNeeded() {
+
+        if (mMap == null) {
+
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+            if (mMap != null) {
+                setUpMap();
+            }
+        }
+    }
+
+    private void setUpMap() {
+
+        if (mMap == null || mMapWorker == null) {
+            return;
+        }
+
+        mMapWorker.initMap(mMap, false);
+
+        //restore map state
+        String tid = mTrajectorySpanDbHandler.getLoggingTid();
+        if (tid != null && mServiceRunningConfirmation.isLogging()) {
+            List<CheckinEntry> checkinList = mCheckinDbHandler.getCheckinList(tid);
+            List<CheckinFreeFormEntry> checkinFreeFormList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
+            List<TrajectoryEntry> positionList = mTrajectoryDbHandler.getTrajectory(tid);
+            mMapWorker.addMarkers(positionList);
+            mMapWorker.addCheckinMarkers(checkinList);
+            mMapWorker.addCheckinMarkers(checkinFreeFormList);
+        }
+
+    }
+    //endregion
 
     //region Logging
 
@@ -191,11 +205,8 @@ public class RecordActivity extends FragmentActivity {
      */
     @Click(R.id.loggingStartButton)
     public void onLoggingStartButtonClicked(View clicked) {
-
-        Log.i(TAG, "onLoggingStart");
-
         startLoggingWithEncourageGpsOn();
-        mMapWorker.initMap(mMap);
+        mMapWorker.initMap(mMap, false);
     }
 
     /**
@@ -204,9 +215,7 @@ public class RecordActivity extends FragmentActivity {
      * @param clicked
      */
     @Click(R.id.loggingStopButton)
-    public void onLoggingStop(View clicked) {
-
-        Log.i(TAG, "onLoggingStop");
+    public void onLoggingStopButtonClicked(View clicked) {
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
         stopService(serviceIntent);
@@ -214,41 +223,33 @@ public class RecordActivity extends FragmentActivity {
 
         setLoggingStateOnView();
 
-        String toastMessage = getResources().getString(R.string.stop_logging);
-        Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), getResources().getString(R.string.stop_logging), Toast.LENGTH_SHORT).show();
     }
 
 
     /**
-     * Encourage to turn on the GPS and execute callback
+     * Encourage to turn on the GPS and start Logging Service
      */
     private void startLoggingWithEncourageGpsOn() {
-        mEncourageGpsOn.encourageGpsOn(new StartLoggingTask(), false);
+
+        mEncourageGpsOn.encourageGpsOn(new IEncourageGpsOnAlertDialogCallback() {
+
+            @Override
+            public void executeTaskIfProviderIsEnabled() {
+
+                //Restart PositioningService because provider for the locationListener is possibly changed
+                restartPositioningService();
+
+                Intent intent = new Intent(getApplicationContext(), BeginRecordingActivity_.class);
+                startActivityForResult(intent, BEGINRECORDINGCODE);
+            }
+
+        }, false);
     }
 
-    //Restart PositioningService if it is running
-    private void restartPositioningServiceIfRunning() {
+    //endregion
 
-        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
-        if ( mServiceRunningConfirmation.isPositioning() ) {
-            stopService(intent);
-        }
-        startService(intent);
-
-    }
-
-    class StartLoggingTask implements IEncourageGpsOnAlertDialogCallback {
-
-        @Override
-        public void executeTaskIfProviderIsEnabled() {
-
-            //Restart PositioningService because provider for the locationListener is possibly changed
-            restartPositioningServiceIfRunning();
-
-            Intent intent = new Intent(getApplicationContext(), BeginRecordingActivity_.class);
-            startActivityForResult(intent, BEGINRECORDINGCODE);
-        }
-    }
+    //region InputTrajectoryDetails
 
     @OnActivityResult(BEGINRECORDINGCODE)
     public void onBeginingResult(int resultCode, Intent data) {
@@ -261,7 +262,7 @@ public class RecordActivity extends FragmentActivity {
         final String memo = data.getStringExtra(TrajectoryPropertyEntry.DESCRIPTION);
         final String companion = data.getStringExtra(CompanionEntry.COMPANION);
 
-        mCurrentTid = generateUniqueTid();
+        mCurrentTid = mTidGenerator.generateUniqueTid();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -283,31 +284,8 @@ public class RecordActivity extends FragmentActivity {
         }
 
     }
-    //endregion
-
-
-    //region ViewControl
-
-    //Change view controls according to Logging State
-    private void setLoggingStateOnView() {
-
-        if (mServiceRunningConfirmation.isLogging()) {
-
-            mLoggingStartButton.setVisibility(View.GONE);
-            mLoggingStopButton.setVisibility(View.VISIBLE);
-            mCheckinButton.setVisibility(View.VISIBLE);
-
-        } else {
-
-            mLoggingStopButton.setVisibility(View.GONE);
-            mCheckinButton.setVisibility(View.GONE);
-            mLoggingStartButton.setVisibility(View.VISIBLE);
-
-        }
-    }
 
     //endregion
-
 
     //region Checkin
 
@@ -317,9 +295,6 @@ public class RecordActivity extends FragmentActivity {
      */
     @Click(R.id.checkInButton)
     public void onCheckedIn(View cliecked) {
-
-        Log.i(TAG, "onCheckedIn");
-
         Intent intent = new Intent(getApplicationContext(), PoiConfirmationActivity_.class);
         startActivityForResult(intent, POICONFIRMATIONCODE);
     }
@@ -337,7 +312,11 @@ public class RecordActivity extends FragmentActivity {
         }
 
         final String tid = mTrajectorySpanDbHandler.getLoggingTid();
-        if (tid == null) {
+        if (tid != null) {
+            mCurrentTid = tid;
+        }
+
+        if (mCurrentTid == null) {
             return;
         }
 
@@ -349,13 +328,10 @@ public class RecordActivity extends FragmentActivity {
         boolean isFreeform = data.getBooleanExtra("IsFreeForm", false);
         if (!isFreeform) {
 
-            final String placeId = data.getStringExtra(CheckinEntry.PLACEID);
-            final String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
-            final String placeName = data.getStringExtra(CheckinEntry.PLACENAME);
-
-            Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
-
-            final CheckinEntry entry = new CheckinEntry(tid, placeId, categoryId, TimestampGenerator.getTimestamp(), latitude, longitude, placeName);
+            String placeId = data.getStringExtra(CheckinEntry.PLACEID);
+            String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
+            String placeName = data.getStringExtra(CheckinEntry.PLACENAME);
+            final CheckinEntry entry = new CheckinEntry(mCurrentTid, placeId, categoryId, TimestampGenerator.getTimestamp(), latitude, longitude, placeName);
 
             new Thread(new Runnable() {
 
@@ -366,34 +342,35 @@ public class RecordActivity extends FragmentActivity {
             }).start();
 
             mMapWorker.addCheckinMarker(entry);
+            Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
         }
 
         //By Free Form Result
         else {
 
-            final String placeName = data.getStringExtra(CheckinFreeFormEntry.PLACENAME);
-            Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
+            String placeName = data.getStringExtra(CheckinFreeFormEntry.PLACENAME);
+            final CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, TimestampGenerator.getTimestamp(), latitude, longitude);
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    mCheckinFreeFormDbHandler.insert(tid, placeName, latitude, longitude);
+                    mCheckinFreeFormDbHandler.insert(entry);
                 }
             }).start();
 
-            CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, TimestampGenerator.getTimestamp(), latitude, longitude);
             mMapWorker.addCheckinMarker(entry);
+            Toast.makeText(this, "Checkin " + placeName, Toast.LENGTH_SHORT).show();
         }
 
+    }
 
+    private void storeCheckinFreeFormResult(Intent data) {
 
     }
 
     //endregion
 
-
-    //region Map
-
+    //region MapEvent
 
     /**
      * This is called when a trajectory entry is stored in the database
@@ -409,7 +386,6 @@ public class RecordActivity extends FragmentActivity {
         float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
         float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
         mMapWorker.addMarker(latitude, longitude);
-
     }
 
     /**
@@ -429,62 +405,43 @@ public class RecordActivity extends FragmentActivity {
         float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
         float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
         mMapWorker.updateCurrentPositionMarker(latitude, longitude);
-
-    }
-
-
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }
-        }
-    }
-
-
-    private void setUpMap() {
-
-        if (mMap == null || mMapWorker == null) {
-            return;
-        }
-
-        mMapWorker.initMap(mMap);
-
-        //restore map state
-        String tid = mTrajectorySpanDbHandler.getLoggingTid();
-        if (tid != null && mServiceRunningConfirmation.isLogging()) {
-            Log.i(TAG, "restore map state");
-            List<CheckinEntry> checkinList = mCheckinDbHandler.getCheckinList(tid);
-            List<CheckinFreeFormEntry> checkinFreeFormList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
-            List<TrajectoryEntry> positionList = mTrajectoryDbHandler.getTrajectory(tid);
-            mMapWorker.addMarkers(positionList);
-            mMapWorker.addCheckinMarkers(checkinList);
-            mMapWorker.addCheckinMarkers(checkinFreeFormList);
-        }
-
     }
 
     //endregion
 
     //region utility
-    private String generateUniqueTid() {
 
-        String tidCandidate = null;
-        while ( true ) {
-            tidCandidate = UUID.randomUUID().toString();
-            if (!mTrajectorySpanDbHandler.isExistTid(tidCandidate)) {
-                break;
-            }
+    /**
+     * Restart PositioningService
+     */
+    private void restartPositioningService() {
+
+        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+        if ( mServiceRunningConfirmation.isPositioning() ) {
+            stopService(intent);
         }
-
-        return tidCandidate;
+        startService(intent);
     }
-    //endregion
 
+    /**
+     * Change view controls according to Logging State
+     */
+    private void setLoggingStateOnView() {
+
+        if (mServiceRunningConfirmation.isLogging()) {
+
+            mLoggingStartButton.setVisibility(View.GONE);
+            mLoggingStopButton.setVisibility(View.VISIBLE);
+            mCheckinButton.setVisibility(View.VISIBLE);
+
+        } else {
+
+            mLoggingStopButton.setVisibility(View.GONE);
+            mCheckinButton.setVisibility(View.GONE);
+            mLoggingStartButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    //endregion
 
 }

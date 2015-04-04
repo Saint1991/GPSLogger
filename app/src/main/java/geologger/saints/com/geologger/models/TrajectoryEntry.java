@@ -2,11 +2,13 @@ package geologger.saints.com.geologger.models;
 
 import android.util.Log;
 
+import java.io.Serializable;
+
 /**
  * Created by Seiya on 2014/12/31.
  * トラジェクトリエントリを記述したBean
  */
-public class TrajectoryEntry {
+public class TrajectoryEntry implements Serializable {
 
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";

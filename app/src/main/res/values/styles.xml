@@ -6,14 +6,20 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="MapButtons">
-        <item name="android:layout_width">120dp</item>
-        <item name="android:layout_height">60dp</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:background">@color/app_color</item>
-        <item name="android:layout_margin">3dp</item>
-        <item name="android:textColor">@color/white</item>
+    <!-- HomeActivity -->
+
+    <style name="HomePanels">
+        <item name="android:layout_width">160dp</item>
+        <item name="android:layout_height">200dp</item>
+        <item name="android:layout_margin">5dp</item>
     </style>
+
+
+    <!-- RecordActivity -->
+    <!-- BeginRecordingActivity -->
+
+
+    <!-- LogListActivity -->
 
     <style name="LogListButtons">
         <item name="android:layout_width">100dp</item>
@@ -25,17 +31,41 @@
         <item name="android:textSize">15sp</item>
     </style>
 
-    <style name="HomePanels">
-        <item name="android:layout_width">160dp</item>
-        <item name="android:layout_height">200dp</item>
-        <item name="android:layout_margin">5dp</item>
+    <style name="logListEntryTextViews">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">#000000</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingTop">15dp</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:textSize">25sp</item>
     </style>
+
+    <!-- LogActivity -->
+    <style name="playButtons">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+    </style>
+
+    <style name="MapButtons">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:background">@color/app_color</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+
+
+
 
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
         <item name="metaButtonBarStyle">@style/ButtonBar</item>
-        <item name="metaButtonBarButtonStyle">@style/ButtonBarButton</item>
     </style>
 
     <style name="ButtonBar">
@@ -56,22 +86,7 @@
         <item name="android:textColor">#FFFFFF</item>
     </style>
 
-    <style name="logListEntryTextViews">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:background">#000000</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingTop">15dp</item>
-        <item name="android:paddingBottom">15dp</item>
-        <item name="android:paddingLeft">5dp</item>
-        <item name="android:textSize">25sp</item>
-    </style>
 
-    <style name="playButtons">
-        <item name="android:layout_width">40dp</item>
-        <item name="android:layout_height">40dp</item>
-    </style>
 
     <style name="ButtonBarButton" />
 

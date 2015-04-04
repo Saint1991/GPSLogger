@@ -2,13 +2,9 @@ package geologger.saints.com.geologger.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -51,6 +47,9 @@ public class BeginRecordingActivity extends Activity {
     @ViewById(R.id.ok_button)
     Button mOkButton;
 
+
+    //region lifecycle
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -60,6 +59,13 @@ public class BeginRecordingActivity extends Activity {
         initCompanionList();
     }
 
+    //endregion
+
+    //region initialize
+
+    /**
+     * Initializing the ListView
+     */
     private void initCompanionList() {
 
         if (mCompanionList == null) {
@@ -70,8 +76,17 @@ public class BeginRecordingActivity extends Activity {
         mCompanionList.setAdapter(adapter);
     }
 
+    //endregion
+
+    //region EventHandlers
+
+    /**
+     * Change Visibility of ListView along with the check state
+     * @param Checked
+     */
     @CheckedChange({R.id.no_companion, R.id.not_alone})
     public void onCompanionRadioCheckChanged(CompoundButton Checked) {
+
         if (mRadioNoCompanion.isChecked()) {
             mCompanionList.setVisibility(View.GONE);
         } else if (mRadioNotAlone.isChecked()) {
@@ -79,70 +94,73 @@ public class BeginRecordingActivity extends Activity {
         }
     }
 
+    /**
+     * Complete and submit the form
+     * @param clicked
+     */
     @Click(R.id.ok_button)
     public void onOkButtonClicked(View clicked) {
 
-        Intent retIntent = new Intent();
-
-        String title = mTitleText.getText().toString();
-        String memo = mMemoText.getText().toString();
+        final String title = mTitleText.getText().toString();
+        final String memo = mMemoText.getText().toString();
 
         if (title == null || title.length() < 1) {
             Toast.makeText(getApplicationContext(), getResources().getText(R.string.title_alert), Toast.LENGTH_SHORT).show();
             return;
         }
 
+        String companion = getCompanionInput();
+        if (companion == null || companion.length()  < 1) {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.companion_alert), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent retIntent = new Intent();
         retIntent.putExtra(TrajectoryPropertyEntry.TITLE, title);
         retIntent.putExtra(TrajectoryPropertyEntry.DESCRIPTION, memo);
-
-        if (mRadioNoCompanion.isChecked() || mCompanionList == null) {
-
-            retIntent.putExtra(CompanionEntry.COMPANION, getResources().getString(R.string.no_companion));
-
-        } else {
-
-            StringBuilder companion = new StringBuilder();
-            SparseBooleanArray checkedPositions = mCompanionList.getCheckedItemPositions();
-            ArrayAdapter<String> adapter = (ArrayAdapter)mCompanionList.getAdapter();
-            boolean isValid = false;
-            for (int i = 0; i < checkedPositions.size(); i++) {
-                if (checkedPositions.get(i)) {
-                    companion.append(adapter.getItem(i) + ",");
-                    isValid = true;
-                }
-            }
-
-            if (!isValid) {
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.companion_alert), Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            retIntent.putExtra(CompanionEntry.COMPANION, companion.substring(0, companion.length() - 1));
-        }
+        retIntent.putExtra(CompanionEntry.COMPANION, companion);
 
         setResult(RESULT_OK, retIntent);
         finish();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_begin_recording, menu);
-        return true;
-    }
+    //endregion
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    //region utility
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    /**
+     * return "No Companion" if No Companion is checked
+     * Else joint of checked companions with "," as their delimiter will be returned
+     * @return
+     */
+    private String getCompanionInput() {
+
+        String ret = null;
+
+        if (mRadioNoCompanion.isChecked() || mCompanionList == null) {
+
+            ret = getResources().getString(R.string.no_companion);
+
+        } else {
+
+            StringBuilder companionBuilder = new StringBuilder();
+            SparseBooleanArray checkedPositions = mCompanionList.getCheckedItemPositions();
+            ArrayAdapter<String> adapter = (ArrayAdapter)mCompanionList.getAdapter();
+            for (int i = 0; i < checkedPositions.size(); i++) {
+                if (checkedPositions.get(i)) {
+                    companionBuilder.append(adapter.getItem(i) + ",");
+                }
+            }
+
+            if (companionBuilder.length() > 1) {
+                ret = companionBuilder.substring(0, companionBuilder.length() - 1);
+            }
+
         }
 
-        return super.onOptionsItemSelected(item);
+        return ret;
     }
+
+    //endregion
+
 }

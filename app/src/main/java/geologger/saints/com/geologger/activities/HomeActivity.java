@@ -11,8 +11,6 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
-
-
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.utils.UserId;
 

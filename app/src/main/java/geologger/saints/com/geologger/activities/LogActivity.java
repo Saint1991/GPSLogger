@@ -1,58 +1,44 @@
 package geologger.saints.com.geologger.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.support.v4.app.FragmentTabHost;
+import android.util.Log;
+import android.widget.TabHost;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.androidannotations.annotations.Bean;
-import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
-import geologger.saints.com.geologger.map.MapWorker;
 import geologger.saints.com.geologger.models.CheckinEntry;
-import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
+import geologger.saints.com.geologger.uicomponents.PlayMapFragment;
+import geologger.saints.com.geologger.uicomponents.PlayMapFragment_;
+import geologger.saints.com.geologger.uicomponents.StatisticFragment;
+import geologger.saints.com.geologger.uicomponents.StatisticFragment_;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 
 @EActivity
-public class LogActivity extends FragmentActivity {
+public class LogActivity extends FragmentActivity implements FragmentTabHost.OnTabChangeListener {
 
     private final String TAG = getClass().getSimpleName();
-    private final long PLAYINTERVAL = 700L;
-
-
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private Timer mTimer;
-    private ProgressDialog mProgress;
-    private boolean isPlaying = false;
+    private final String MAP = "map";
+    private final String STATISTICS = "statistics";
 
     private List<TrajectoryEntry> mTrajectoryEntryList;
-    private List<CheckinEntry> mCheckinEntryList;
-    private List<CheckinFreeFormEntry> mCheckinFreeFormEntryList;
-    private List<LatLng> mLatLngList;
-    private List<String> mTimestampList;
+    private ArrayList<CheckinEntry> mCheckinEntryList;
 
     @Bean
     CheckinSQLite mCheckinDbHandler;
@@ -64,107 +50,49 @@ public class LogActivity extends FragmentActivity {
     TrajectorySQLite mTrajectoryDbHandler;
 
     @Bean
-    MapWorker mMapWorker;
+    ProgressDialogUtility mProgressUtility;
 
+    @ViewById(android.R.id.tabhost)
+    FragmentTabHost mTabHost;
 
-    @ViewById(R.id.playButton)
-    Button mPlayButton;
+    //region lifecycle
 
-    @ViewById(R.id.pauseButton)
-    Button mPauseButton;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
 
-    @ViewById(R.id.playSlider)
-    SeekBar mPlaySlider;
+        Log.i(TAG, "onCreate");
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_log);
 
-    @ViewById(R.id.timestampIndicator)
-    TextView mTimestampIndicator;
+        //Show Progress Dialog
+        mProgressUtility.showProgress(getResources().getString(R.string.loading));
 
-
-    //region PlayerControls
-
-    @Click(R.id.toBeginButton)
-    public void toBegin() {
-        mPlaySlider.setProgress(0);
-    }
-
-    @Click(R.id.playButton)
-    public void play() {
-
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-
-                try {
-
-                    int progress = mPlaySlider.getProgress();
-                    progress++;
-
-                    if (mPlaySlider.getMax() < progress) {
-                        pause();
-                        return;
-                    }
-
-
-                    mPlaySlider.setProgress(progress);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    pause();
-                    toBegin();
-                }
-
-            }
-
-        }, 0L, PLAYINTERVAL);
-
-        isPlaying = true;
-        switchPlayerButton();
-    }
-
-    @Click(R.id.pauseButton)
-        public void pause() {
-
-            if (mTimer != null) {
-            mTimer.cancel();
-            mTimer = null;
+        //Load Trajectory Data from Database
+        //If missed to load dismiss progress and end
+        if (!loadDatas()) {
+            mProgressUtility.dismissProgress();
+            return;
         }
 
-        isPlaying = false;
-        switchPlayerButton();
+        initializeTabHost();
     }
 
-    @UiThread
-    void setTimestamp(int progress) {
-        String timestamp = mTimestampList.get(progress);
-        mTimestampIndicator.setText(timestamp);
-    }
+    @Override
+    protected void onResume() {
 
-    @UiThread
-    void switchPlayerButton() {
+        super.onResume();
 
-        try {
-
-            if (isPlaying) {
-
-                mPauseButton.setVisibility(View.VISIBLE);
-                mPlayButton.setVisibility(View.GONE);
-
-            } else {
-
-                mPlayButton.setVisibility(View.VISIBLE);
-                mPauseButton.setVisibility(View.GONE);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (mTrajectoryEntryList == null || mCheckinEntryList == null) {
+            loadDatas();
         }
 
+        //Dismiss Progress Dialog
+        mProgressUtility.dismissProgress();
     }
 
     //endregion
 
+    //region initialize
 
     private boolean loadDatas() {
 
@@ -172,112 +100,84 @@ public class LogActivity extends FragmentActivity {
         String tid = intent.getStringExtra(TrajectorySpanEntry.TID);
 
         mTrajectoryEntryList = mTrajectoryDbHandler.getTrajectory(tid);
-        mCheckinEntryList = mCheckinDbHandler.getCheckinList(tid);
-        mCheckinFreeFormEntryList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
+        mCheckinEntryList = mCheckinDbHandler.getCheckinArrayList(tid);
 
-        mLatLngList = new ArrayList<LatLng>();
-        mTimestampList = new ArrayList<String>();
+        return mTrajectoryEntryList.size() > 0;
+    }
+
+    private void initializeTabHost() {
+
+        if (mTabHost == null) {
+            mTabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
+        }
+        mTabHost.setup(this, getSupportFragmentManager(), R.id.container);
+
+        Resources resources = getResources();
+
+        TabHost.TabSpec mapSpec = mTabHost.newTabSpec(MAP);
+        mapSpec.setIndicator(resources.getString(R.string.map));
+        Bundle mapBundle = new Bundle();
+        mapBundle.putParcelableArrayList(PlayMapFragment.LATLNGLIST, createLatLngList());
+        mapBundle.putStringArrayList(PlayMapFragment.TIMESTAMPLIST, createTimestampList());
+        mapBundle.putSerializable(PlayMapFragment.CHECKINLIST, mCheckinEntryList);
+
+        TabHost.TabSpec statisticsSpec = mTabHost.newTabSpec(STATISTICS);
+        statisticsSpec.setIndicator(resources.getString(R.string.statistics));
+        Bundle statisticsBundle = new Bundle();
+
+
+        mTabHost.addTab(mapSpec, PlayMapFragment_.class, mapBundle);
+        mTabHost.addTab(statisticsSpec, StatisticFragment_.class, statisticsBundle);
+
+        mTabHost.setOnTabChangedListener(this);
+    }
+
+    //endregion
+
+    //region tab
+
+    @Override
+    public void onTabChanged(String tabId) {
+
+        switch(tabId) {
+
+            case MAP:
+
+                break;
+
+            case STATISTICS:
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    //endregion
+
+    //region utility
+
+    private ArrayList<LatLng> createLatLngList() {
+
+        ArrayList<LatLng> ret = new ArrayList<>();
         for (TrajectoryEntry entry : mTrajectoryEntryList) {
             LatLng position = new LatLng(entry.getLatitude(), entry.getLongitude());
-            mLatLngList.add(position);
-            mTimestampList.add(entry.getTimestamp());
+            ret.add(position);
         }
 
-        return (mTimestampList.size() == mLatLngList.size() && mLatLngList.size() > 0);
-
+        return ret;
     }
 
-    private void initSlider() {
-        mPlaySlider.setMax(mTrajectoryEntryList.size() - 1);
-        mPlaySlider.setProgress(0);
-    }
+    private ArrayList<String> createTimestampList() {
 
-    @UiThread
-    public void dismissProgress() {
-        if (mProgress != null) {
-            mProgress.dismiss();
-        }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_log);
-
-
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage(getResources().getString(R.string.loading));
-        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgress.show();
-
-        if (!loadDatas()) {
-            dismissProgress();
-            return;
+        ArrayList<String> ret = new ArrayList<>();
+        for (TrajectoryEntry entry : mTrajectoryEntryList) {
+            ret.add(entry.getTimestamp());
         }
 
-        mPlaySlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                LatLng position = mLatLngList.get(progress);
-                mMapWorker.updateCurrentPositionMarker(position);
-                setTimestamp(progress);
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-
-        });
-
-        setUpMapIfNeeded();
+        return ret;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setUpMapIfNeeded();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        pause();
-    }
-
-
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }
-        }
-    }
-
-
-    private void setUpMap() {
-
-        LatLng firstPosition = mLatLngList.get(0);
-        mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F);
-        mMapWorker.drawLine(mLatLngList);
-        mMapWorker.addCheckinMarkers(mCheckinEntryList);
-
-        initSlider();
-        dismissProgress();
-    }
+    //endregion
 }

@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.mapsapi;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +16,6 @@ import geologger.saints.com.geologger.mapsapi.models.MapStep;
  * Created by Seiya on 2015/03/17.
  */
 public class MapsApiParser {
-
 
     public static List<MapLeg> parseRoute(String json) {
 

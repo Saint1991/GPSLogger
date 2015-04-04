@@ -29,7 +29,6 @@ public class MapsApiClient {
     }
 
     public String query(LatLng origin, LatLng destination, String language) {
-
         String travelMode = "walking";
         String query = BASEURL + "origin=" + origin.latitude + "," + origin.longitude + "&" + "destination=" + destination.latitude + "," + destination.longitude + "&mode=" + travelMode + "&language=" + language;
         String response = mHttpClient.sendHttpGetRequest(query);

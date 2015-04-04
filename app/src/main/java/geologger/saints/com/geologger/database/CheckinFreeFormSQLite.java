@@ -30,11 +30,16 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
         mDbHelper = new BaseSQLiteOpenHelper(context);
     }
 
+
+    //region insert
+
     /**
-     * チェックインの自由入力欄のエントリを格納する
+     * insert an entry that has passed parameters
      * @param tid
      * @param placeName
      * @param timestamp
+     * @param latitude
+     * @param longitude
      * @return
      */
     public boolean insert(String tid, String placeName, String timestamp, float latitude, float longitude) {
@@ -55,7 +60,19 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
     }
 
     /**
-     * チェックインの自由入力欄のエントリを格納する
+     * insert an entry that has passed parameters
+     * timestamp will be automatically complemented
+     * @param tid
+     * @param placeName
+     * @return
+     */
+    public boolean insert(String tid, String placeName, float latitude, float longitude) {
+        String timestamp = TimestampGenerator.getTimestamp();
+        return this.insert(tid, placeName, timestamp, latitude, longitude);
+    }
+
+    /**
+     * insert an entry
      * @param entry
      * @return
      */
@@ -70,22 +87,16 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
         return this.insert(tid, placeName, timestamp, latitude, longitude);
     }
 
-    /**
-     * チェックインの自由入力欄のエントリを格納する
-     * タイムスタンプは現在時刻で補完する
-     * @param tid
-     * @param placeName
-     * @return
-     */
-    public boolean insert(String tid, String placeName, float latitude, float longitude) {
-        String timestamp = TimestampGenerator.getTimestamp();
-        return this.insert(tid, placeName, timestamp, latitude, longitude);
-    }
+
+
+    //endregion
+
+    //region remove
 
     /**
-     * 指定したtidに対応するエントリを削除する
+     * remove all entries that has passed tid
      * @param tid
-     * @return 成功時true, 失敗時false
+     * @return success:true, fail:false
      */
     public int removeByTid(String tid) {
 
@@ -97,11 +108,12 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
     }
 
     /**
-     * 指定したtimestampに対応するエントリを削除する
+     * remove all entries that has passed timestamp
      * @param timestamp
      * @return
      */
     public int removeByTimestamp(String timestamp) {
+
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int removeCount = db.delete(TABLENAME, CheckinFreeFormEntry.TIMESTAMP + "=?", new String[]{timestamp});
         db.close();
@@ -109,18 +121,33 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
         return removeCount;
     }
 
+    //endregion
+
+    //region find
+
     /**
-     * エントリ一覧をリストで取得する
+     * Get a list of CheckinFreeFormEntry
      * @param tid
+     * @param offset
+     * @param limit
      * @return
      */
-    public List<CheckinFreeFormEntry> getCheckinFreeFormList(String tid) {
+    public List<CheckinFreeFormEntry> getCheckinFreeFormList(String tid, int offset, int limit) {
 
         List<CheckinFreeFormEntry> ret = new ArrayList<CheckinFreeFormEntry>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         if (db.isOpen()) {
-            Cursor cursor = db.query(TABLENAME, null, CheckinFreeFormEntry.TID + "=?", new String[]{tid}, null, null, CheckinFreeFormEntry.TIMESTAMP + " ASC");
 
+            StringBuilder limitBuilder = new StringBuilder();
+            if (limit > 0) {
+                if (offset > 0) {
+                    limitBuilder.append(offset + ", ");
+                }
+                limitBuilder.append(limit);
+            }
+            String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
+
+            Cursor cursor = db.query(TABLENAME, null, CheckinFreeFormEntry.TID + "=?", new String[]{tid}, null, null, CheckinFreeFormEntry.TIMESTAMP + " ASC", limitStr);
 
             boolean isEOF = cursor.moveToFirst();
             while (isEOF) {
@@ -133,11 +160,27 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
         }
 
         return ret;
-
     }
 
-    //カーソルの現在位置からエントリを取得する
-    //取得できない場合はnullを返す
+    /**
+     * get All Entries As a list
+     * @param tid
+     * @return
+     */
+    public List<CheckinFreeFormEntry> getCheckinFreeFormList(String tid) {
+        return this.getCheckinFreeFormList(tid, 0, 0);
+    }
+
+    //endregion
+
+    //region utility
+
+    /**
+     * Get the entry from cursor
+     * If cursor is invalid state, return null
+     * @param cursor
+     * @return
+     */
     private CheckinFreeFormEntry getEntryFromCursor(Cursor cursor) {
 
         if (cursor.isNull(cursor.getColumnIndex(CheckinFreeFormEntry.TID))) {
@@ -154,4 +197,6 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
 
         return entry;
     }
+
+    //endregion
 }

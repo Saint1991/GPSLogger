@@ -40,9 +40,6 @@ public class MyLocationListener implements LocationListener {
         float latitude = (float)location.getLatitude();
         float longitude = (float)location.getLongitude();
 
-        if (mContext == null) {
-            Log.i(TAG, "mContext is null");
-        }
         Position.savePosition(mContext.getApplicationContext(), latitude, longitude);
         Log.i(TAG, "onLocationChanged: " + "(" + latitude + ", " + longitude + ")");
         Intent broadcastIntent = new Intent(ACTION);
@@ -54,7 +51,6 @@ public class MyLocationListener implements LocationListener {
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         Log.i(TAG, "onStatusChanged " + provider + " " + status );
-
     }
 
     @Override

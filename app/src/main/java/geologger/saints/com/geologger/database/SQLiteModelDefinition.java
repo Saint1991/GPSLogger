@@ -6,7 +6,7 @@ import geologger.saints.com.geologger.models.TableDefinitions;
 
 /**
  * Created by Seiya on 2015/01/01.
- * テーブル作成のためのスキーマを定義する．
+ * Utility class for handle a table information of TableDefinitions．
  */
 public class SQLiteModelDefinition {
 
@@ -14,8 +14,8 @@ public class SQLiteModelDefinition {
     private HashMap<String, String> mColumnDefinitions = null;
 
     /**
-     * コンストラクタ
-     * @param tableName table名
+     * Constructor
+     * @param tableName
      */
     public SQLiteModelDefinition(String tableName) {
         this.mTableName = tableName;
@@ -23,9 +23,16 @@ public class SQLiteModelDefinition {
     }
 
     /**
-     * コンストラクタで渡されたtable名とカラム定義から
-     * CREATE TABLEクエリを文字列で返す
-     * @return CREATE TABLE用クエリ
+     * Get TableName
+     * @return table名
+     */
+    public String getTableName() {
+        return this.mTableName;
+    }
+
+    /**
+     * returning CREATE TABLE Query
+     * @return
      */
     public String makeQuery() {
 
@@ -46,11 +53,5 @@ public class SQLiteModelDefinition {
         return retQuery;
     }
 
-    /**
-     * table名を取得する
-     * @return table名
-     */
-    public String getTableName() {
-        return this.mTableName;
-    }
+
 }

@@ -26,6 +26,8 @@
     <string name="go_here">Go Here</string>
     <string name="title">Title</string>
     <string name="memo">Memo</string>
+    <string name="map">Map</string>
+    <string name="statistics">Statistics</string>
 
     <string name="poi_search_hint">place name</string>
     <string name="detail">Details</string>

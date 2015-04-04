@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.activities;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,7 +16,6 @@ import android.widget.Toast;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
@@ -36,15 +34,14 @@ import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.LogListEntry;
 import geologger.saints.com.geologger.models.TrajectoryPropertyEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 import geologger.saints.com.geologger.utils.SendDataTask;
 
-import static android.view.Window.FEATURE_NO_TITLE;
 
 @EActivity
 public class LogListActivity extends Activity {
 
     private final String TAG = getClass().getSimpleName();
-    private ProgressDialog mProgress;
 
     private enum MODE {NORMAL, SELECTION};
     private MODE mode = MODE.NORMAL;
@@ -73,6 +70,9 @@ public class LogListActivity extends Activity {
     @Bean
     SendDataTask mSendDataTask;
 
+    @Bean
+    ProgressDialogUtility mProgressUtility;
+
 
     @ViewById(R.id.log_list)
     ListView mLogList;
@@ -90,27 +90,32 @@ public class LogListActivity extends Activity {
     Button mLogDeleteCancelButton;
 
 
+    //region lifecycle
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate");
-        requestWindowFeature(FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
 
-        beginProgress();
+        mProgressUtility.showProgress(getResources().getString(R.string.list_initializing));
         new Thread(new Runnable() {
             @Override
             public void run() {
                 initLogList();
-                dismissProgress();
+                mProgressUtility.dismissProgress();
             }
         }).run();
     }
 
-    //region Init
+    //endregion
 
-    // Initializing LogList
+    //region Initialize
+
+    /**
+     * Initialize ListView
+     */
     private void initLogList() {
 
         List<TrajectorySpanEntry> spanList = mTrajectorySpanDbHandler.getSpanList();
@@ -124,6 +129,7 @@ public class LogListActivity extends Activity {
             return;
         }
 
+        //Registering Items to ListView
         List<LogListEntry> logList = new ArrayList<>();
         for (TrajectorySpanEntry spanEntry : spanList) {
             String tid = spanEntry.getTid();
@@ -137,8 +143,6 @@ public class LogListActivity extends Activity {
 
             logList.add(new LogListEntry(tid, title, spanEntry.getBegin(), spanEntry.getEnd(), companion, description));
         }
-
-        //Registering Items to ListView
         LogListAdapter adapter = new LogListAdapter(getApplicationContext(), logList);
         mLogList.setAdapter(adapter);
 
@@ -180,7 +184,51 @@ public class LogListActivity extends Activity {
 
     //endregion
 
-    //region SELECTION
+    //region ModeChange
+
+    /**
+     * Switch Normal to SELECT and vice versa.
+     * @param to
+     */
+    private void switchMode(MODE to) {
+
+        if (mLogList == null) {
+            return;
+        }
+
+        switch(to) {
+
+            case NORMAL:
+
+                LogListAdapter adapter = ((LogListAdapter)mLogList.getAdapter()).cloneInOtherLayout(R.layout.log_list_entry);
+                mLogList.setAdapter(adapter);
+                mLogList.setChoiceMode(ListView.CHOICE_MODE_NONE);
+
+                mLogDeleteButton.setVisibility(View.GONE);
+                mLogDeleteCancelButton.setVisibility(View.GONE);
+                mSendDataButton.setVisibility(View.GONE);
+
+                this.mode = MODE.NORMAL;
+                break;
+
+            case SELECTION:
+
+                LogListAdapter adapterWithCheckBox = ((LogListAdapter)mLogList.getAdapter()).cloneInOtherLayout(R.layout.log_list_entry_with_checkbox);
+                mLogList.setAdapter(adapterWithCheckBox);
+                mLogList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+                mLogDeleteButton.setVisibility(View.VISIBLE);
+                mLogDeleteCancelButton.setVisibility(View.VISIBLE);
+                mSendDataButton.setVisibility(View.VISIBLE);
+
+                this.mode = MODE.SELECTION;
+                break;
+        }
+    }
+
+    //endregion
+
+    //region SelectionMode
 
     //This is called when the SELECTION Button is Clicked
     //Remove Selected entries from view and DB
@@ -288,50 +336,10 @@ public class LogListActivity extends Activity {
 
     //endregion
 
-    //region ModeChange
-
-    //Switch Delete Mode and Normal Mode
-    private void switchMode(MODE to) {
-
-        if (mLogList == null) {
-            return;
-        }
-
-        switch(to) {
-
-            case NORMAL:
-
-                LogListAdapter adapter = ((LogListAdapter)mLogList.getAdapter()).cloneInOtherLayout(R.layout.log_list_entry);
-                mLogList.setAdapter(adapter);
-                mLogList.setChoiceMode(ListView.CHOICE_MODE_NONE);
-
-                mLogDeleteButton.setVisibility(View.GONE);
-                mLogDeleteCancelButton.setVisibility(View.GONE);
-                mSendDataButton.setVisibility(View.GONE);
-
-                this.mode = MODE.NORMAL;
-                break;
-
-            case SELECTION:
-
-                LogListAdapter adapterWithCheckBox = ((LogListAdapter)mLogList.getAdapter()).cloneInOtherLayout(R.layout.log_list_entry_with_checkbox);
-                mLogList.setAdapter(adapterWithCheckBox);
-                mLogList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-
-                mLogDeleteButton.setVisibility(View.VISIBLE);
-                mLogDeleteCancelButton.setVisibility(View.VISIBLE);
-                mSendDataButton.setVisibility(View.VISIBLE);
-
-                this.mode = MODE.SELECTION;
-                break;
-        }
-    }
-
-
-    //endregion
-
     //region utility
+
     private boolean removeDatasFromDB(String tid) {
+
         mTrajectoryDbHander.removeByTid(tid);
         mCheckinFreeFormDbHandler.removeByTid(tid);
         mCheckinDbHandler.removeByTid(tid);
@@ -341,38 +349,6 @@ public class LogListActivity extends Activity {
 
         return mTrajectorySpanDbHandler.removeByTid(tid) > 0;
     }
+
     //endregion
-
-    @UiThread
-    public void beginProgress() {
-
-        if (mProgress == null) {
-            mProgress = new ProgressDialog(this);
-        }
-
-        mProgress.setMessage(getResources().getString(R.string.list_initializing));
-        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgress.show();
-    }
-
-    @UiThread
-    public void dismissProgress() {
-
-        if (mProgress != null) {
-            mProgress.dismiss();
-        }
-    }
-
-    private List<Integer> getCheckedPositionList(SparseBooleanArray checkedPositions) {
-
-        List<Integer> checkedIndexList = new ArrayList<Integer>();
-        for (int i = 0; i < checkedPositions.size(); i++) {
-            if (checkedPositions.get(i)) {
-                checkedIndexList.add(i);
-            }
-        }
-
-        return checkedIndexList;
-    }
-
 }

@@ -34,6 +34,8 @@ public class GPSLoggingService extends Service {
     private final String DEFAULTSAMPLINGINTERVAL = "10000";
     private static final int LOGGING_NOTIFICATION_ID = 1;
 
+    private String mTid = null;
+    private Timer mTimer = null;
 
     @Bean
     TrajectorySQLite mTrajectoryDbHandler;
@@ -41,13 +43,10 @@ public class GPSLoggingService extends Service {
     @Bean
     TrajectorySpanSQLite mTrajectorySpanDbHandler;
 
-    private String mTid = null;
-    Timer mTimer = null;
+    public GPSLoggingService() {}
 
 
-    public GPSLoggingService() {
-
-    }
+    //region lifecycle
 
     @Override
     public void onCreate() {
@@ -58,16 +57,42 @@ public class GPSLoggingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        Log.i(TAG, "onStartCommand");
         super.onStartCommand(intent, flags, startId);
 
-        Log.i(TAG, "onStartCommand");
+        initialize(intent);
 
-        //インテントからtidを取得し，トラジェクトリの開始時刻を記録
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void onDestroy() {
+
+        Log.i(TAG, "onDestroy");
+        this.mTimer.cancel();
+        this.mTrajectorySpanDbHandler.setEnd(this.mTid, TimestampGenerator.getTimestamp());
+        this.mTid = null;
+
+        stopForeground(true);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    //endregion
+
+    //region initialize
+
+    private void initialize(Intent intent) {
+
+        //Get Tid from intent and insert TrajectorySpanEntry
         if (this.mTid == null) {
             this.mTid = intent.getStringExtra(TrajectoryEntry.TID);
             mTrajectorySpanDbHandler.insert(this.mTid);
         }
-
 
         if (mTimer == null) {
             mTimer = new Timer();
@@ -103,25 +128,10 @@ public class GPSLoggingService extends Service {
 
         },0L, loggingInterval);
 
-        return START_REDELIVER_INTENT;
     }
+    //endregion
 
-
-    @Override
-    public void onDestroy() {
-        Log.i(TAG, "onDestroy");
-        this.mTimer.cancel();
-        this.mTrajectorySpanDbHandler.setEnd(this.mTid, TimestampGenerator.getTimestamp());
-        this.mTid = null;
-
-        stopForeground(true);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
+    //region utility
 
     private void makeForegroundService() {
 
@@ -137,4 +147,5 @@ public class GPSLoggingService extends Service {
         startForeground(LOGGING_NOTIFICATION_ID, notification);
     }
 
+    //endregion
 }

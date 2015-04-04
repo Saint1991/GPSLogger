@@ -27,11 +27,14 @@ public class CompanionSQLite {
 
     public CompanionSQLite() {}
 
+
+    //region insert
+
     /**
-     * 同伴者情報のエントリを格納する
+     * Insert an entry that has passed params
      * @param tid
      * @param companion
-     * @return 成功時true，失敗時false
+     * @return Success:true fail:false
      */
     public boolean insert(String tid, String companion, String timestamp) {
 
@@ -49,24 +52,11 @@ public class CompanionSQLite {
     }
 
     /**
-     * 指定したエントリを格納する
-     * @param entry
-     * @return 成功時true，失敗時false
-     */
-    public boolean insert(CompanionEntry entry) {
-        String tid = entry.getTid();
-        String companion = entry.getCompanion();
-        String timestamp = entry.getTimestamp();
-
-        return this.insert(tid, companion, timestamp);
-    }
-
-    /**
-     * 指定したエントリを格納する．
-     * タイムスタンプは自動で補完する
+     * Insert an entry that has passed params
+     * Timestamp will automatically be generated
      * @param tid
      * @param companion
-     * @return 成功時true，失敗時false
+     * @return success:true，fail:false
      */
     public boolean insert(String tid, String companion) {
         String timestamp = TimestampGenerator.getTimestamp();
@@ -74,9 +64,25 @@ public class CompanionSQLite {
     }
 
     /**
-     * 指定したtidに対応するエントリを削除する
+     * Insert entry that has passed params
+     * @param entry
+     * @return Success:true fail:false
+     */
+    public boolean insert(CompanionEntry entry) {
+        String tid = entry.getTid();
+        String companion = entry.getCompanion();
+        String timestamp = entry.getTimestamp();
+        return this.insert(tid, companion, timestamp);
+    }
+
+    //endregion
+
+    //region remove
+
+    /**
+     * Remove all entries that have passed tid
      * @param tid
-     * @return 成功時true, 失敗時false
+     * @return the number of removed items
      */
     public int removeByTid(String tid) {
 
@@ -87,33 +93,59 @@ public class CompanionSQLite {
         return removedCount;
     }
 
+    //endregion
+
+    //region find
+
     /**
-     * 指定したtidに対応するcompanionのListを返す
-     * Listはtimestampでソートされている
+     * Get the list of CompanionEntry
+     * List will be sorted by timestamp in an ascending order
      * @param tid
      * @return
      */
-    public List<CompanionEntry> getCompanionList(String tid) {
-
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor= db.query(TABLENAME, null, CompanionEntry.TID + "=?", new String[]{tid}, null, null, CompanionEntry.TIMESTAMP + " ASC");
+    public List<CompanionEntry> getCompanionList(String tid, int offset, int limit) {
 
         List<CompanionEntry> ret = new ArrayList<CompanionEntry>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            CompanionEntry entry = getEntryFromCursor(cursor);
-            ret.add(entry);
-            isEOF = cursor.moveToNext();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        if (db.isOpen()) {
+
+            StringBuilder limitBuilder = new StringBuilder();
+            if (limit > 0) {
+                if (offset > 0) {
+                    limitBuilder.append(offset + ", ");
+                }
+                limitBuilder.append(limit);
+            }
+            String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
+
+            Cursor cursor= db.query(TABLENAME, null, CompanionEntry.TID + "=?", new String[]{tid}, null, null, CompanionEntry.TIMESTAMP + " ASC", limitStr);
+
+            boolean isEOF = cursor.moveToFirst();
+            while (isEOF) {
+                CompanionEntry entry = getEntryFromCursor(cursor);
+                ret.add(entry);
+                isEOF = cursor.moveToNext();
+            }
+            cursor.close();
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return ret;
     }
 
+
     /**
-     * 指定したtidに対応するcompanionの最初の要素を返します
-     * 見つからない場合はnullを返します
+     * Get the list of CompanionEntry
+     * List will be sorted by timestamp in an ascending order
+     * @param tid
+     * @return
+     */
+    public List<CompanionEntry> getCompanionList(String tid) {
+        return this.getCompanionList(tid, 0, 0);
+    }
+
+    /**
+     * Get the CompanionEntry that has passed tid
      * @param tid
      * @return
      */
@@ -133,8 +165,16 @@ public class CompanionSQLite {
         return ret;
     }
 
-    //カーソルの現在位置からエントリを取得する
-    //取得できない場合はnullを返す
+    //endregion
+
+    //region utility
+
+    /**
+     * Get corresponding entry to the passed cursor
+     * If cursor is invalid return null
+     * @param cursor
+     * @return
+     */
     private CompanionEntry getEntryFromCursor(Cursor cursor) {
 
         if (cursor.isNull(cursor.getColumnIndex(CompanionEntry.TID))) {
@@ -148,4 +188,6 @@ public class CompanionSQLite {
 
         return entry;
     }
+
+    //endregion
 }

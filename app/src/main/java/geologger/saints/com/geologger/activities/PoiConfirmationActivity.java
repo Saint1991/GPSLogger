@@ -2,7 +2,6 @@ package geologger.saints.com.geologger.activities;
 
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -31,20 +29,73 @@ import geologger.saints.com.geologger.foursquare.models.FourSquarePoiCategory;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
+import geologger.saints.com.geologger.utils.StringUtil;
 
 @EActivity
 public class PoiConfirmationActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener {
 
     private final String TAG = getClass().getSimpleName();
-    private ProgressDialog mProgress;
 
     private List<FourSquarePoi> mFourSquarePoiList;
 
     @Bean
     FourSquareClient mFourSquareClient;
 
+    @Bean
+    ProgressDialogUtility mProgressUtility;
 
-    //region SelectFromList
+
+    //region lifecycle
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        Log.i(TAG, "onCreate");
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_poi_confirmation);
+
+        mProgressUtility.showProgress(getResources().getString(R.string.searching));
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                mFourSquarePoiList = mFourSquareClient.searchPoi(null);
+                updateListView();
+                mProgressUtility.dismissProgress();
+            }
+
+        }).start();
+    }
+
+    //endregion
+
+    //region initialize
+
+    @UiThread
+    public void updateListView() {
+
+        if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
+            return;
+        }
+
+        FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
+        PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
+        ListView poiList = fragment.getListView();
+        if (poiList == null) {
+            return;
+        }
+
+        PoiListAdapter adapter = (PoiListAdapter)poiList.getAdapter();
+        adapter.addAll(mFourSquarePoiList);
+        poiList.setAdapter(adapter);
+    }
+
+    //endregion
+
+    //region CheckInItemSelected
+
     @Override
     public void onFragmentInteraction(ListView parent, View called, int position, long id) {
 
@@ -99,10 +150,8 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
     //endregion
 
+    //region FreeFormSelected
 
-    //region FreeForm
-
-    //Show Dialog for Free Form input
     @Click(R.id.buttonToFreeForm)
     public void showFreeFormDialog() {
 
@@ -135,10 +184,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
         AlertDialog dialog = builder.create();
         dialog.setTitle(getResources().getString(R.string.freeform));
-
-
         dialog.setView(inputForm, 5, 30, 5, 30);
-
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
@@ -146,67 +192,9 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
                 inputManager.showSoftInput(inputForm, 0);
             }
         });
-
         dialog.show();
     }
 
     //endregion
-
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-        Log.i(TAG, "onCreate");
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_poi_confirmation);
-
-
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage(getResources().getString(R.string.searching));
-        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgress.show();
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                mFourSquarePoiList = mFourSquareClient.searchPoi(null);
-                initListView();
-                dismissProgress();
-            }
-
-        }).start();
-
-    }
-
-    @UiThread
-    public void initListView() {
-
-        if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
-            return;
-        }
-
-        FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
-        PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
-        ListView poiList = fragment.getListView();
-        if (poiList == null) {
-            return;
-        }
-
-        PoiListAdapter adapter = (PoiListAdapter)poiList.getAdapter();
-        adapter.addAll(mFourSquarePoiList);
-        poiList.setAdapter(adapter);
-
-    }
-
-    @UiThread
-    public void dismissProgress() {
-        if (mProgress != null) {
-            mProgress.dismiss();
-        }
-    }
-
 
 }

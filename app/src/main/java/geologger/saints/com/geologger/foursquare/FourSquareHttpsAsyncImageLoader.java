@@ -16,7 +16,6 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class FourSquareHttpsAsyncImageLoader extends AsyncTaskLoader<Bitmap> {
 
-    private final String TAG = getClass().getSimpleName();
     private FourSquareClient mFourSquareClient;
     private String mPlaceId;
     private int mWidth;

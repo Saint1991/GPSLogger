@@ -36,6 +36,8 @@ public class MapWorker extends BaseMapWorker {
         mCheckinMarkerIdMap = new HashMap<String, String>();
     }
 
+    //region initialize
+
     /**
      * Initializing map and set Click Event to infowindow of Checkin marker
      * @param map
@@ -63,46 +65,9 @@ public class MapWorker extends BaseMapWorker {
         });
     }
 
-    /**
-     * Clear recorded previous position.
-     */
-    public void clearPrevious() {
-        mPreviousPosition = null;
-    }
+    //endregion
 
     //region Marker
-
-    /**
-     * Draw Marker at the disginated point and connect with the previous point with blue line
-     * @param latitude
-     * @param longitude
-     */
-    @Override
-    public Marker addMarker(float latitude, float longitude) {
-
-        LatLng position = new LatLng(latitude, longitude);
-        return addMarker(position);
-
-    }
-
-    /**
-     * Draw Marker at the disginated point and connect with the previous point with blue line
-     * @param position
-     * @return
-     */
-    @Override
-    public Marker addMarker(LatLng position) {
-
-        Marker ret = super.addMarker(position);
-
-        if (mPreviousPosition != null) {
-           super.drawLine(this.mPreviousPosition, position);
-        }
-        mPreviousPosition = position;
-
-        return ret;
-    }
-
     /**
      * Add Checkin Marker at the corresponding point to the entry
      * @param entry
@@ -126,7 +91,6 @@ public class MapWorker extends BaseMapWorker {
         }
 
         return ret;
-
     }
 
     /**
@@ -138,10 +102,16 @@ public class MapWorker extends BaseMapWorker {
         for (CheckinFreeFormEntry entry : checkinEntryList) {
             addCheckinMarker(entry);
         }
-
     }
 
-    public Marker addDistinationMarker(LatLng position, String placeName, String address) {
+    /**
+     * Add Marker that reporesent destination
+     * @param position
+     * @param placeName
+     * @param address
+     * @return
+     */
+    public Marker addDestinationMarker(LatLng position, String placeName, String address) {
 
         if (position == null) {
             return null;
@@ -157,6 +127,17 @@ public class MapWorker extends BaseMapWorker {
 
         Marker ret = mMap.addMarker(marker);
         return ret;
+    }
+
+    //endregion
+
+    //region utility
+
+    /**
+     * Clear recorded previous position.
+     */
+    public void clearPrevious() {
+        mPreviousPosition = null;
     }
 
     //endregion

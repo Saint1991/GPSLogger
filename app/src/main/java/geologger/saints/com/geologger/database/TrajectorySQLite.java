@@ -18,7 +18,6 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
 
 /**
  * Created by Mizuno on 2015/01/28.
- * Trajectoryテーブルに対するデータの操作を扱うクラス
  */
 @EBean
 public class TrajectorySQLite {
@@ -33,14 +32,16 @@ public class TrajectorySQLite {
 
     public TrajectorySQLite() {}
 
+    //region insert
+
     /**
-     * トラジェクトリのエントリを格納する
+     * Insert an entry that has passed params
      * @param tid
      * @param latitude
      * @param longitude
      * @param timestamp
      * @param isGpsOn
-     * @return 成功時true，失敗時false
+     * @return success:true，fail:false
      */
     public boolean insert(String tid, float latitude, float longitude, String timestamp, boolean isGpsOn) {
 
@@ -60,9 +61,23 @@ public class TrajectorySQLite {
     }
 
     /**
-     * 指定したTrajectoryEntryを格納する
+     * Insert an entry that has passed params
+     * Timestamp will be automatically complemented
+     * @param tid
+     * @param latitude
+     * @param longitude
+     * @return success:true, fail:false
+     */
+    public boolean insert(String tid, float latitude, float longitude) {
+        String timestamp = TimestampGenerator.getTimestamp();
+        boolean isGpsOn = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return this.insert(tid, latitude, longitude, timestamp, isGpsOn);
+    }
+
+    /**
+     * Insert an entry that has passed params
      * @param entry
-     * @return 成功時true, 失敗時false
+     * @return success:true, fail:false
      */
     public boolean insert(TrajectoryEntry entry) {
         String tid = entry.getTid();
@@ -73,24 +88,14 @@ public class TrajectorySQLite {
         return this.insert(tid, latitude, longitude, timestamp, isGpsOn);
     }
 
-    /**
-     * 指定したトラジェクトリのエントリを挿入する．
-     * タイムスタンプとGpsのオンオフは自動で補完する．
-     * @param tid
-     * @param latitude
-     * @param longitude
-     * @return 成功時true, 失敗時false
-     */
-    public boolean insert(String tid, float latitude, float longitude) {
-        String timestamp = TimestampGenerator.getTimestamp();
-        boolean isGpsOn = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        return this.insert(tid, latitude, longitude, timestamp, isGpsOn);
-    }
+    //endregion
+
+    //region remove
 
     /**
-     * 指定したtidに対応するエントリを削除する
+     * Remove all entries that has passed tid
      * @param tid
-     * @return 成功時true, 失敗時false
+     * @return success:true, fail:false
      */
     public int removeByTid(String tid) {
 
@@ -101,10 +106,14 @@ public class TrajectorySQLite {
         return removedCount;
     }
 
+    //endregion
+
+    //region find
+
     /**
-     * 指定したtidに相当する最初のトラジェクトリエントリを取得する
+     * Get First entry of the trajectory whose id is passed tid
      * @param tid
-     * @return 対応する最初のトラジェクトリ, 対応するデータがない場合はnullを返す
+     * @return
      */
     public TrajectoryEntry getFirstEntry(String tid) {
 
@@ -122,9 +131,9 @@ public class TrajectorySQLite {
     }
 
     /**
-     * 指定したtidに対応するトラジェクトリの最後のエントリを返す
+     * Get Last entry of the trajectory whose id is passed tid
      * @param tid
-     * @return 最後のトラジェクトリエントリ
+     * @return
      */
     public TrajectoryEntry getLastEntry(String tid) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -141,7 +150,7 @@ public class TrajectorySQLite {
     }
 
     /**
-     * tidに対応するトラジェクトリデータをListで取得する
+     * Get all entries that has passed tid as a list
      * @param tid
      * @return
      */
@@ -163,8 +172,16 @@ public class TrajectorySQLite {
         return ret;
     }
 
-    //カーソルの現在位置からエントリを取得する
-    //取得できない場合はnullを返す
+    //endregion
+
+    //region utility
+
+    /**
+     * Get the entry from cursor
+     * If cursor is invalid state, return null
+     * @param cursor
+     * @return
+     */
     private TrajectoryEntry getEntryFromCursor(Cursor cursor) {
 
         if (cursor.isNull(cursor.getColumnIndex(TrajectoryEntry.TID))) {
@@ -181,6 +198,6 @@ public class TrajectorySQLite {
         return entry;
     }
 
-
+    //endregion
 
 }

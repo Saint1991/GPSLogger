@@ -1,9 +1,11 @@
 package geologger.saints.com.geologger.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Mizuno on 2015/01/29.
  */
-public class CheckinEntry extends CheckinFreeFormEntry {
+public class CheckinEntry extends CheckinFreeFormEntry implements Serializable{
 
     public static final String PLACEID = "place_id";
     public static final String CATEGORYID = "category_id";

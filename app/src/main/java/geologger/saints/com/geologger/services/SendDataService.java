@@ -91,7 +91,6 @@ public class SendDataService extends Service {
         List<String> tidListToSend = makeTidListToSend();
         mSendDataTask.setTidList(tidListToSend);
 
-        Log.i(TAG, "onStartCommand");
         new Thread(mSendDataTask).start();
 
         return START_NOT_STICKY;
@@ -109,6 +108,8 @@ public class SendDataService extends Service {
     }
 
 
+
+    //region utility
 
     // Check if connected to WIFI or WIMAX
     private boolean isReadyToSendData(Intent intent) {
@@ -149,7 +150,6 @@ public class SendDataService extends Service {
         return ret;
     }
 
-
-
+    //endregion
 
 }

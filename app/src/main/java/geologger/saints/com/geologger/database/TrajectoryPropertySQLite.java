@@ -26,8 +26,10 @@ public class TrajectoryPropertySQLite {
 
     public TrajectoryPropertySQLite() {}
 
+    //region insert
+
     /**
-     * insert an entry along with params
+     * insert an entry that has passed params
      * @param tid
      * @param title
      * @param description
@@ -60,6 +62,28 @@ public class TrajectoryPropertySQLite {
         return this.insert(tid, title, description);
     }
 
+    //endregion
+
+    //region remove
+
+    /**
+     * Remove the corresponding entry to the passed tid
+     * @param tid
+     * @return
+     */
+    public int removeByTid(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removeCount = db.delete(TABLENAME, TrajectoryPropertyEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removeCount;
+    }
+
+    //endregion
+
+    //region find
+
     /**
      * Load an entry that have the passed TID
      * @param tid
@@ -79,46 +103,18 @@ public class TrajectoryPropertySQLite {
         db.close();
 
         return ret;
-
     }
+
+    //endregion
+
+    //region utility
 
     /**
-     * Get Map whose key is TID and its value is corresponding TrajectoryPropertyEntry
+     * Get the entry from cursor
+     * If cursor is invalid state, return null
+     * @param cursor
      * @return
      */
-    public Map<String, TrajectoryPropertyEntry> getTrajectoryPropertyMap() {
-
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, null);
-
-        Map<String, TrajectoryPropertyEntry> ret = new HashMap<>();
-        boolean isEOF = cursor.moveToFirst();
-        while(isEOF) {
-            TrajectoryPropertyEntry entry = getEntryFromCursor(cursor);
-            ret.put(entry.getTid(), entry);
-            isEOF = cursor.moveToNext();
-        }
-
-        cursor.close();
-        db.close();
-
-        return ret;
-    }
-
-    /**
-     * Remove the corresponding entry to the passed tid
-     * @param tid
-     * @return
-     */
-    public int removeByTid(String tid) {
-
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removeCount = db.delete(TABLENAME, TrajectoryPropertyEntry.TID + "=?", new String[]{tid});
-        db.close();
-
-        return removeCount;
-    }
-
     private TrajectoryPropertyEntry getEntryFromCursor(Cursor cursor) {
 
         if (cursor.isNull(cursor.getColumnIndex(TrajectoryPropertyEntry.TID))) {
@@ -132,4 +128,6 @@ public class TrajectoryPropertySQLite {
 
         return entry;
     }
+
+    //endregion
 }

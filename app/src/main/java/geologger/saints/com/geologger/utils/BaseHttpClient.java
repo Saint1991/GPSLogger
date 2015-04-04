@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -32,6 +31,8 @@ public class BaseHttpClient {
     protected Context mContext;
 
     public BaseHttpClient() {}
+
+    //region GET
 
     public String sendHttpGetRequest(String query) {
 
@@ -58,6 +59,10 @@ public class BaseHttpClient {
 
         return ret;
     }
+
+    //endregion
+
+    //region POST
 
     public String sendHttpPostRequest(String url, String params) {
 
@@ -91,6 +96,8 @@ public class BaseHttpClient {
 
         return ret;
     }
+
+
 
     /**
      *
@@ -132,4 +139,6 @@ public class BaseHttpClient {
 
         return ret;
     }
+
+    //endregion
 }

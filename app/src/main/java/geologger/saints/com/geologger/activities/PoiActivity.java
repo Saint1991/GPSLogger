@@ -2,20 +2,17 @@ package geologger.saints.com.geologger.activities;
 
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -35,43 +32,20 @@ import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
 import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
+import geologger.saints.com.geologger.utils.Position;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
 
 @EActivity
 public class PoiActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener{
 
     private final String TAG = getClass().getSimpleName();
-    private ProgressDialog mProgress;
 
     private List<FourSquarePoi> mFourSquarePoiList;
     private boolean mIsPositionUpdated = false;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_poi);
-
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage(getResources().getString(R.string.position_updating));
-        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgress.show();
-
-        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
-        if ( mServiceRunningConfirmation.isPositioning() ) {
-            stopService(intent);
-        }
-        startService(intent);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if ( mServiceRunningConfirmation.isPositioning() && !mServiceRunningConfirmation.isLogging() ) {
-            Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
-            stopService(intent);
-        }
-    }
+    @Bean
+    ProgressDialogUtility mProgressUtility;
 
     @Bean
     FourSquareClient mFourSquareClient;
@@ -85,45 +59,82 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
     @ViewById(R.id.search_submit)
     Button mSearchButton;
 
+    //region lifecycle
 
-    // This is called when search button is clicked
-    // Start searching POI with showing ProgressBar
-    @Click(R.id.search_submit)
-    void searchPoiButtonClicked() {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
 
-        final String query = mSearchText.getText().toString();
+        Log.i(TAG, "onCreate");
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_poi);
 
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage(getResources().getString(R.string.searching));
-        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgress.show();
+        long passedFromLastPositionUpdate = Position.getPassedTimeFromLastUpdate(getApplicationContext());
+        if (passedFromLastPositionUpdate == -1L || 300000 < passedFromLastPositionUpdate) {
+            mProgressUtility.showProgress(getResources().getString(R.string.position_updating));
+        } else {
+            mIsPositionUpdated = true;
+        }
 
-        new Thread(new Runnable() {
-           public void run() {
-               mFourSquarePoiList = mFourSquareClient.searchPoi(query);
-               initListView();
-               dismissProgress();
-           }
-        }).start();
-
+        restartPositioningService();
     }
 
+    @Override
+    protected void onDestroy() {
+
+        Log.i(TAG, "onDestroy");
+        super.onDestroy();
+
+        if ( mServiceRunningConfirmation.isPositioning() && !mServiceRunningConfirmation.isLogging() ) {
+            Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+            stopService(intent);
+        }
+    }
+
+    //endregion
+
+    //region initialize
+
     /**
-     * wait until the first positiin update is occurred
+     * Wait till first position update is occurred
      * @param intent
      */
     @Receiver(actions = MyLocationListener.ACTION)
     public void onCurrentPositionUpdated(Intent intent) {
         if (!mIsPositionUpdated) {
-            dismissProgress();
+            mProgressUtility.dismissProgress();
             mIsPositionUpdated = true;
         }
     }
 
-    //Initializing ListView
-    //Set mFourSquarePoiList to the view
+    //endregion
+
+    //region search
+
+    /**
+     * This is called when search button is clicked
+     * Start searching POI with showing ProgressBar
+     */
+    @Click(R.id.search_submit)
+    void searchPoiButtonClicked() {
+
+        final String query = mSearchText.getText().toString();
+        mProgressUtility.showProgress(getResources().getString(R.string.searching));
+
+        new Thread(new Runnable() {
+           public void run() {
+               mFourSquarePoiList = mFourSquareClient.searchPoi(query);
+               updateListView();
+               mProgressUtility.dismissProgress();
+           }
+        }).start();
+    }
+
+    /**
+     * Updating ListView
+     * Set mFourSquarePoiList to the view
+     */
     @UiThread
-    public void initListView() {
+    public void updateListView() {
 
         if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
             return;
@@ -140,19 +151,12 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
         adapter.clear();
         adapter.addAll(mFourSquarePoiList);
         poiList.setAdapter(adapter);
-
     }
 
-    //close progress window
-    @UiThread
-    public void dismissProgress() {
-        if (mProgress != null) {
-            mProgress.dismiss();
-        }
-    }
+    //endregion
 
-    //Click Event
-    //Show Corresponding POI Detail to clicked Entry By Browser
+    //region ItemClicked
+
     @Override
     public void onFragmentInteraction(ListView parent, View called, int position, long id) {
 
@@ -194,5 +198,19 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
         dialog.show();
 
     }
+
+    //endregion
+
+    //region utility
+
+    private void restartPositioningService() {
+        Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
+        if ( mServiceRunningConfirmation.isPositioning() ) {
+            stopService(intent);
+        }
+        startService(intent);
+    }
+
+    //endregion
 
 }

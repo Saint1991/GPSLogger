@@ -1,9 +1,11 @@
 package geologger.saints.com.geologger.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Mizuno on 2015/04/03.
  */
-public class TrajectoryPropertyEntry {
+public class TrajectoryPropertyEntry implements Serializable {
 
     public static final String TID = "t_id";
     public static final String TITLE = "title";

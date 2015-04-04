@@ -1,76 +1,33 @@
-<LinearLayout
+<android.support.v4.app.FragmentTabHost
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/tabhost"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#000000">
-
-
-    <fragment
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="5"
-        android:id="@+id/map"
-        tools:context="geologger.saints.com.geologger.activities.LogActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="0" />
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0" />
+
+        <FrameLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="10dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/toBeginButton"
-                style="@style/playButtons"
-                android:background="@drawable/tobegin"/>
-
-            <SeekBar
-                android:id="@+id/playSlider"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_margin="3dp"/>
-
-
-            <Button
-                android:id="@+id/playButton"
-                style="@style/playButtons"
-                android:background="@drawable/play"/>
-
-            <Button
-                android:id="@+id/pauseButton"
-                style="@style/playButtons"
-                android:background="@drawable/pause"
-                android:visibility="gone"/>
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/timestampIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="15sp"
-            android:textColor="@color/app_color"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="-25dp"
-            android:text="test"/>
+            android:layout_weight="1" />
 
     </LinearLayout>
 
-
-
-
-
-</LinearLayout>
-
-
+</android.support.v4.app.FragmentTabHost>

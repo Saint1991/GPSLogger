@@ -36,11 +36,8 @@ import geologger.saints.com.geologger.utils.TimestampGenerator;
 @EBean
 public class BaseMapWorker {
 
-    private final String TAG = getClass().getSimpleName();
-
     protected GoogleMap mMap;
     protected Marker mCurrentPositionMarker;
-    protected boolean mOrientationEnabled = false;
     protected boolean mUseMyLocation = false;
 
     @RootContext
@@ -49,80 +46,27 @@ public class BaseMapWorker {
 
     public BaseMapWorker() {}
 
-    //region init
-    /**
-     * Initialize this instance with GoogleMap Object
-     * This must be called at first of all
-     */
-    public void initMap(GoogleMap map) {
-
-        init(map);
-
-        updateCurrentPositionMarker();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
-        setMyLocationButtonListner();
-    }
-
+    //region initialize
     /**
      * Initialize this instance with GoogleMap Object
      * If useDefaultCurrentPositionMarker is true setMyLocationEnabled will be set true
      * @param map
      * @param useMyLocation
      */
-    public void initMap(GoogleMap map, boolean useMyLocation, boolean orientationEnabled) {
+    public void initMap(GoogleMap map, boolean useMyLocation) {
 
         init(map);
-        mOrientationEnabled = orientationEnabled;
         mUseMyLocation = useMyLocation;
 
         if (mUseMyLocation) {
             mMap.setMyLocationEnabled(true);
+            UiSettings settings = mMap.getUiSettings();
+            settings.setCompassEnabled(true);
         } else {
             updateCurrentPositionMarker();
         }
 
         animateCameraToCurrentPosition();
-
-        if (mOrientationEnabled) {
-            UiSettings settings = mMap.getUiSettings();
-            settings.setCompassEnabled(true);
-        }
-
-        setMyLocationButtonListner();
-    }
-
-    /**
-     * animateCamera To The CurrentPosition
-     */
-    protected void animateCameraToCurrentPosition() {
-
-        float[] position = Position.getPosition(mActivity.getApplicationContext());
-        LatLng moveTo = new LatLng(position[0], position[1]);
-
-
-        if (moveTo != null) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveTo, 15));
-        }
-    }
-
-    /**
-     * Initialize this instance with GoogleMap Object with designating the Marker Color that represents user's current position
-     * @param map
-     * @param markerColor
-     * @param alpha
-     */
-    public void initMap(GoogleMap map, float markerColor, float alpha) {
-
-        initMap(map);
-        mCurrentPositionMarker.setIcon(BitmapDescriptorFactory.defaultMarker(markerColor));
-        mCurrentPositionMarker.setAlpha(alpha);
-    }
-
-    public void initMap(GoogleMap map, LatLng firstPosition) {
-        init(map);
-        updateCurrentPositionMarker(firstPosition);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
-        setMyLocationButtonListner();
     }
 
     /**
@@ -131,10 +75,22 @@ public class BaseMapWorker {
      * @param map
      * @param firstPosition
      */
+    public void initMap(GoogleMap map, LatLng firstPosition) {
+        init(map);
+        updateCurrentPositionMarker(firstPosition);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mCurrentPositionMarker.getPosition(), 15));
+    }
+
+    /**
+     * Initialize this instance with GoogleMap Object
+     * A Marker is set on the designated position.
+     * @param map
+     * @param firstPosition
+     * @param markerColor
+     * @param alpha
+     */
     public void initMap(GoogleMap map, LatLng firstPosition, float markerColor, float alpha) {
-
         initMap(map, firstPosition);
-
         mCurrentPositionMarker.setIcon(BitmapDescriptorFactory.defaultMarker(markerColor));
         mCurrentPositionMarker.setAlpha(alpha);
     }
@@ -146,31 +102,11 @@ public class BaseMapWorker {
         setMap(map);
 
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        setMyLocationButtonListner();
         mCurrentPositionMarker = null;
     }
 
-    private void setMyLocationButtonListner() {
-        if (mMap != null) {
-            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-                @Override
-                public boolean onMyLocationButtonClick() {
-                    animateCameraToCurrentPosition();
-                    return true;
-                }
-            });
-        }
-    }
-
-    /**
-     * Set Google Map Object to this instance
-     * @param map
-     */
-    public void setMap(GoogleMap map) {
-        this.mMap = map;
-    }
-
     //endregion
-
 
     //region Marker
 
@@ -195,11 +131,10 @@ public class BaseMapWorker {
         marker.alpha(alpha);
 
         return mMap.addMarker(marker);
-
     }
 
     /**
-     * dd Marker with the disignated color
+     * dd Marker with the designated color
      * @param latitude
      * @param longitude
      * @param color
@@ -254,17 +189,21 @@ public class BaseMapWorker {
     }
     //endregion
 
-
-
     //region CurrentPositionMarker
+
     /**
-     * Draw a marker that represents user's current position with the disignated position
+     * Draw a marker that represents user's current position with the designated position
      * @param position
      */
     public void updateCurrentPositionMarker(LatLng position) {
 
         if (mMap == null) {
             return;
+        }
+
+        if (position == null) {
+            float[] pos = Position.getPosition(mActivity.getApplicationContext());
+            position = new LatLng(pos[0], pos[1]);
         }
 
         if (mCurrentPositionMarker == null) {
@@ -275,7 +214,6 @@ public class BaseMapWorker {
         }
 
         mCurrentPositionMarker.setPosition(position);
-
     }
 
     /**
@@ -293,19 +231,26 @@ public class BaseMapWorker {
      * Draw a marker that represents user's current position.
      */
     public void updateCurrentPositionMarker() {
-
-        float[] position = Position.getPosition(mActivity);
-        LatLng currentPosition = new LatLng(position[0], position[1]);
-
-        updateCurrentPositionMarker(currentPosition);
-
+        updateCurrentPositionMarker(null);
     }
 
     //endregion
 
-
-
     //region Line
+
+    public Polyline drawLine(LatLng from, LatLng to, int color) {
+
+        if (mMap == null) {
+            return null;
+        }
+
+        PolylineOptions lineOptions = new PolylineOptions();
+        lineOptions.width(6.0F);
+        lineOptions.color(color);
+        lineOptions.add(from, to);
+
+        return mMap.addPolyline(lineOptions);
+    }
 
     /**
      * Draw blue line between two designated points
@@ -314,17 +259,23 @@ public class BaseMapWorker {
      * @return Polyline Object that is drawn on the map. If map hasn't set, this returns null.
      */
     public Polyline drawLine(LatLng from, LatLng to) {
+        return drawLine(from, to, Color.BLUE);
+    }
 
-        if (mMap == null) {
-            return null;
-        }
+    /**
+     * Draw line between two designated points
+     * @param fromLat
+     * @param fromLng
+     * @param toLat
+     * @param toLng
+     * @return Polyline Object that is drawn on the map. If map hasn't set, this returns null.
+     */
+    public Polyline drawLine(float fromLat, float fromLng, float toLat, float toLng, int color) {
 
-        PolylineOptions lineOptions = new PolylineOptions();
-        lineOptions.width(6.0F);
-        lineOptions.color(Color.BLUE);
-        lineOptions.add(from, to);
+        LatLng from = new LatLng(fromLat, fromLng);
+        LatLng to = new LatLng(toLat, toLng);
 
-        return mMap.addPolyline(lineOptions);
+        return drawLine(from, to, color);
     }
 
     /**
@@ -333,22 +284,18 @@ public class BaseMapWorker {
      * @param fromLng
      * @param toLat
      * @param toLng
-     * @return Polyline Object that is drawn on the map. If map hasn't set, this returns null.
+     * @return
      */
     public Polyline drawLine(float fromLat, float fromLng, float toLat, float toLng) {
-
-        LatLng from = new LatLng(fromLat, fromLng);
-        LatLng to = new LatLng(toLat, toLng);
-
-        return drawLine(from, to);
+        return drawLine(fromLat, fromLng, toLat, toLng, Color.BLUE);
     }
 
     /**
-     * Draw blue line connecting LatLngs in disignated list
+     * Draw line connecting LatLngs in designated list
      * @param latLngList
      * @return
      */
-    public Polyline drawLine(List<LatLng> latLngList) {
+    public Polyline drawLine(List<LatLng> latLngList, int color) {
 
         if (mMap == null) {
             return null;
@@ -356,7 +303,7 @@ public class BaseMapWorker {
 
         PolylineOptions lineOptions = new PolylineOptions();
         lineOptions.width(6.0F);
-        lineOptions.color(Color.BLUE);
+        lineOptions.color(color);
         for (LatLng point : latLngList) {
             lineOptions.add(point);
         }
@@ -364,8 +311,55 @@ public class BaseMapWorker {
         return mMap.addPolyline(lineOptions);
     }
 
+    /**
+     * Draw blue line connecting LatLngs in designated list
+     * @param latLngList
+     * @return
+     */
+    public Polyline drawLine(List<LatLng> latLngList) {
+        return drawLine(latLngList, Color.BLUE);
+    }
 
+    //endregion
 
+    //region camera
+
+    protected void animateCameraToCurrentPosition() {
+
+        float[] position = Position.getPosition(mActivity.getApplicationContext());
+        LatLng moveTo = new LatLng(position[0], position[1]);
+
+        if (moveTo != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveTo, 15));
+        }
+    }
+
+    //endregion
+
+    //region utility
+
+    /**
+     * Set MyLocationButtonListener
+     */
+    private void setMyLocationButtonListner() {
+        if (mMap != null) {
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    animateCameraToCurrentPosition();
+                    return true;
+                }
+            });
+        }
+    }
+
+    /**
+     * Set Google Map Object to this instance
+     * @param map
+     */
+    public void setMap(GoogleMap map) {
+        this.mMap = map;
+    }
 
     //endregion
 

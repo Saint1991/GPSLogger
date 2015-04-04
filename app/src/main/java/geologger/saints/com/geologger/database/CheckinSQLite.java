@@ -30,13 +30,15 @@ public class CheckinSQLite implements IRemoveBy {
         mDbHelper = new BaseSQLiteOpenHelper(context);
     }
 
+    //region insert
+
     /**
-     * チェックイン情報のエントリを格納する
+     * Insert an entry that has passed params
      * @param tid
      * @param placeId
      * @param categoryId
      * @param timestamp
-     * @return 成功時true，失敗時false
+     * @return success:true，fail:false
      */
     public boolean insert(String tid, String placeId, String categoryId, String timestamp, float latitude, float longitude, String placeName) {
 
@@ -58,9 +60,22 @@ public class CheckinSQLite implements IRemoveBy {
     }
 
     /**
-     * 指定したエントリを格納する
+     * Insert an entry that has passed params
+     * Timestamp will be automatically complemented
+     * @param tid
+     * @param placeId
+     * @param categoryId
+     * @return
+     */
+    public boolean insert(String tid, String placeId, String categoryId, float latitude, float longitude, String placeName) {
+        String timestamp = TimestampGenerator.getTimestamp();
+        return this.insert(tid, placeId, categoryId, timestamp, latitude, longitude, placeName );
+    }
+
+    /**
+     * Insert an entry that has passed params
      * @param entry
-     * @return 成功時true，失敗時false
+     * @return success:true，fail:false
      */
     public boolean insert(CheckinEntry entry) {
 
@@ -75,23 +90,14 @@ public class CheckinSQLite implements IRemoveBy {
         return this.insert(tid, placeId, categoryId, timestamp, latitude, longitude, placeName);
     }
 
-    /**
-     * 指定したエントリを格納する
-     * タイムスタンプは自動で補完する
-     * @param tid
-     * @param placeId
-     * @param categoryId
-     * @return
-     */
-    public boolean insert(String tid, String placeId, String categoryId, float latitude, float longitude, String placeName) {
-        String timestamp = TimestampGenerator.getTimestamp();
-        return this.insert(tid, placeId, categoryId, timestamp, latitude, longitude, placeName );
-    }
+    //endregion
+
+    //region remove
 
     /**
-     * 指定したtidに対応するエントリを削除する
+     * remove all entries that has passed tid
      * @param tid
-     * @return 成功時true, 失敗時false
+     * @return the number of removed items
      */
     public int removeByTid(String tid) {
 
@@ -103,11 +109,12 @@ public class CheckinSQLite implements IRemoveBy {
     }
 
     /**
-     * 指定したtimestampに対応するエントリを削除する
+     * remove all entries that has passed timestamp
      * @param timestamp
      * @return
      */
     public int removeByTimestamp(String timestamp) {
+
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int removeCount = db.delete(TABLENAME, CheckinEntry.TIMESTAMP + "=?", new String[]{timestamp});
         db.close();
@@ -115,18 +122,57 @@ public class CheckinSQLite implements IRemoveBy {
         return removeCount;
     }
 
+    //endregion
+
+    //region find
+
     /**
-     * 指定したtidに対応するCheckinのListを返す．
-     * Listはtimestampでソートされている
+     * Get a list of CheckinEntry
      * @param tid
+     * @param offset
+     * @param limit
      * @return
      */
+    public List<CheckinEntry> getCheckinList(String tid, int offset, int limit) {
+
+        List<CheckinEntry> ret = new ArrayList<CheckinEntry>();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        if (db.isOpen()) {
+
+            StringBuilder limitBuilder = new StringBuilder();
+            if (limit > 0) {
+                if (offset > 0) {
+                    limitBuilder.append(offset + ", ");
+                }
+                limitBuilder.append(limit);
+            }
+            String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
+
+            Cursor cursor = db.query(TABLENAME, null, CheckinEntry.TID + "=?", new String[]{tid}, null, null, CheckinEntry.TIMESTAMP + " ASC", limitStr);
+
+            boolean isEOF = cursor.moveToFirst();
+            while (isEOF) {
+                CheckinEntry entry = getEntryFromCursor(cursor);
+                ret.add(entry);
+                isEOF = cursor.moveToNext();
+            }
+            cursor.close();
+            db.close();
+        }
+
+        return ret;
+    }
+
     public List<CheckinEntry> getCheckinList(String tid) {
+        return this.getCheckinList(tid, 0, 0);
+    }
+
+    public ArrayList<CheckinEntry> getCheckinArrayList(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLENAME, null, CheckinEntry.TID + "=?", new String[]{tid}, null, null, CheckinEntry.TIMESTAMP + " ASC");
 
-        List<CheckinEntry> ret = new ArrayList<CheckinEntry>();
+        ArrayList<CheckinEntry> ret = new ArrayList<CheckinEntry>();
         boolean isEOF = cursor.moveToFirst();
         while (isEOF) {
             CheckinEntry entry = getEntryFromCursor(cursor);
@@ -139,8 +185,16 @@ public class CheckinSQLite implements IRemoveBy {
         return ret;
     }
 
-    //カーソルの現在位置からエントリを取得する
-    //取得できない場合はnullを返す
+    //endregion
+
+    //region utility
+
+    /**
+     * Get the entry from cursor
+     * If cursor is invalid state, return null
+     * @param cursor
+     * @return
+     */
     private CheckinEntry getEntryFromCursor(Cursor cursor) {
 
         if (cursor.isNull(cursor.getColumnIndex(CheckinEntry.TID))) {
@@ -159,4 +213,6 @@ public class CheckinSQLite implements IRemoveBy {
 
         return entry;
     }
+
+    //endregion
 }

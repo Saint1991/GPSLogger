@@ -1,10 +1,12 @@
 package geologger.saints.com.geologger.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Mizuno on 2015/01/29.
  * CompanionテーブルのBean
  */
-public class CompanionEntry {
+public class CompanionEntry implements Serializable {
 
     private String tid = null;
     private String companion = null;

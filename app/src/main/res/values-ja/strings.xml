@@ -22,7 +22,8 @@
     <string name="title">タイトル</string>
     <string name="memo">メモ</string>
 
-
+    <string name="map">地図</string>
+    <string name="statistics">統計表示</string>
 
     <string name="poi_search_hint">検索したい場所の名前</string>
     <string name="send">送信</string>

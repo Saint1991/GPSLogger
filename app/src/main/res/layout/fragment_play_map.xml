@@ -1,0 +1,65 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="geologger.saints.com.geologger.uicomponents.PlayMapFragment">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/timestampIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#333"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="right"
+            android:text="test"/>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/toBeginButton"
+            style="@style/playButtons"
+            android:background="@drawable/tobegin"/>
+
+        <SeekBar
+            android:id="@+id/playSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="3dp"/>
+
+        <Button
+            android:id="@+id/playButton"
+            style="@style/playButtons"
+            android:background="@drawable/play"/>
+
+        <Button
+            android:id="@+id/pauseButton"
+            style="@style/playButtons"
+            android:background="@drawable/pause"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

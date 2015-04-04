@@ -18,10 +18,7 @@ import geologger.saints.com.geologger.utils.HttpAsyncImageLoader;
 @EView
 public class LoaderImageView extends ImageView implements LoaderManager.LoaderCallbacks<Bitmap> {
 
-    private final String TAG = getClass().getSimpleName();
-
     protected String mUrl;
-
 
     public LoaderImageView(Context context) {
         super(context);

@@ -42,6 +42,8 @@ public class FourSquareClient extends BaseHttpClient {
         mContext = context;
     }
 
+    //region POI
+
     public List<FourSquarePoi> searchPoi(String term) {
 
         List<FourSquarePoi> ret = null;
@@ -78,13 +80,13 @@ public class FourSquareClient extends BaseHttpClient {
             e.printStackTrace();
         }
 
-
         Log.i(TAG, query.toString());
-
-
         return ret;
     }
 
+    //endregion
+
+    //region photo
 
     /**
      * Searching Photos of the corresponding placeId
@@ -132,5 +134,7 @@ public class FourSquareClient extends BaseHttpClient {
 
         return ret;
     }
+
+    //endregion
 
 }

@@ -22,7 +22,6 @@ public class PositioningService extends Service {
     private final String TAG = getClass().getSimpleName();
     private static final String DEFAULTSAMPLINGINTERVAL = "1000";
     private static final String DEFAULTSAMPLINGDISTANCE = "2";
-    private static final int POSITIONING_NOTIFICATION_ID = 2;
 
     @SystemService
     LocationManager mLocationManager;
@@ -34,14 +33,13 @@ public class PositioningService extends Service {
     MyLocationListener2 mLocationListener2;
 
     //Constructor
-    public PositioningService() {
+    public PositioningService() {}
 
-    }
-
+    //region lifecycle
     @Override
     public void onCreate() {
-        super.onCreate();
         Log.i(TAG, "onCreate");
+        super.onCreate();
     }
 
     @Override
@@ -85,5 +83,7 @@ public class PositioningService extends Service {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    //endregion
 
 }

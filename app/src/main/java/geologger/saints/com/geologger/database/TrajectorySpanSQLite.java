@@ -27,8 +27,11 @@ public class TrajectorySpanSQLite  {
 
     public TrajectorySpanSQLite() {}
 
+
+    //region insert
+
     /**
-     * 指定したtid, 開始時刻beginを持つエントリを作成する
+     * Insert an entry that has passed params
      * @param tid
      * @param begin
      * @return
@@ -48,8 +51,8 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
-     * 指定したtidのエントリを作成
-     * 開始時刻は現在時で補完される
+     * Insert an entry
+     * Start time will be automatically complemented
      * @param tid
      * @return
      */
@@ -59,23 +62,10 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
-     * 指定したtidに対応するエントリを削除する
-     * @param tid
-     * @return 成功時true, 失敗時false
-     */
-    public int removeByTid(String tid) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removedCount = db.delete(TABLENAME, TrajectorySpanEntry.TID + "=?", new String[]{tid});
-        db.close();
-
-        return removedCount;
-    }
-
-    /**
-     * 指定したtidのエントリに終了時刻をセットする．
+     * Set End time to the entry that has passed tid
      * @param tid
      * @param end
-     * @return 成功時true, 失敗時false
+     * @return success:true, fail:false
      */
     public boolean setEnd(String tid, String end) {
 
@@ -113,11 +103,33 @@ public class TrajectorySpanSQLite  {
     }
 
 
+    //endregion
+
+    //region remove
+
     /**
-     * 指定したエントリにendが設定されているかを確認することで，
-     * ロギングが終了したトラジェクトリかをチェックする．
+     * Remove all entries that has passed tid
      * @param tid
-     * @return true: 終了したトラジェクトリ, false: 未終了もしくは存在しないトラジェクトリ
+     * @return success:true, fail:false
+     */
+    public int removeByTid(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int removedCount = db.delete(TABLENAME, TrajectorySpanEntry.TID + "=?", new String[]{tid});
+        db.close();
+
+        return removedCount;
+    }
+
+    //endregion
+
+    //region find
+
+    /**
+     * Check if the record that has passed tid has end time value
+     * that means check if the logging of the trajectory has been completed
+     * @param tid
+     * @return true: completed, false: ongoing
      */
     public boolean isEnd(String tid) {
 
@@ -141,7 +153,7 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
-     * 指定したTID既存のものかチェックする
+     * Check if passed tid already exist
      * @param tid
      * @return
      */
@@ -157,8 +169,9 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
-     * 現在ロギング中のトラジェクトリのTIDを取得
-     * @return ロギング中のものがない場合はnullを返す
+     * Get the tid whose trajectory is on logging
+     * if logging is not going return null
+     * @return tid that of currently logging trajectory
      */
     public String getLoggingTid() {
 
@@ -185,16 +198,27 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
-     * トラジェクトリスパンの一覧をListで取得する
-     * 結果は開始時刻beginでソートされている
+     * Get a list of TrajectorySpanEntry
+     * @param offset
+     * @param limit
      * @return
      */
-    public List<TrajectorySpanEntry> getSpanList() {
-
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
+    public List<TrajectorySpanEntry> getSpanList(int offset, int limit) {
 
         List<TrajectorySpanEntry> ret = new ArrayList<TrajectorySpanEntry>();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        StringBuilder limitBuilder = new StringBuilder();
+        if (limit > 0) {
+            if (offset > 0) {
+                limitBuilder.append(offset + ", ");
+            }
+            limitBuilder.append(limit);
+        }
+        String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
+
+        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC", limitStr);
+
         boolean isEOF = cursor.moveToFirst();
         while (isEOF) {
             TrajectorySpanEntry entry = getEntryFromCursor(cursor);
@@ -207,9 +231,16 @@ public class TrajectorySpanSQLite  {
         return ret;
     }
 
+    /**
+     * Get a list of TrajectorySpanEntry
+     * @return
+     */
+    public List<TrajectorySpanEntry> getSpanList() {
+        return this.getSpanList(0, 0);
+    }
 
     /**
-     * トラジェクトリIDの一覧をListで返す
+     * Get all tids stored in the DB
      * @return
      */
     public List<String> getTidList() {
@@ -231,7 +262,7 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
-     * ロギングが終了しているTIDの一覧を取得する
+     * Get a list of tid that logging is completed
      * @return
      */
     public List<String> getLoggingFinishedTidList() {
@@ -252,8 +283,16 @@ public class TrajectorySpanSQLite  {
         return ret;
     }
 
-    //カーソルの現在位置からエントリを取得する
-    //取得できない場合はnullを返す
+    //endregion
+
+    //region utility
+
+    /**
+     * Get the entry from cursor
+     * If cursor is invalid state, return null
+     * @param cursor
+     * @return
+     */
     private TrajectorySpanEntry getEntryFromCursor(Cursor cursor) {
 
         if(cursor.getCount() == 0 || cursor.isNull(cursor.getColumnIndex(TrajectorySpanEntry.TID))) {
@@ -267,4 +306,6 @@ public class TrajectorySpanSQLite  {
 
         return entry;
     }
+
+    //endregion
 }

@@ -13,8 +13,8 @@ import geologger.saints.com.geologger.models.TableDefinitions;
 
 /**
  * Created by Seiya on 2015/01/01.
- * SQLiteOpenHelperの実装
- * SQLiteModelDefinitionに応じてテーブルを初期化します．
+ * Implementation of SQLiteOpenHelper
+ * Create Table referring to SQLiteModelDefinition
  * */
 @EBean
 public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
@@ -25,10 +25,9 @@ public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
         super(context, TableDefinitions.DBNAME, null, 2);
     }
 
-    //TableDefinitionsに記述されている全テーブルを作成
+    //Create All Tables that are stated in the TableDefinitions
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.i(TAG, "onCreate");
         Set<String> tables = TableDefinitions.tables();
         for (String tableName : tables) {
             String query = new SQLiteModelDefinition(tableName).makeQuery();
@@ -43,7 +42,7 @@ public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    //tableDefinitionsに記述されている全テーブルを削除
+    //Remove All Tables that are stated in TableDefinitions
     protected void dropTable(SQLiteDatabase db) {
         Set<String> tables = TableDefinitions.tables();
         for (String tableName : tables) {

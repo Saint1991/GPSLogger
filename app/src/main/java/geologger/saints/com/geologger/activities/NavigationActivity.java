@@ -1,11 +1,11 @@
 package geologger.saints.com.geologger.activities;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,12 +30,12 @@ import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.mapsapi.MapsApiClient;
 import geologger.saints.com.geologger.utils.Position;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 
 @EActivity
 public class NavigationActivity extends FragmentActivity {
 
     private final String TAG = getClass().getSimpleName();
-    private ProgressDialog mProgress;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private LatLng mDestination;
@@ -50,6 +50,9 @@ public class NavigationActivity extends FragmentActivity {
     @Bean
     MapsApiClient mMapApiClient;
 
+    @Bean
+    ProgressDialogUtility mProgressUtility;
+
     @ViewById(R.id.destination)
     TextView mDestinationText;
 
@@ -63,47 +66,56 @@ public class NavigationActivity extends FragmentActivity {
     ImageButton mInstructioinButton;
 
 
+    //region lifecycle
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
-
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage(getResources().getString(R.string.position_updating));
-        mProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgress.show();
-
     }
 
     @Override
     protected void onResume() {
+        Log.i(TAG, "onResume");
         super.onResume();
+        initialize();
+    }
 
+    //endregion
+
+    //region initialize
+
+    private void initialize() {
+
+        //Show Progress Dialog
+        mProgressUtility.showProgress(getResources().getString(R.string.position_updating));
+
+        //Get Arguments from intent
         Intent intent = getIntent();
         mDestination = new LatLng(intent.getDoubleExtra(TrajectoryEntry.LATITUDE, 0.0), intent.getDoubleExtra(TrajectoryEntry.LONGITUDE, 0.0));
         mPlaceName = intent.getStringExtra(CheckinEntry.PLACENAME);
         mAddress = intent.getStringExtra("Address");
 
+        //Initializing the Map
         setUpMapIfNeeded();
-    }
 
-    protected void onPause() {
-        super.onPause();
+        //Start searching based on the arguments
+        startSearching();
+
+        //Dismiss Progress Dialog
+        mProgressUtility.dismissProgress();
     }
 
     private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
+
         if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
+
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
             if (mMap != null) {
                 setUpMap();
             }
         }
-
-        startSearching();
     }
 
     private void setUpMap() {
@@ -112,10 +124,13 @@ public class NavigationActivity extends FragmentActivity {
             return;
         }
 
-        mMapWorker.initMap(mMap, true, true);
-        mMapWorker.addDistinationMarker(mDestination, mPlaceName, mAddress);
+        mMapWorker.initMap(mMap, true);
+        mMapWorker.addDestinationMarker(mDestination, mPlaceName, mAddress);
     }
 
+    //endregion
+
+    //region searching
 
     private void startSearching() {
 
@@ -134,20 +149,23 @@ public class NavigationActivity extends FragmentActivity {
                 String response = mMapApiClient.query(origin, mDestination, getResources().getConfiguration().locale.getLanguage());
                 if (response == null) {
                     showAlertMessage();
-                    dismissProgress();
+                    mProgressUtility.dismissProgress();
                 } else {
 
                     //ここでガイドのルートを描画する処理を記述
                     mSearchResult = new MapRouteSearchResult(MapsApiParser.parseRoute(response));
                     if (mSearchResult != null) {
                         afterSearching();
-                        dismissProgress();
                     }
                 }
             }
 
         }).start();
     }
+
+    //endregion
+
+    //region updateview
 
     @UiThread
     public void afterSearching() {
@@ -170,7 +188,6 @@ public class NavigationActivity extends FragmentActivity {
         if (destination != null) {
             mDestinationText.setText(mSearchResult.getDestination());
         }
-
     }
 
     @UiThread
@@ -186,6 +203,10 @@ public class NavigationActivity extends FragmentActivity {
         mDurationText.setText(minutes + " min");
     }
 
+    //endregion
+
+    //region navigationDialog
+
     @Click(R.id.instruction_button)
     public void instructionButtonClicked() {
 
@@ -200,9 +221,6 @@ public class NavigationActivity extends FragmentActivity {
             body.append(Html.fromHtml(index++ + ". " + instruction + "<br>"));
         }
 
-        /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, instructions);
-        ListView instructionListView = new ListView(this);
-        instructionListView.setAdapter(adapter);*/
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.guide));
         builder.setMessage(body.toString());
@@ -210,17 +228,14 @@ public class NavigationActivity extends FragmentActivity {
         builder.show();
     }
 
-    @UiThread
-    public void dismissProgress() {
-        if (mProgress != null) {
-            mProgress.dismiss();
-        }
-    }
+    //endregion
+
+    //region utility
 
     @UiThread
     public void showAlertMessage() {
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.network_connectivity_alert), Toast.LENGTH_SHORT).show();
     }
 
-
+    //endregion
 }

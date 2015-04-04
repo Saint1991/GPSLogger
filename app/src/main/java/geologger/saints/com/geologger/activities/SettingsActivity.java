@@ -18,17 +18,6 @@ import org.androidannotations.annotations.EActivity;
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.utils.UserId;
 
-/**
- * A {@link PreferenceActivity} that presents a set of application settings. On
- * handset devices, settings are presented as a single list. On tablets,
- * settings are split by category, with category headers shown to the left of
- * the list of settings.
- * <p/>
- * See <a href="http://developer.android.com/design/patterns/settings.html">
- * Android Design: Settings</a> for design guidelines and the <a
- * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
- * API Guide</a> for more information on developing a Settings UI.
- */
 @EActivity
 public class SettingsActivity extends PreferenceActivity {
 
@@ -41,9 +30,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-
         getFragmentManager().beginTransaction().replace(android.R.id.content, new ParameterSettingFragment()).commit();
     }
 

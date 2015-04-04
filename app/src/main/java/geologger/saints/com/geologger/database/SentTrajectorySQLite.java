@@ -28,11 +28,14 @@ public class SentTrajectorySQLite {
 
     public SentTrajectorySQLite() {}
 
+
+    //region insert
+
     /**
-     * 指定したトラジェクトリ送信情報のエントリを格納する
+     * Insert an entry that has passed params
      * @param tid
      * @param isSent
-     * @return true: 成功時, false: 失敗時
+     * @return true: if success, false if failure
      */
     public boolean insert(String tid, boolean isSent) {
 
@@ -49,9 +52,9 @@ public class SentTrajectorySQLite {
     }
 
     /**
-     * 指定したエントリを格納する
+     * Insert an entry that has passed params
      * @param entry
-     * @return　true: 成功時, false: 失敗時
+     * @return　true: if success, false: if failure
      */
     public boolean insert(SentTrajectoryEntry entry) {
 
@@ -62,7 +65,7 @@ public class SentTrajectorySQLite {
     }
 
     /**
-     * 送信済みTIDリストを記録する
+     * Insert List of entries
      * @param sentTidList
      * @return
      */
@@ -80,10 +83,14 @@ public class SentTrajectorySQLite {
         db.close();
     }
 
+    //endregion
+
+    //region remove
+
     /**
-     * 指定したtidに対応するエントリを削除する
+     * Remove an entry that has passed tid
      * @param tid
-     * @return 成功時true, 失敗時false
+     * @return success:true, fail:false
      */
     public int removeByTid(String tid) {
 
@@ -94,10 +101,14 @@ public class SentTrajectorySQLite {
         return removedCount;
     }
 
+    //endregion
+
+    //region find
+
     /**
-     * 指定したトラジェクトリIDのデータを送信したかをチェック
+     * check if the trajectory data that has passed tid has already been sent
      * @param tid
-     * @return true: 送信済み, false 未送信
+     * @return true: has been sent, false: not yet
      */
     public boolean isSent(String tid) {
 
@@ -117,7 +128,7 @@ public class SentTrajectorySQLite {
     }
 
     /**
-     * 送信済みのTIDリストを取得する
+     * Get all entries as a list
      * @return
      */
     public List<String> getSentTrajectoryList() {
@@ -140,8 +151,15 @@ public class SentTrajectorySQLite {
         return sentList;
     }
 
-    //カーソルの現在位置からエントリを取得する
-    //取得できない場合はnullを返す
+    //endregion
+
+    //region utility
+    /**
+     * Get the entry from cursor
+     * If cursor is invalid state, return null
+     * @param cursor
+     * @return
+     */
     private SentTrajectoryEntry getEntryFromCursor(Cursor cursor) {
 
         if (cursor.isNull(cursor.getColumnIndex(SentTrajectoryEntry.TID))) {
@@ -154,5 +172,7 @@ public class SentTrajectorySQLite {
 
         return entry;
     }
+
+    //endregion
 
 }

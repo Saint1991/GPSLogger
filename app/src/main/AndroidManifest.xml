@@ -27,11 +27,9 @@
             android:name=".activities.HomeActivity_"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/FullscreenTheme" >
+            android:screenOrientation="sensorPortrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -46,9 +44,7 @@
         <activity
             android:name=".activities.BeginRecordingActivity_"
             android:label="@string/title_activity_begin_recording"
-            android:screenOrientation="sensorPortrait"
-            android:windowSoftInputMode="adjustNothing"
-            >
+            android:screenOrientation="sensorPortrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
@@ -63,8 +59,7 @@
             android:name=".activities.LogActivity_"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/FullscreenTheme" >
+            android:screenOrientation="sensorPortrait">
         </activity>
         <activity
             android:name=".activities.PoiActivity_"
