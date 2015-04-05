@@ -7,7 +7,7 @@
     <string name="data_sending">データ送信</string>
     <string name="positioning_interval">位置情報更新の最低間隔</string>
     <string name="positioning_distance">位置情報更新の最低距離</string>
-    <string name="logging_interval">ロギングの感覚</string>
+    <string name="logging_interval">ロギングの間隔</string>
     <string name="Poi_result_count">POI検索数</string>
     <string name="server_url">データ送信先のサーバ</string>
 

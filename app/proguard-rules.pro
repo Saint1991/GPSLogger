@@ -15,18 +15,22 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--optimizationpasses 5
--optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
--dontusemixedcaseclassnames
--dontskipnonpubliclibraryclasses
+-allowaccessmodification
 -dontpreverify
--dontwarn org.androidannotations.api.rest.*
--verbose
+-dontskipnonpubliclibraryclasses
+-dontusemixedcaseclassnames
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
 -libraryjars libs
+-optimizationpasses 5
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+-printmapping bin/classes-processed.map
+-renamesourcefileattribute SourceFile
+-repackageclasses ''
+-verbose
 
--keep interface android.support.v4.**
+
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
 -keep public class * extends android.app.Service
@@ -34,18 +38,9 @@
 -keep public class * extends android.content.ContentProvider
 -keep public class * extends android.app.backup.BackupAgentHelper
 -keep public class * extends android.preference.Preference
--keep public class geologger.com.saints.geologger.*.*
+-keep public class * extends android.widget.BaseAdapter
 -keep public class com.android.vending.licensing.ILicensingService
--keep class android.support.v4.* { *; }
 
--keepclassmembers public class * extends android.view.View {
-   void set*(***);
-   *** get*();
-}
-
--keepclassmembers class **.R$* {
-    public static <fields>;
-}
 
 -keepclasseswithmembernames class * {
     native <methods>;
@@ -68,9 +63,35 @@
   public static final android.os.Parcelable$Creator *;
 }
 
+#play-service
+-keep class * extends java.util.ListResourceBundle {
+    protected Object[][] getContents();
+}
 
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}
+
+-keepnames class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
 
 #Gson
 -keep class sun.misc.Unsafe { *; }
 -keep class com.google.gson.stream.** { *; }
--keep class geologger.com.saints.geologger.models.*
+-keep public class geologger.saints.com.geologger.models.** { *;}
+-keep public class geologger.saints.com.geologger.mapsapi.models.** {*;}
+-keep public class geologger.saints.com.geologger.foursquare.models.** {*;}
+
+#AndroidAnnotations
+-dontwarn org.androidannotations.api.rest.*
+
+##graphview
+-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+  public *;
+}

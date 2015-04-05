@@ -28,9 +28,12 @@ android {
         versionName "1.1"
     }
     buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
-            //ほんとはproguard-rules.proをちゃんと設定して有効にするべき
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -45,21 +48,15 @@ android {
     }
 }
 
-
 configurations {
     all*.exclude group: 'commons-logging', module: 'commons-logging'
 }
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.gms:play-services:6.5.87'
-    compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.code.gson:gson:2.3.1'
-}
-dependencies {
     compile 'com.android.support:support-v4:21.+'
-}
-dependencies {
-    compile 'com.google.android.gms:play-services:4.2.42'
     compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.jjoe64:graphview:3.1.3'
 }
+

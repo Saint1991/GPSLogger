@@ -3,6 +3,7 @@ package geologger.saints.com.geologger.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,7 @@ public class PoiListAdapter extends ArrayAdapter<FourSquarePoi> {
 
         StringBuilder categoryStr = new StringBuilder();
         FourSquarePoiCategory[] categories = fourSquarePoi.getCategories();
+
         for (FourSquarePoiCategory category : categories) {
             categoryStr.append(category.getName() + ", ");
         }
