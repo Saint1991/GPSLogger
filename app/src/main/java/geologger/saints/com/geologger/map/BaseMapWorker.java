@@ -1,9 +1,7 @@
 package geologger.saints.com.geologger.map;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
-import android.location.Location;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,16 +14,14 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.androidannotations.annotations.EBean;
-import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.RootContext;
 
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
-import geologger.saints.com.geologger.utils.Direction;
 import geologger.saints.com.geologger.utils.Position;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 
 /**
@@ -127,7 +123,7 @@ public class BaseMapWorker {
         marker.position(position);
         marker.icon(BitmapDescriptorFactory.defaultMarker(color));
         marker.title(mActivity.getResources().getString(R.string.timestamp));
-        marker.snippet(TimestampGenerator.getTimestamp());
+        marker.snippet(TimestampUtil.getTimestamp());
         marker.alpha(alpha);
 
         return mMap.addMarker(marker);
@@ -208,7 +204,7 @@ public class BaseMapWorker {
 
         if (mCurrentPositionMarker == null) {
             MarkerOptions marker = new MarkerOptions();
-            marker.position(position).title(mActivity.getResources().getString(R.string.imhere));
+            marker.position(position).title(mActivity.getResources().getString(R.string.current_position));
             mCurrentPositionMarker = mMap.addMarker(marker);
             return;
         }

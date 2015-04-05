@@ -1,8 +1,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    style="@style/fragment_root_layout"
     android:orientation="vertical"
     tools:context="geologger.saints.com.geologger.uicomponents.PlayMapFragment">
 
@@ -17,46 +16,47 @@
             android:layout_height="match_parent"/>
 
         <TextView
-            android:id="@+id/timestampIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#333"
+            android:id="@+id/timestamp_indicator"
+            style="@style/default_text"
             android:layout_marginTop="10dp"
             android:layout_marginRight="10dp"
             android:layout_gravity="right"
-            android:text="test"/>
+            android:textSize="16sp"
+            android:textColor="#333" />
 
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal"
+        android:gravity="center">
 
         <Button
             android:id="@+id/toBeginButton"
-            style="@style/playButtons"
-            android:background="@drawable/tobegin"/>
+            style="@style/play_buttons"
+            android:background="@drawable/to_begin_button"/>
 
         <SeekBar
             android:id="@+id/playSlider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_margin="3dp"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/playButton"
-            style="@style/playButtons"
-            android:background="@drawable/play"/>
+            style="@style/play_buttons"
+            android:background="@drawable/play_button"/>
 
         <Button
             android:id="@+id/pauseButton"
-            style="@style/playButtons"
-            android:background="@drawable/pause"
+            style="@style/play_buttons"
+            android:background="@drawable/pause_button"
             android:visibility="gone"/>
 
     </LinearLayout>

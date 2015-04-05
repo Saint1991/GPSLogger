@@ -1,137 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- The name of this application -->
     <string name="app_name">GeoLogger</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_poi_confirmation">PoiConfirmation</string>
+
+    <!-- Titles of each activity that are shown on the action bar -->
+    <string name="title_activity_begin_recording">開始設定</string>
+    <string name="title_activity_home">ホーム</string>
+    <string name="title_activity_log">アクティビティ</string>
+    <string name="title_activity_log_list">アクティビティログ</string>
+    <string name="title_activity_navigation">ルート案内</string>
+    <string name="title_activity_poi">POI検索</string>
+    <string name="title_activity_poi_confirmation">POI選択</string>
+    <string name="title_activity_record">ロギング</string>
     <string name="title_activity_settings">設定</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_poi_search">PoiSearchActivity</string>
-    <string name="title_activity_log">LogActivity</string>
-    <string name="title_activity_setting">SettingActivity</string>
-    <string name="title_activity_poi">PoiActivity</string>
-    <string name="title_activity_log_list">LogListActivity</string>
-    <string name="start">START</string>
-    <string name="stop">STOP</string>
-    <string name="yes">YES</string>
-    <string name="no">NO</string>
-    <string name="ok">OK</string>
+
+    <!-- Basic -->
+    <string name="start">開始</string>
+    <string name="stop">終了</string>
     <string name="cancel">キャンセル</string>
-    <string name="checkin">チェックイン</string>
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
     <string name="detail">詳細</string>
-    <string name="title">タイトル</string>
-    <string name="memo">メモ</string>
-
-    <string name="map">地図</string>
-    <string name="statistics">統計表示</string>
-
-    <string name="poi_search_hint">検索したい場所の名前</string>
-    <string name="send">送信</string>
-
-    <string name="start_logging">ロギングを開始します...</string>
-    <string name="now_logging">ロギング中</string>
-    <string name="stop_logging">ロギングを終了しました!</string>
-    <string name="action_settings">設定</string>
-    <string name="search">検索</string>
-
-    <string name="search_route">ルート検索中...</string>
-
     <string name="delete">削除</string>
-    <string name="u_delete"><u>削除</u></string>
-    <string name="companion">同伴者</string>
-    <string name="companion_alert">最低1項目選択してください</string>
-    <string name="freeform">自由入力</string>
-    <string name="freeform_hint">チェックインする場所の名前を入力</string>
-    <string name="gps_confirmation">GPS設定</string>
-    <string name="gps_confirmation_message">GPSがONになっていません. \n GPSをONにしますか?</string>
-    <string name="imhere">現在地</string>
-    <string name="timestamp">日時</string>
+    <string name="send">送信</string>
+    <string name="title">タイトル</string>
+    <string name="search">検索</string>
+    <string name="keyword">キーワード</string>
+    <string name="timestamp">タイムスタンプ</string>
     <string name="searching">検索中...</string>
     <string name="loading">読み込み中...</string>
-    <string name="position_updating">位置情報更新中...</string>
-    <string name="positioning_interval">現在地の更新頻度</string>
-    <string name="positioning_distance">現在地の更新を行う距離の粒度</string>
-    <string name="logging_interval">ロギングの記録間隔</string>
-    <string name="Poi_result_count">POIの検索結果数</string>
-    <string name="positioning">ポジショニング</string>
-    <string name="logging">ロギング</string>
-    <string name="user_id">ユーザID</string>
-    <string name="data_sending">データ送信</string>
-    <string name="server_url">データ送信先のサーバ</string>
-    <string name="could_not_remove_entry_message">ロギング中のエントリは削除できません</string>
-    <string name="could_not_remove">削除できませんでした．</string>
-    <string name="items_removed">個の項目を削除しました．</string>
-    <string name="data_sent">データを送信しました</string>
-    <string name="now_positioning">ポジショニング中...</string>
-    <string name="start_positioning">ポジショニングを開始します</string>
-    <string name="go_here">ここへ行く</string>
-    <string name="action_selection">選択</string>
-    <string name="network_connectivity_alert">ネットワークに接続していません</string>
-    <string name="destination">目的地</string>
-    <string name="distance">距離</string>
-    <string name="duration">時間</string>
-    <string name="guide">ルート案内</string>
-    <string name="list_initializing">項目を取得中...</string>
-    <string name="no_companion">同伴者なし</string>
-    <string name="not_alone">同伴者有り</string>
-    <string name="title_alert">タイトルは必須項目です</string>
+    <string name="could_not_remove">削除できませんでした.</string>
+    <string name="items_removed"> 個の項目を削除しました.</string>
+    <string name="initializing">初期化中...</string>
+    <string name="action_selection">アクション選択</string>
+    <string name="network_connectivity_alert">ネットワークの接続を確認してください．</string>
 
-
-
-    <string-array name="companion_candidate_list">
-        <item>恋人</item>
-        <item>家族</item>
-        <item>友人</item>
-        <item>ペット</item>
-    </string-array>
-
-    <string-array name="interval">
-        <item>1 秒</item>
-        <item>2 秒</item>
-        <item>5 秒</item>
-        <item>10 秒</item>
-        <item>20 秒</item>
-        <item>60 秒</item>
-    </string-array>
-
-    <string-array name="interval_values">
-        <item>1000</item>
-        <item>2000</item>
-        <item>5000</item>
-        <item>10000</item>
-        <item>20000</item>
-        <item>60000</item>
-    </string-array>
-
-    <string-array name="distance">
-        <item>1 m</item>
-        <item>2 m</item>
-        <item>3 m</item>
-        <item>5 m</item>
-        <item>10 m</item>
-        <item>20 m</item>
-        <item>50 m</item>
-        <item>100 m</item>
-    </string-array>
-
-    <string-array name="distance_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>20</item>
-        <item>50</item>
-        <item>100</item>
-    </string-array>
-
-    <string-array name="poi_count">
-        <item>25</item>
-        <item>50</item>
-        <item>75</item>
-        <item>100</item>
-        <item>200</item>
-    </string-array>
-
+    <!-- Map -->
+    <string name="position_updating">位置情報を更新中...</string>
+    <string name="current_position">現在地</string>
+    <string name="now_positioning">位置情報を取得中...</string>
 
 </resources>

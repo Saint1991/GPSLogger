@@ -30,7 +30,6 @@ import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.uicomponents.PoiListFragment;
 import geologger.saints.com.geologger.utils.ProgressDialogUtility;
-import geologger.saints.com.geologger.utils.StringUtil;
 
 @EActivity
 public class PoiConfirmationActivity extends FragmentActivity implements PoiListFragment.OnFragmentInteractionListener {
@@ -117,7 +116,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
         //Make Confirmation Dialog
         AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
-        String checkin = getResources().getString(R.string.checkin);
+        String checkin = getResources().getString(R.string.check_in);
         confirmationDialog.setTitle(checkin);
         confirmationDialog.setMessage(checkin + " " + placeName + "?");
 
@@ -152,7 +151,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
     //region FreeFormSelected
 
-    @Click(R.id.buttonToFreeForm)
+    @Click(R.id.button_to_free_form)
     public void showFreeFormDialog() {
 
         final EditText inputForm = new EditText(this);
@@ -183,7 +182,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
         });
 
         AlertDialog dialog = builder.create();
-        dialog.setTitle(getResources().getString(R.string.freeform));
+        dialog.setTitle(getResources().getString(R.string.free_form));
         dialog.setView(inputForm, 5, 30, 5, 30);
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override

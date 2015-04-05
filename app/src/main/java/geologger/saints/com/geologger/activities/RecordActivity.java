@@ -41,12 +41,11 @@ import geologger.saints.com.geologger.map.MapWorker;
 import geologger.saints.com.geologger.services.PositioningService_;
 import geologger.saints.com.geologger.utils.EncourageGpsOn;
 import geologger.saints.com.geologger.sensors.MyLocationListener;
-import geologger.saints.com.geologger.utils.IEncourageGpsOnAlertDialogCallback;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 import geologger.saints.com.geologger.utils.ServiceRunningConfirmation;
 import geologger.saints.com.geologger.utils.TidGenerator;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 
 @EActivity
@@ -97,13 +96,13 @@ public class RecordActivity extends FragmentActivity {
     @Bean
     TidGenerator mTidGenerator;
 
-    @ViewById(R.id.loggingStartButton)
+    @ViewById(R.id.logging_start_button)
     Button mLoggingStartButton;
 
-    @ViewById(R.id.loggingStopButton)
+    @ViewById(R.id.logging_stop_button)
     Button mLoggingStopButton;
 
-    @ViewById(R.id.checkInButton)
+    @ViewById(R.id.check_in_button)
     Button mCheckinButton;
 
     //region LifeCycle
@@ -203,7 +202,7 @@ public class RecordActivity extends FragmentActivity {
      * startLogginig and update View
      * @param clicked
      */
-    @Click(R.id.loggingStartButton)
+    @Click(R.id.logging_start_button)
     public void onLoggingStartButtonClicked(View clicked) {
         startLoggingWithEncourageGpsOn();
         mMapWorker.initMap(mMap, false);
@@ -214,7 +213,7 @@ public class RecordActivity extends FragmentActivity {
      * stop logging and update view
      * @param clicked
      */
-    @Click(R.id.loggingStopButton)
+    @Click(R.id.logging_stop_button)
     public void onLoggingStopButtonClicked(View clicked) {
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
@@ -232,7 +231,7 @@ public class RecordActivity extends FragmentActivity {
      */
     private void startLoggingWithEncourageGpsOn() {
 
-        mEncourageGpsOn.encourageGpsOn(new IEncourageGpsOnAlertDialogCallback() {
+        mEncourageGpsOn.encourageGpsOn(new EncourageGpsOn.IEncourageGpsOnAlertDialogCallback() {
 
             @Override
             public void executeTaskIfProviderIsEnabled() {
@@ -293,7 +292,7 @@ public class RecordActivity extends FragmentActivity {
      * Start PoiConfirmationActivity
      * @param cliecked
      */
-    @Click(R.id.checkInButton)
+    @Click(R.id.check_in_button)
     public void onCheckedIn(View cliecked) {
         Intent intent = new Intent(getApplicationContext(), PoiConfirmationActivity_.class);
         startActivityForResult(intent, POICONFIRMATIONCODE);
@@ -331,7 +330,7 @@ public class RecordActivity extends FragmentActivity {
             String placeId = data.getStringExtra(CheckinEntry.PLACEID);
             String categoryId = data.getStringExtra(CheckinEntry.CATEGORYID);
             String placeName = data.getStringExtra(CheckinEntry.PLACENAME);
-            final CheckinEntry entry = new CheckinEntry(mCurrentTid, placeId, categoryId, TimestampGenerator.getTimestamp(), latitude, longitude, placeName);
+            final CheckinEntry entry = new CheckinEntry(mCurrentTid, placeId, categoryId, TimestampUtil.getTimestamp(), latitude, longitude, placeName);
 
             new Thread(new Runnable() {
 
@@ -349,7 +348,7 @@ public class RecordActivity extends FragmentActivity {
         else {
 
             String placeName = data.getStringExtra(CheckinFreeFormEntry.PLACENAME);
-            final CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, TimestampGenerator.getTimestamp(), latitude, longitude);
+            final CheckinFreeFormEntry entry = new CheckinFreeFormEntry(tid, placeName, TimestampUtil.getTimestamp(), latitude, longitude);
 
             new Thread(new Runnable() {
                 @Override

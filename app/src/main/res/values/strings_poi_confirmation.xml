@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="free_form">Free Form</string>
+    <string name="free_form_hint">Place Name</string>
+    <string name="not_found">Not Found? →</string>
+</resources>

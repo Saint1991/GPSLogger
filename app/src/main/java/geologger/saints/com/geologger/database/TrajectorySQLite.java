@@ -14,7 +14,7 @@ import java.util.List;
 
 import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 /**
  * Created by Mizuno on 2015/01/28.
@@ -69,7 +69,7 @@ public class TrajectorySQLite {
      * @return success:true, fail:false
      */
     public boolean insert(String tid, float latitude, float longitude) {
-        String timestamp = TimestampGenerator.getTimestamp();
+        String timestamp = TimestampUtil.getTimestamp();
         boolean isGpsOn = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         return this.insert(tid, latitude, longitude, timestamp, isGpsOn);
     }

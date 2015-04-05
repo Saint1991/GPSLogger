@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination">目的地</string>
+    <string name="address">住所</string>
+    <string name="search_route">ルートを検索中...</string>
+    <string name="distance">距離</string>
+    <string name="duration">所用時間</string>
+    <string name="guide">ルート案内</string>
+</resources>

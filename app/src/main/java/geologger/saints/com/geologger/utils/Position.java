@@ -23,7 +23,7 @@ public class Position {
         SharedPreferences.Editor editor = preference.edit();
         editor.putFloat(LATITUDE, latitude);
         editor.putFloat(LONGITUDE, longitude);
-        editor.putString(TIMESTAMP, TimestampGenerator.getTimestamp());
+        editor.putString(TIMESTAMP, TimestampUtil.getTimestamp());
         editor.commit();
     }
 
@@ -51,19 +51,15 @@ public class Position {
 
         long ret = -1L;
 
-        try {
-
-            SharedPreferences preference = context.getSharedPreferences(PREFNAME, Context.MODE_MULTI_PROCESS);
-            Date lastUpdate = DateFormat.getDateInstance().parse(preference.getString(TIMESTAMP, null));
-
-            long now = System.currentTimeMillis();
-            ret = now - lastUpdate.getTime();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
+        SharedPreferences preference = context.getSharedPreferences(PREFNAME, Context.MODE_MULTI_PROCESS);
+        Date lastUpdate = TimestampUtil.parseTimestamp(preference.getString(TIMESTAMP, null));
+        if (lastUpdate == null) {
+            return ret;
         }
+
+        long now = System.currentTimeMillis();
+        ret = now - lastUpdate.getTime();
+        Log.i("passedtime", ret + "");
 
         return ret;
     }

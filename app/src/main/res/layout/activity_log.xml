@@ -1,19 +1,15 @@
 <android.support.v4.app.FragmentTabHost
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/tabhost"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    style="@style/root_layout">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        style="@style/fill"
         android:orientation="vertical">
 
         <TabWidget
             android:id="@android:id/tabs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            style="@style/horizontal_stack_liner_layout"
             android:layout_weight="0" />
 
         <FrameLayout

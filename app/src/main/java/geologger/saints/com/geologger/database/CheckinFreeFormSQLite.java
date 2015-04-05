@@ -13,7 +13,7 @@ import java.util.List;
 
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.TableDefinitions;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 /**
  * Created by Mizuno on 2015/01/30.
@@ -67,7 +67,7 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
      * @return
      */
     public boolean insert(String tid, String placeName, float latitude, float longitude) {
-        String timestamp = TimestampGenerator.getTimestamp();
+        String timestamp = TimestampUtil.getTimestamp();
         return this.insert(tid, placeName, timestamp, latitude, longitude);
     }
 

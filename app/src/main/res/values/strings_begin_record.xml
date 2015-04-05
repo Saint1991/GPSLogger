@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="memo">Memo</string>
+    <string name="companion">Companion</string>
+    <string name="companion_alert">Please check at least one!</string>
+    <string name="no_companion">No Companion</string>
+    <string name="not_alone">With Someone</string>
+    <string name="title_alert">Title must not be empty!</string>
+
+    <string-array name="companion_candidate_list">
+        <item>Boyfriend / Girlfriend</item>
+        <item>Family</item>
+        <item>Friend(s)</item>
+        <item>Co-worker(s)</item>
+    </string-array>
+
+</resources>

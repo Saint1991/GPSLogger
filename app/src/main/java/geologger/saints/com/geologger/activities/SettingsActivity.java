@@ -69,8 +69,6 @@ public class SettingsActivity extends PreferenceActivity {
                 userIdPreference.setTitle(userId);
             }
 
-
-
             userIdPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {

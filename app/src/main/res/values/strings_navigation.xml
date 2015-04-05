@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="destination">Destination</string>
+    <string name="address">Address</string>
+    <string name="search_route">Searhing Route...</string>
+    <string name="distance">Distance</string>
+    <string name="duration">Duration</string>
+    <string name="guide">Navigation</string>
+</resources>

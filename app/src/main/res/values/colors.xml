@@ -1,7 +1,11 @@
 <resources>
-
-    <color name="black_overlay">#66000000</color>
-    <color name="white">#ffffff</color>
     <color name="app_color">#47CFFF</color>
-
+    <color name="app_background_color">#222</color>
+    <color name="button_clicked_color">#5547CFFF</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="white">#FFF</color>
+    <color name="black">#000</color>
+    <color name="red">#F00</color>
+    <color name="red_button_clicked_color">#33FF0000</color>
 </resources>

@@ -1,147 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- The name of this application -->
     <string name="app_name">GeoLogger</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_poi_confirmation">PoiConfirmation</string>
-    <string name="title_activity_settings">Settings</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_poi_search">PoiSearchActivity</string>
-    <string name="title_activity_log">LogActivity</string>
-    <string name="title_activity_setting">SettingActivity</string>
-    <string name="title_activity_poi">PoiActivity</string>
-    <string name="title_activity_log_list">LogListActivity</string>
 
+    <!-- Titles of each activity that are shown on the action bar -->
+    <string name="title_activity_begin_recording">Log Information</string>
+    <string name="title_activity_home">Home</string>
+    <string name="title_activity_log">Your Activity</string>
+    <string name="title_activity_log_list">Your Activities</string>
+    <string name="title_activity_navigation">Navigation</string>
+    <string name="title_activity_poi">Poi Search</string>
+    <string name="title_activity_poi_confirmation">Poi Select</string>
+    <string name="title_activity_record">Recording</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Basic -->
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="cancel">CANCEL</string>
-    <string name="checkin">CHECK IN</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="ok">OK</string>
-    <string name="send">SEND</string>
-    <string name="delete">DELETE</string>
-    <string name="u_delete"><u>REMOVE</u></string>
-    <string name="data_sent">Datas have been sent</string>
-    <string name="go_here">Go Here</string>
-    <string name="title">Title</string>
-    <string name="memo">Memo</string>
-    <string name="map">Map</string>
-    <string name="statistics">Statistics</string>
-
-    <string name="poi_search_hint">place name</string>
     <string name="detail">Details</string>
-    <string name="start_logging">Start Logging...</string>
-    <string name="now_logging">Now Logging</string>
-    <string name="stop_logging">Finish Logging!</string>
-    <string name="action_settings">Settings</string>
+    <string name="delete">DELETE</string>
+    <string name="send">SEND</string>
+    <string name="title">Title</string>
     <string name="search">SEARCH</string>
-
-    <string name="companion">Companion</string>
-    <string name="companion_alert">Please check at least one</string>
-    <string name="freeform">Free Form</string>
-    <string name="freeform_hint">Input checking in place name here</string>
-    <string name="gps_confirmation">GPS Confirmation</string>
-    <string name="gps_confirmation_message">GPS is currently not ON. \n Turn on the GPS?</string>
-    <string name="imhere">I\'m here</string>
+    <string name="keyword">keyword</string>
+    <string name="gps">GPS</string>
     <string name="timestamp">Timestamp</string>
     <string name="searching">Searching...</string>
     <string name="loading">Loading...</string>
-    <string name="positioning_interval">Position Update Interval</string>
-    <string name="positioning_distance">Position Update Distance</string>
-    <string name="logging_interval">Logging Interval</string>
-    <string name="Poi_result_count">The number of POI searching result</string>
-    <string name="positioning">Positioning</string>
-    <string name="logging">Logging</string>
-    <string name="user_id">User ID</string>
-    <string name="data_sending">DATA SENDING</string>
-    <string name="server_url">Server URL to send log data</string>
-    <string name="could_not_remove_entry_message">Could not Remove onLogging Entry</string>
     <string name="could_not_remove">Could not remove.</string>
     <string name="items_removed"> items removed.</string>
-    <string name="position_updating">Position Updatinig...</string>
-    <string name="now_positioning">Now Positioning...</string>
-    <string name="start_positioning">Start Positioning</string>
+    <string name="initializing">Initializing...</string>
     <string name="action_selection">Select Action</string>
-    <string name="search_route">Searhing Route...</string>
     <string name="network_connectivity_alert">Please check your network connectivity</string>
-    <string name="destination">Destination</string>
-    <string name="distance">Distance</string>
-    <string name="duration">Duration</string>
-    <string name="guide">Navigation</string>
-    <string name="list_initializing">Initializing...</string>
-    <string name="no_companion">No Companion</string>
-    <string name="not_alone">With Someone</string>
-    <string name="title_alert">Title must not be empty!</string>
 
-    <string-array name="companion_candidate_list">
-        <item>No Companion</item>
-        <item>Boyfriend / Girlfriend</item>
-        <item>Family</item>
-        <item>Friend(s)</item>
-        <item>Pet</item>
-    </string-array>
-
-    <string-array name="interval">
-        <item>1 Sec</item>
-        <item>2 Sec</item>
-        <item>5 Sec</item>
-        <item>10 Sec</item>
-        <item>20 Sec</item>
-        <item>60 Sec</item>
-    </string-array>
-
-    <string-array name="interval_values">
-        <item>1000</item>
-        <item>2000</item>
-        <item>5000</item>
-        <item>10000</item>
-        <item>20000</item>
-        <item>60000</item>
-    </string-array>
-
-    <string-array name="distance">
-        <item>1 m</item>
-        <item>2 m</item>
-        <item>3 m</item>
-        <item>5 m</item>
-        <item>10 m</item>
-        <item>20 m</item>
-        <item>50 m</item>
-        <item>100 m</item>
-    </string-array>
-
-    <string-array name="distance_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>5</item>
-        <item>10</item>
-        <item>20</item>
-        <item>50</item>
-        <item>100</item>
-    </string-array>
-
-    <string-array name="poi_count">
-        <item>25</item>
-        <item>50</item>
-        <item>75</item>
-        <item>100</item>
-        <item>200</item>
-    </string-array>
-    <string name="title_activity_navigation">Navigation</string>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_tab">TabActivity</string>
-
-
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_begin_recording">BeginRecordingActivity</string>
-
+    <!-- Map -->
+    <string name="position_updating">Position Updatinig...</string>
+    <string name="current_position">I\'M HERE</string>
+    <string name="now_positioning">Now Positioning...</string>
 
 </resources>

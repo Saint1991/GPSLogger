@@ -12,7 +12,7 @@ import java.util.List;
 
 import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.TableDefinitions;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 /**
  * Created by Mizuno on 2015/01/29.
@@ -59,7 +59,7 @@ public class CompanionSQLite {
      * @return success:true，fail:false
      */
     public boolean insert(String tid, String companion) {
-        String timestamp = TimestampGenerator.getTimestamp();
+        String timestamp = TimestampUtil.getTimestamp();
         return this.insert(tid, companion, timestamp);
     }
 

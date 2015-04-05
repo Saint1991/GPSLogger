@@ -24,7 +24,7 @@ import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.utils.Position;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 @EService
 public class GPSLoggingService extends Service {
@@ -70,7 +70,7 @@ public class GPSLoggingService extends Service {
 
         Log.i(TAG, "onDestroy");
         this.mTimer.cancel();
-        this.mTrajectorySpanDbHandler.setEnd(this.mTid, TimestampGenerator.getTimestamp());
+        this.mTrajectorySpanDbHandler.setEnd(this.mTid, TimestampUtil.getTimestamp());
         this.mTid = null;
 
         stopForeground(true);

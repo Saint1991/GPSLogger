@@ -42,7 +42,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/checkin">
+        android:title="@string/check_in">
 
     <ListPreference
             android:key="poi_result_count"

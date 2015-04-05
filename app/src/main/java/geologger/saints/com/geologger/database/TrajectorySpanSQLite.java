@@ -12,7 +12,7 @@ import java.util.List;
 
 import geologger.saints.com.geologger.models.TableDefinitions;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
-import geologger.saints.com.geologger.utils.TimestampGenerator;
+import geologger.saints.com.geologger.utils.TimestampUtil;
 
 /**
  * Created by Mizuno on 2015/01/29.
@@ -57,7 +57,7 @@ public class TrajectorySpanSQLite  {
      * @return
      */
     public boolean insert(String tid) {
-        String begin = TimestampGenerator.getTimestamp();
+        String begin = TimestampUtil.getTimestamp();
         return this.insert(tid, begin);
     }
 

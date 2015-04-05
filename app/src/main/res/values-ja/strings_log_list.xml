@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_sent">データを送信しました.</string>
+    <string name="could_not_remove_entry_message">ロギング中の項目は削除できません．</string>
+    <string name="no_record">ログがありません</string>
+</resources>

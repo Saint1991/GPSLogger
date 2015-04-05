@@ -99,7 +99,7 @@ public class LogListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
 
-        mProgressUtility.showProgress(getResources().getString(R.string.list_initializing));
+        mProgressUtility.showProgress(getResources().getString(R.string.initializing));
         new Thread(new Runnable() {
             @Override
             public void run() {

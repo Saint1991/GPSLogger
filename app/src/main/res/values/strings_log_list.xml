@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_sent">Data has been sent.</string>
+    <string name="could_not_remove_entry_message">Could not Remove the entry that currently be logging</string>
+    <string name="no_record">No Record Found</string>
+</resources>

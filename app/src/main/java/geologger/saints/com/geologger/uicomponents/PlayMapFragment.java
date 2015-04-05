@@ -62,7 +62,7 @@ public class PlayMapFragment extends Fragment {
     @ViewById(R.id.playSlider)
     SeekBar mPlaySlider;
 
-    @ViewById(R.id.timestampIndicator)
+    @ViewById(R.id.timestamp_indicator)
     TextView mTimestampIndicator;
 
     //factory method

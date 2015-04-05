@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="positioning">ポジショニング</string>
+    <string name="logging">ロギング</string>
+    <string name="user_id">ユーザID</string>
+    <string name="data_sending">データ送信</string>
+    <string name="positioning_interval">位置情報更新の最低間隔</string>
+    <string name="positioning_distance">位置情報更新の最低距離</string>
+    <string name="logging_interval">ロギングの感覚</string>
+    <string name="Poi_result_count">POI検索数</string>
+    <string name="server_url">データ送信先のサーバ</string>
+
+    <string-array name="interval">
+        <item>1 秒</item>
+        <item>2 秒</item>
+        <item>5 秒</item>
+        <item>10 秒</item>
+        <item>20 秒</item>
+        <item>60 秒</item>
+    </string-array>
+
+    <string-array name="interval_values">
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>20000</item>
+        <item>60000</item>
+    </string-array>
+
+    <string-array name="distance">
+        <item>1 m</item>
+        <item>2 m</item>
+        <item>3 m</item>
+        <item>5 m</item>
+        <item>10 m</item>
+        <item>20 m</item>
+        <item>50 m</item>
+        <item>100 m</item>
+    </string-array>
+
+    <string-array name="distance_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+        <item>20</item>
+        <item>50</item>
+        <item>100</item>
+    </string-array>
+
+    <string-array name="poi_count">
+        <item>25</item>
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>200</item>
+    </string-array>
+
+</resources>

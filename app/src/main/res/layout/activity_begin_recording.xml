@@ -1,110 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:padding="20dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/root_layout"
     android:overScrollMode="always">
 
     <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical"
-        tools:context="geologger.saints.com.geologger.activities.BeginRecordingActivity">
+        tools:context="geologger.saints.com.geologger.activities.BeginRecordingActivity"
+        style="@style/vertically_center_layout"
+        android:orientation="vertical">
 
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:text="@string/title"
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
-                    android:textSize="16sp"/>
-
-                <EditText
-                    android:id="@+id/title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:maxLength="50"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:text="@string/memo"
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
-                    android:textSize="16sp"/>
-
-                <EditText
-                    android:id="@+id/memo"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:maxLength="200"/>
-
-            </LinearLayout>
+        <LinearLayout style="@style/horizontal_stack_liner_layout">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/companion"
-                android:textSize="16sp"
-                android:layout_marginTop="20dp"/>
+                android:text="@string/title"
+                style="@style/label_begin_record"/>
 
-            <RadioGroup
-                android:id="@+id/has_companion"
+            <EditText
+                android:id="@+id/title"
+                style="@style/input_text_begin_record"
+                android:maxLength="50"/>
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/horizontal_stack_liner_layout">
+
+            <TextView
+                android:text="@string/memo"
+                style="@style/label_begin_record"/>
+
+            <EditText
+                android:id="@+id/memo"
+                style="@style/input_text_begin_record"
+                android:maxLength="200"/>
+
+        </LinearLayout>
+
+        <TextView
+            style="@style/stretch"
+            android:text="@string/companion"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"/>
+
+        <RadioGroup
+            android:id="@+id/has_companion"
+            style="@style/stretch"
+            android:layout_margin="10dp">
+
+            <RadioButton
+                android:id="@+id/no_companion"
+                style="@style/horizontally_fill"
+                android:text="@string/no_companion"
+                android:checked="true"/>
+
+            <RadioButton
+                android:id="@+id/not_alone"
+                style="@style/horizontally_fill"
+                android:text="@string/not_alone"/>
+
+            <ListView
+                android:id="@+id/companion_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-                android:paddingLeft="15dp">
-
-                <RadioButton
-                    android:id="@+id/no_companion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_companion"
-                    android:checked="true"/>
-
-                <RadioButton
-                    android:id="@+id/not_alone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/not_alone"/>
-
-                <ListView
-                    android:id="@+id/companion_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:layout_gravity="center_horizontal"
-                    android:choiceMode="multipleChoice"
-                    android:visibility="gone"/>
-
-            </RadioGroup>
-
-            <Button
-                android:id="@+id/ok_button"
-                android:layout_marginTop="20dp"
-                android:layout_width="120dp"
-                android:layout_height="50dp"
+                android:layout_height="245dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@color/app_color"
-                android:textSize="18sp"
-                android:text="@string/ok"/>
+                android:choiceMode="multipleChoice"
+                android:visibility="gone"/>
 
-</LinearLayout>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/ok_button"
+            style="@style/default_button"
+            android:layout_width="120dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="5dp"
+            android:layout_gravity="center_horizontal"
+            android:textSize="18sp"
+            android:text="@string/ok"/>
+
+    </LinearLayout>
 </ScrollView>

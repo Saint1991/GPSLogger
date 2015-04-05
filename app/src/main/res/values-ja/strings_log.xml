@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="map">地図</string>
+    <string name="statistics">統計情報</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="memo">メモ</string>
+    <string name="companion">同伴者</string>
+    <string name="companion_alert">項目が1つも選択されていません．</string>
+    <string name="no_companion">同伴者なし</string>
+    <string name="not_alone">同伴者有り</string>
+    <string name="title_alert">タイトルは空にできません.</string>
+
+    <string-array name="companion_candidate_list">
+        <item>恋人</item>
+        <item>家族</item>
+        <item>友人</item>
+        <item>同僚</item>
+    </string-array>
+
+</resources>

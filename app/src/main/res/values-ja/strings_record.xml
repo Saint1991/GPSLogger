@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="check_in">チェックイン</string>
+    <string name="start_logging">ロギングを開始します...</string>
+    <string name="stop_logging">ロギングを完了しました!</string>
+    <string name="now_logging">ロギング中...</string>
+    <string name="gps_confirmation_message">GPSがONになっていません．\nOnにしますか?</string>
+</resources>
