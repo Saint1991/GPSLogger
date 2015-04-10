@@ -203,7 +203,7 @@ public class RecordActivity extends FragmentActivity {
      * @param clicked
      */
     @Click(R.id.logging_start_button)
-    public void onLoggingStartButtonClicked(View clicked) {
+    protected void onLoggingStartButtonClicked(View clicked) {
         startLoggingWithEncourageGpsOn();
         mMapWorker.initMap(mMap, false);
     }
@@ -214,7 +214,7 @@ public class RecordActivity extends FragmentActivity {
      * @param clicked
      */
     @Click(R.id.logging_stop_button)
-    public void onLoggingStopButtonClicked(View clicked) {
+    protected void onLoggingStopButtonClicked(View clicked) {
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
         stopService(serviceIntent);
@@ -251,7 +251,7 @@ public class RecordActivity extends FragmentActivity {
     //region InputTrajectoryDetails
 
     @OnActivityResult(BEGINRECORDINGCODE)
-    public void onBeginingResult(int resultCode, Intent data) {
+    protected void onBeginingResult(int resultCode, Intent data) {
 
         if (resultCode != RESULT_OK) {
             return;
@@ -293,7 +293,7 @@ public class RecordActivity extends FragmentActivity {
      * @param cliecked
      */
     @Click(R.id.check_in_button)
-    public void onCheckedIn(View cliecked) {
+    protected void onCheckedIn(View cliecked) {
         Intent intent = new Intent(getApplicationContext(), PoiConfirmationActivity_.class);
         startActivityForResult(intent, POICONFIRMATIONCODE);
     }
@@ -376,7 +376,7 @@ public class RecordActivity extends FragmentActivity {
      * @param intent
      */
     @Receiver(actions = GPSLoggingService.ACTION)
-    public void onPositionLogged(Intent intent) {
+    protected void onPositionLogged(Intent intent) {
 
         if (mMap == null || mMapWorker == null) {
             return;
@@ -393,7 +393,7 @@ public class RecordActivity extends FragmentActivity {
      * @param intent
      */
     @Receiver(actions = MyLocationListener.ACTION)
-    public void onCurrentPositionUpdated(Intent intent) {
+    protected void onCurrentPositionUpdated(Intent intent) {
 
         Log.i(TAG, MyLocationListener.ACTION);
 

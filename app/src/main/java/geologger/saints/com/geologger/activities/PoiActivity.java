@@ -99,7 +99,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
      * @param intent
      */
     @Receiver(actions = MyLocationListener.ACTION)
-    public void onCurrentPositionUpdated(Intent intent) {
+    protected void onCurrentPositionUpdated(Intent intent) {
         if (!mIsPositionUpdated) {
             mProgressUtility.dismissProgress();
             mIsPositionUpdated = true;
@@ -134,7 +134,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
      * Set mFourSquarePoiList to the view
      */
     @UiThread
-    public void updateListView() {
+    protected void updateListView() {
 
         if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
             return;

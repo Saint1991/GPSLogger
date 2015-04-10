@@ -1,3 +1,5 @@
 <resources>
     <dimen name="player_button_padding">15dp</dimen>
+    <dimen name="statistics_vertical_margin">25dp</dimen>
+    <dimen name="graph_thickness">2dp</dimen>
 </resources>

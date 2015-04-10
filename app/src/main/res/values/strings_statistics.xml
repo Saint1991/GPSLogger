@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_time">Total Time</string>
+    <string name="track_length">Track Length</string>
+    <string name="max_speed">Max Speed</string>
+    <string name="avg_speed">Average Speed</string>
+    <string name="speed_chart">Speed Chart</string>
+    <string name="km">km</string>
+    <string name="km_h">km/h</string>
+    <string name="hour">hour</string>
+    <string name="minute">minutes</string>
+</resources>

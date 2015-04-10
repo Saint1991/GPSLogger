@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_time">合計時間</string>
+    <string name="track_length">総距離</string>
+    <string name="max_speed">最大速度</string>
+    <string name="avg_speed">平均速度</string>
+    <string name="speed_chart">スピードチャート</string>
+    <string name="km">km</string>
+    <string name="km_h">km/h</string>
+    <string name="hour">時</string>
+    <string name="minute">分</string>
+</resources>

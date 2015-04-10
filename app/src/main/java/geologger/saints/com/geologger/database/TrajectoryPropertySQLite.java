@@ -3,6 +3,7 @@ package geologger.saints.com.geologger.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
@@ -38,14 +39,18 @@ public class TrajectoryPropertySQLite {
     public boolean insert(String tid, String title, String description) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(TrajectoryPropertyEntry.TID, tid);
-        insertValues.put(TrajectoryPropertyEntry.TITLE, title);
-        insertValues.put(TrajectoryPropertyEntry.DESCRIPTION, description);
-
-        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
-        db.close();
+        boolean result = false;
+        try {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(TrajectoryPropertyEntry.TID, tid);
+            insertValues.put(TrajectoryPropertyEntry.TITLE, title);
+            insertValues.put(TrajectoryPropertyEntry.DESCRIPTION, description);
+            result = db.insert(TABLENAME, null, insertValues) != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -74,10 +79,16 @@ public class TrajectoryPropertySQLite {
     public int removeByTid(String tid) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removeCount = db.delete(TABLENAME, TrajectoryPropertyEntry.TID + "=?", new String[]{tid});
-        db.close();
+        int removedCount = -1;
+        try {
+            removedCount = db.delete(TABLENAME, TrajectoryPropertyEntry.TID + "=?", new String[]{tid});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
-        return removeCount;
+        return removedCount;
     }
 
     //endregion
@@ -92,15 +103,27 @@ public class TrajectoryPropertySQLite {
     public TrajectoryPropertyEntry getEntry(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, TrajectoryPropertyEntry.TID + "=?", new String[]{tid}, null, null, null, "1");
-
         TrajectoryPropertyEntry ret = null;
-        if (cursor.moveToFirst()) {
-            ret = getEntryFromCursor(cursor);
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, TrajectoryPropertyEntry.TID + "=?", new String[]{tid}, null, null, null, "1");
+            try {
+                if (cursor.moveToFirst()) {
+                    ret = getEntryFromCursor(cursor);
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
 
-        cursor.close();
-        db.close();
+
 
         return ret;
     }

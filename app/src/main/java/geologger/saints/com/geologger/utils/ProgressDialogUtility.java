@@ -1,7 +1,9 @@
 package geologger.saints.com.geologger.utils;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
@@ -21,6 +23,15 @@ public class ProgressDialogUtility {
     public ProgressDialogUtility() {}
 
     @UiThread
+    public void showProgress(Context context, String message) {
+        if (context instanceof Activity) {
+            mActivity = (Activity)context;
+        }
+
+        showProgress(message);
+    }
+
+    @UiThread
     public void showProgress(String message) {
 
         if (mProgress != null && mProgress.isShowing()) {
@@ -28,7 +39,7 @@ public class ProgressDialogUtility {
             mProgress = null;
         }
 
-        if (mProgress == null) {
+        if (mProgress == null && mActivity != null) {
             mProgress = new ProgressDialog(mActivity);
         }
 

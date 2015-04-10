@@ -1,11 +1,123 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/fragment_root_layout"
-    android:orientation="vertical"
-    tools:context="geologger.saints.com.geologger.uicomponents.StatisticFragment">
+    tools:context="geologger.saints.com.geologger.uicomponents.StatisticFragment"
+    style="@style/root_layout"
+    android:padding="20dp"
+    android:orientation="vertical">
 
-    <TextView
-        style="@style/stretch"
-        android:text="statistics" />
+    <LinearLayout
+        style="@style/horizontal_stack_liner_layout"
+        android:layout_marginTop="@dimen/statistics_vertical_margin"
+        android:layout_marginBottom="@dimen/statistics_vertical_margin">
+
+        <LinearLayout
+            style="@style/statistics_label_value_vertical_linear_layout"
+            android:gravity="center_horizontal">
+
+            <TextView
+                style="@style/statistics_label"
+                android:text="@string/total_time"/>
+
+            <LinearLayout
+                style="@style/horizontal_stack_liner_layout"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/total_time"
+                    style="@style/statistics_value"/>
+
+                <TextView
+                    style="@style/statistics_unit"
+                    android:text="@string/minute"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/statistics_label_value_vertical_linear_layout"
+            android:gravity="center_horizontal">
+
+            <TextView
+                style="@style/statistics_label"
+                android:text="@string/track_length"/>
+
+            <LinearLayout
+                style="@style/horizontal_stack_liner_layout"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/track_length"
+                    style="@style/statistics_value"/>
+
+                <TextView
+                    style="@style/statistics_unit"
+                    android:text="@string/km"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/horizontal_stack_liner_layout"
+        android:layout_marginTop="@dimen/statistics_vertical_margin"
+        android:layout_marginBottom="@dimen/statistics_vertical_margin">
+
+        <LinearLayout
+            style="@style/statistics_label_value_vertical_linear_layout"
+            android:gravity="center_horizontal">
+
+            <TextView
+                style="@style/statistics_label"
+                android:text="@string/avg_speed"/>
+
+            <LinearLayout
+                style="@style/horizontal_stack_liner_layout"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/avg_speed"
+                    style="@style/statistics_value"/>
+
+                <TextView
+                    style="@style/statistics_unit"
+                    android:text="@string/km_h"/>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/statistics_label_value_vertical_linear_layout"
+            android:gravity="center_horizontal">
+
+            <TextView
+                style="@style/statistics_label"
+                android:text="@string/max_speed"/>
+
+            <LinearLayout
+                style="@style/horizontal_stack_liner_layout"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/max_speed"
+                    style="@style/statistics_value"/>
+
+                <TextView
+                    style="@style/statistics_unit"
+                    android:text="@string/km_h"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/graph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp">
+
+    </FrameLayout>
 
 </LinearLayout>

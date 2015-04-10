@@ -3,6 +3,7 @@ package geologger.saints.com.geologger.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
@@ -40,13 +41,17 @@ public class SentTrajectorySQLite {
     public boolean insert(String tid, boolean isSent) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(SentTrajectoryEntry.TID, tid);
-        insertValues.put(SentTrajectoryEntry.ISSENT, isSent);
-
-        boolean result = db.insertWithOnConflict(TABLENAME, null, insertValues, SQLiteDatabase.CONFLICT_REPLACE) != -1;
-        db.close();
+        boolean result = false;
+        try {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(SentTrajectoryEntry.TID, tid);
+            insertValues.put(SentTrajectoryEntry.ISSENT, isSent);
+            result = db.insertWithOnConflict(TABLENAME, null, insertValues, SQLiteDatabase.CONFLICT_REPLACE) != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -72,15 +77,18 @@ public class SentTrajectorySQLite {
     public void insertSentTidList(List<String> sentTidList) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        for (String tid : sentTidList) {
-            ContentValues insertValues = new ContentValues();
-            insertValues.put(SentTrajectoryEntry.TID, tid);
-            insertValues.put(SentTrajectoryEntry.ISSENT, true);
-            db.insertWithOnConflict(TABLENAME, null, insertValues, SQLiteDatabase.CONFLICT_REPLACE);
+        try {
+            for (String tid : sentTidList) {
+                ContentValues insertValues = new ContentValues();
+                insertValues.put(SentTrajectoryEntry.TID, tid);
+                insertValues.put(SentTrajectoryEntry.ISSENT, true);
+                db.insertWithOnConflict(TABLENAME, null, insertValues, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-
-        db.close();
     }
 
     //endregion
@@ -95,8 +103,14 @@ public class SentTrajectorySQLite {
     public int removeByTid(String tid) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removedCount = db.delete(TABLENAME, SentTrajectoryEntry.TID + "=?", new String[]{tid});
-        db.close();
+        int removedCount = -1;
+        try {
+            removedCount = db.delete(TABLENAME, SentTrajectoryEntry.TID + "=?", new String[]{tid});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return removedCount;
     }
@@ -113,16 +127,29 @@ public class SentTrajectorySQLite {
     public boolean isSent(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, SentTrajectoryEntry.TID + "=?" , new String[]{tid}, null, null, null, "1");
+        boolean ret = false;
+        try {
 
-        boolean ret = cursor.moveToFirst();
-        if (!ret) {
-            return ret;
+            Cursor cursor = db.query(TABLENAME, null, SentTrajectoryEntry.TID + "=?" , new String[]{tid}, null, null, null, "1");
+            try {
+                ret = cursor.moveToFirst();
+                if (!ret) {
+                    return ret;
+                }
+
+                ret = !cursor.isNull(cursor.getColumnIndex(SentTrajectoryEntry.ISSENT)) && cursor.getInt(cursor.getColumnIndex(SentTrajectoryEntry.ISSENT)) == 1;
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
 
-        ret = !cursor.isNull(cursor.getColumnIndex(SentTrajectoryEntry.ISSENT)) && cursor.getInt(cursor.getColumnIndex(SentTrajectoryEntry.ISSENT)) == 1;
-        cursor.close();
-        db.close();
 
         return ret;
     }
@@ -134,19 +161,32 @@ public class SentTrajectorySQLite {
     public List<String> getSentTrajectoryList() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, null);
-
         List<String> sentList = new ArrayList<String>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            SentTrajectoryEntry entry = getEntryFromCursor(cursor);
-            if (entry.getIsSent()) {
-                sentList.add(entry.getTid());
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, null, null, null, null, null);
+            try {
+
+
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    SentTrajectoryEntry entry = getEntryFromCursor(cursor);
+                    if (entry.getIsSent()) {
+                        sentList.add(entry.getTid());
+                    }
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
             }
-            isEOF = cursor.moveToNext();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return sentList;
     }

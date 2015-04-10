@@ -85,7 +85,7 @@ public class BeginRecordingActivity extends Activity {
      * @param Checked
      */
     @CheckedChange({R.id.no_companion, R.id.not_alone})
-    public void onCompanionRadioCheckChanged(CompoundButton Checked) {
+    protected void onCompanionRadioCheckChanged(CompoundButton Checked) {
 
         if (mRadioNoCompanion.isChecked()) {
             mCompanionList.setVisibility(View.GONE);
@@ -99,7 +99,7 @@ public class BeginRecordingActivity extends Activity {
      * @param clicked
      */
     @Click(R.id.ok_button)
-    public void onOkButtonClicked(View clicked) {
+    protected void onOkButtonClicked(View clicked) {
 
         final String title = mTitleText.getText().toString();
         final String memo = mMemoText.getText().toString();

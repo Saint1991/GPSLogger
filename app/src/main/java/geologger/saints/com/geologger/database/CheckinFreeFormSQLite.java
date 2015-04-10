@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
@@ -45,16 +46,21 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
     public boolean insert(String tid, String placeName, String timestamp, float latitude, float longitude) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        boolean result = false;
 
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(CheckinFreeFormEntry.TID, tid);
-        insertValues.put(CheckinFreeFormEntry.PLACENAME, placeName);
-        insertValues.put(CheckinFreeFormEntry.TIMESTAMP, timestamp);
-        insertValues.put(CheckinFreeFormEntry.LATITUDE, latitude);
-        insertValues.put(CheckinFreeFormEntry.LONGITUDE, longitude);
-
-        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
-        db.close();
+        try {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(CheckinFreeFormEntry.TID, tid);
+            insertValues.put(CheckinFreeFormEntry.PLACENAME, placeName);
+            insertValues.put(CheckinFreeFormEntry.TIMESTAMP, timestamp);
+            insertValues.put(CheckinFreeFormEntry.LATITUDE, latitude);
+            insertValues.put(CheckinFreeFormEntry.LONGITUDE, longitude);
+            result = db.insert(TABLENAME, null, insertValues) != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -101,8 +107,15 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
     public int removeByTid(String tid) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removedCount = db.delete(TABLENAME, CheckinFreeFormEntry.TID + "=?", new String[]{tid});
-        db.close();
+        int removedCount = -1;
+
+        try {
+            removedCount = db.delete(TABLENAME, CheckinFreeFormEntry.TID + "=?", new String[]{tid});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return removedCount;
     }
@@ -115,10 +128,17 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
     public int removeByTimestamp(String timestamp) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removeCount = db.delete(TABLENAME, CheckinFreeFormEntry.TIMESTAMP + "=?", new String[]{timestamp});
-        db.close();
+        int removedCount = -1;
 
-        return removeCount;
+        try {
+            removedCount = db.delete(TABLENAME, CheckinFreeFormEntry.TIMESTAMP + "=?", new String[]{timestamp});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
+
+        return removedCount;
     }
 
     //endregion
@@ -136,8 +156,8 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
 
         List<CheckinFreeFormEntry> ret = new ArrayList<CheckinFreeFormEntry>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        if (db.isOpen()) {
 
+        try {
             StringBuilder limitBuilder = new StringBuilder();
             if (limit > 0) {
                 if (offset > 0) {
@@ -148,14 +168,23 @@ public class CheckinFreeFormSQLite implements IRemoveBy {
             String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
 
             Cursor cursor = db.query(TABLENAME, null, CheckinFreeFormEntry.TID + "=?", new String[]{tid}, null, null, CheckinFreeFormEntry.TIMESTAMP + " ASC", limitStr);
+            try {
 
-            boolean isEOF = cursor.moveToFirst();
-            while (isEOF) {
-                CheckinFreeFormEntry entry = getEntryFromCursor(cursor);
-                ret.add(entry);
-                isEOF = cursor.moveToNext();
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    CheckinFreeFormEntry entry = getEntryFromCursor(cursor);
+                    ret.add(entry);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
             }
-            cursor.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             db.close();
         }
 

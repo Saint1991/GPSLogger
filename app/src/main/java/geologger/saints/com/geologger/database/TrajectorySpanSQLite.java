@@ -3,6 +3,7 @@ package geologger.saints.com.geologger.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
@@ -39,13 +40,18 @@ public class TrajectorySpanSQLite  {
     public boolean insert(String tid, String begin) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        boolean result = false;
 
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(TrajectorySpanEntry.TID, tid);
-        insertValues.put(TrajectorySpanEntry.BEGIN, begin);
-
-        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
-        db.close();
+        try {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(TrajectorySpanEntry.TID, tid);
+            insertValues.put(TrajectorySpanEntry.BEGIN, begin);
+            result = db.insert(TABLENAME, null, insertValues) != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -70,34 +76,47 @@ public class TrajectorySpanSQLite  {
     public boolean setEnd(String tid, String end) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
-        TrajectorySpanEntry entry = null;
-        if (cursor.moveToFirst()) {
-            entry = getEntryFromCursor(cursor);
-        }
-
-        String target = null;
-        if (entry == null) {
-            target = getLoggingTid();
-        }
-
-        if (target == null && entry == null) {
-            return false;
-        }
-
         boolean result = false;
-        ContentValues updateValues = new ContentValues();
-        if (entry != null) {
-            updateValues.put(TrajectorySpanEntry.END, end);
-            result = db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
-        } else if (target != null) {
-            updateValues.put(TrajectorySpanEntry.TID, target);
-            updateValues.put(TrajectorySpanEntry.END, end);
-            result = db.insert(TABLENAME, null, updateValues) != -1;
-        }
+        try {
 
-        db.close();
+            Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
+            try {
+
+                TrajectorySpanEntry entry = null;
+                if (cursor.moveToFirst()) {
+                    entry = getEntryFromCursor(cursor);
+                }
+
+                String target = null;
+                if (entry == null) {
+                    target = getLoggingTid();
+                }
+
+                if (target == null && entry == null) {
+                    return false;
+                }
+
+                ContentValues updateValues = new ContentValues();
+                if (entry != null) {
+                    updateValues.put(TrajectorySpanEntry.END, end);
+                    result = db.update(TABLENAME, updateValues, TrajectorySpanEntry.TID + "=?", new String[]{tid}) == 1;
+                } else if (target != null) {
+                    updateValues.put(TrajectorySpanEntry.TID, target);
+                    updateValues.put(TrajectorySpanEntry.END, end);
+                    result = db.insert(TABLENAME, null, updateValues) != -1;
+                }
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -126,6 +145,43 @@ public class TrajectorySpanSQLite  {
     //region find
 
     /**
+     * Get timestamp of begining and end of the trajectory that has the passed tid
+     * [0] => begin, [1] => end
+     * if not found, null is returned
+     * @param tid
+     * @return
+     */
+    public String[] getStartAndEndTimestamp(String tid) {
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        String[] timestamps = new String[2];
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, "1");
+            try {
+                if (!cursor.moveToFirst()) {
+                    return null;
+                }
+
+                timestamps[0] = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.BEGIN));
+                timestamps[1] = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.END));
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
+
+        return timestamps;
+    }
+
+    /**
      * Check if the record that has passed tid has end time value
      * that means check if the logging of the trajectory has been completed
      * @param tid
@@ -134,19 +190,31 @@ public class TrajectorySpanSQLite  {
     public boolean isEnd(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
+        String end = null;
+        try {
 
-        if (!cursor.moveToFirst()) {
-            return false;
+            Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
+            try {
+
+                if (!cursor.moveToFirst()) {
+                    return false;
+                }
+
+                end = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.END));
+                if (end == null) {
+                    return false;
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-
-        String end = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.END));
-        if (end == null) {
-            return false;
-        }
-
-        cursor.close();
-        db.close();
 
         end = end.toLowerCase();
         return end != "null";
@@ -158,12 +226,26 @@ public class TrajectorySpanSQLite  {
      * @return
      */
     public boolean isExistTid(String tid) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
 
-        boolean isExist = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        boolean isExist = true;
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, TrajectorySpanEntry.TID + "=?", new String[]{tid}, null, null, null, null);
+            try {
+                isExist = cursor.getCount() > 0;
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return isExist;
     }
@@ -176,23 +258,36 @@ public class TrajectorySpanSQLite  {
     public String getLoggingTid() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
+        String tid = null;
+        try {
 
-        if (!cursor.moveToFirst()) {
-            cursor.close();
+            Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
+            try {
+
+                if (!cursor.moveToFirst()) {
+                    cursor.close();
+                    db.close();
+                    return null;
+                }
+
+                tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
+                if (tid.length() == 0 || tid == null) {
+                    cursor.close();
+                    db.close();
+                    return null;
+                }
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             db.close();
-            return null;
         }
-
-        String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
-        if (tid.length() == 0 || tid == null) {
-            cursor.close();
-            db.close();
-            return null;
-        }
-
-        cursor.close();
-        db.close();
 
         return tid;
     }
@@ -208,25 +303,36 @@ public class TrajectorySpanSQLite  {
         List<TrajectorySpanEntry> ret = new ArrayList<TrajectorySpanEntry>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        StringBuilder limitBuilder = new StringBuilder();
-        if (limit > 0) {
-            if (offset > 0) {
-                limitBuilder.append(offset + ", ");
+        try {
+
+            StringBuilder limitBuilder = new StringBuilder();
+            if (limit > 0) {
+                if (offset > 0) {
+                    limitBuilder.append(offset + ", ");
+                }
+                limitBuilder.append(limit);
             }
-            limitBuilder.append(limit);
-        }
-        String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
+            String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
 
-        Cursor cursor = db.query(TABLENAME, null, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC", limitStr);
+            Cursor cursor = db.query(TABLENAME, null, null, null, null, null, TrajectorySpanEntry.BEGIN + " ASC", limitStr);
+            try {
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    TrajectorySpanEntry entry = getEntryFromCursor(cursor);
+                    ret.add(entry);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
 
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            TrajectorySpanEntry entry = getEntryFromCursor(cursor);
-            ret.add(entry);
-            isEOF = cursor.moveToNext();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return ret;
     }
@@ -246,17 +352,28 @@ public class TrajectorySpanSQLite  {
     public List<String> getTidList() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, null, null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
-
         List<String> ret = new ArrayList<String>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
-            ret.add(tid);
-            isEOF = cursor.moveToNext();
+        try {
+
+            Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, null, null, null, null, TrajectorySpanEntry.BEGIN + " DESC");
+            try {
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
+                    ret.add(tid);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return ret;
     }
@@ -268,16 +385,31 @@ public class TrajectorySpanSQLite  {
     public List<String> getLoggingFinishedTidList() {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NOT NULL", null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
-
         List<String> ret = new ArrayList<String>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
-            ret.add(tid);
-            isEOF = cursor.moveToNext();
+        try {
+
+            Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NOT NULL", null, null, null, TrajectorySpanEntry.BEGIN + " ASC");
+            try {
+
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
+                    ret.add(tid);
+                    isEOF = cursor.moveToNext();
+                }
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-        cursor.close();
+
         db.close();
 
         return ret;

@@ -16,17 +16,21 @@ public class TimestampUtil {
 
     private TimestampUtil() {}
 
+
+    public static String getTimestamp(Timestamp timestamp) {
+        String timestampStr = timestamp.toString();
+        return timestampStr.substring(0, timestampStr.indexOf("."));
+    }
+
     /**
      * 現在時刻に応じたtimestamp文字列を取得します
      * @return 現在時刻に対応するtimestamp文字列
      */
     public static String getTimestamp() {
-        Date now = new Date();
-        long time = now.getTime();
-        Timestamp timestamp = new Timestamp(time);
-        String timestampStr = timestamp.toString();
-        return timestampStr.substring(0, timestampStr.indexOf("."));
+        long time = System.currentTimeMillis();
+        return getTimestamp(new Timestamp(time));
     }
+
 
     /**
      *
@@ -34,9 +38,7 @@ public class TimestampUtil {
      * @return　引数に与えた時刻に対応するtimestamp文字列
      */
     public static String getTimestamp(long time) {
-        Timestamp timestamp = new Timestamp(time);
-        String timestampStr = timestamp.toString();
-        return timestampStr.substring(0, timestampStr.indexOf("."));
+        return getTimestamp(new Timestamp(time));
     }
 
     public static Date parseTimestamp(String timestamp) {
@@ -63,7 +65,7 @@ public class TimestampUtil {
      * @param to
      * @return
      */
-    public static long calcPassedSec(String from, String to) {
+    public static float calcPassedSec(String from, String to) {
 
         Date fromDate = parseTimestamp(from);
         Date toDate = parseTimestamp(to);
@@ -72,7 +74,7 @@ public class TimestampUtil {
             return -1L;
         }
 
-        long passedSec = (toDate.getTime() - fromDate.getTime()) / 1000;
+        float passedSec = (toDate.getTime() - fromDate.getTime()) / 1000.0F;
         return passedSec;
     }
 }

@@ -21,6 +21,8 @@
     <string name="cancel">キャンセル</string>
     <string name="yes">はい</string>
     <string name="no">いいえ</string>
+    <string name="ok">OK</string>
+    <string name="gps">GPS</string>
     <string name="detail">詳細</string>
     <string name="delete">削除</string>
     <string name="send">送信</string>

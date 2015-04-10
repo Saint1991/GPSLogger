@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
@@ -43,18 +44,23 @@ public class CheckinSQLite implements IRemoveBy {
     public boolean insert(String tid, String placeId, String categoryId, String timestamp, float latitude, float longitude, String placeName) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        boolean result = false;
 
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(CheckinEntry.TID, tid);
-        insertValues.put(CheckinEntry.PLACEID, placeId);
-        insertValues.put(CheckinEntry.CATEGORYID, categoryId);
-        insertValues.put(CheckinEntry.TIMESTAMP, timestamp);
-        insertValues.put(CheckinEntry.LATITUDE, latitude);
-        insertValues.put(CheckinEntry.LONGITUDE, longitude);
-        insertValues.put(CheckinEntry.PLACENAME, placeName);
-
-        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
-        db.close();
+        try {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(CheckinEntry.TID, tid);
+            insertValues.put(CheckinEntry.PLACEID, placeId);
+            insertValues.put(CheckinEntry.CATEGORYID, categoryId);
+            insertValues.put(CheckinEntry.TIMESTAMP, timestamp);
+            insertValues.put(CheckinEntry.LATITUDE, latitude);
+            insertValues.put(CheckinEntry.LONGITUDE, longitude);
+            insertValues.put(CheckinEntry.PLACENAME, placeName);
+            result = db.insert(TABLENAME, null, insertValues) != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -102,8 +108,14 @@ public class CheckinSQLite implements IRemoveBy {
     public int removeByTid(String tid) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removedCount = db.delete(TABLENAME, CheckinEntry.TID + "=?", new String[]{tid});
-        db.close();
+        int removedCount = -1;
+        try {
+            removedCount = db.delete(TABLENAME, CheckinEntry.TID + "=?", new String[]{tid});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return removedCount;
     }
@@ -116,10 +128,16 @@ public class CheckinSQLite implements IRemoveBy {
     public int removeByTimestamp(String timestamp) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removeCount = db.delete(TABLENAME, CheckinEntry.TIMESTAMP + "=?", new String[]{timestamp});
-        db.close();
+        int removedCount = -1;
+        try {
+            removedCount = db.delete(TABLENAME, CheckinEntry.TIMESTAMP + "=?", new String[]{timestamp});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
-        return removeCount;
+        return removedCount;
     }
 
     //endregion
@@ -137,7 +155,8 @@ public class CheckinSQLite implements IRemoveBy {
 
         List<CheckinEntry> ret = new ArrayList<CheckinEntry>();
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        if (db.isOpen()) {
+
+        try {
 
             StringBuilder limitBuilder = new StringBuilder();
             if (limit > 0) {
@@ -149,14 +168,22 @@ public class CheckinSQLite implements IRemoveBy {
             String limitStr = limitBuilder.length() == 0 ? null : limitBuilder.toString();
 
             Cursor cursor = db.query(TABLENAME, null, CheckinEntry.TID + "=?", new String[]{tid}, null, null, CheckinEntry.TIMESTAMP + " ASC", limitStr);
-
-            boolean isEOF = cursor.moveToFirst();
-            while (isEOF) {
-                CheckinEntry entry = getEntryFromCursor(cursor);
-                ret.add(entry);
-                isEOF = cursor.moveToNext();
+            try {
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    CheckinEntry entry = getEntryFromCursor(cursor);
+                    ret.add(entry);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
             }
-            cursor.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             db.close();
         }
 
@@ -170,17 +197,31 @@ public class CheckinSQLite implements IRemoveBy {
     public ArrayList<CheckinEntry> getCheckinArrayList(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, CheckinEntry.TID + "=?", new String[]{tid}, null, null, CheckinEntry.TIMESTAMP + " ASC");
-
         ArrayList<CheckinEntry> ret = new ArrayList<CheckinEntry>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            CheckinEntry entry = getEntryFromCursor(cursor);
-            ret.add(entry);
-            isEOF = cursor.moveToNext();
+
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, CheckinEntry.TID + "=?", new String[]{tid}, null, null, CheckinEntry.TIMESTAMP + " ASC");
+
+            try {
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    CheckinEntry entry = getEntryFromCursor(cursor);
+                    ret.add(entry);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-        cursor.close();
-        db.close();
+
 
         return ret;
     }

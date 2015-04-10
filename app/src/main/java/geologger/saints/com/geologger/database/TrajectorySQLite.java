@@ -3,6 +3,7 @@ package geologger.saints.com.geologger.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.location.LocationManager;
 
 import org.androidannotations.annotations.Bean;
@@ -46,16 +47,21 @@ public class TrajectorySQLite {
     public boolean insert(String tid, float latitude, float longitude, String timestamp, boolean isGpsOn) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        boolean result = false;
 
-        ContentValues insertValues = new ContentValues();
-        insertValues.put(TrajectoryEntry.TID, tid);
-        insertValues.put(TrajectoryEntry.LATITUDE, latitude);
-        insertValues.put(TrajectoryEntry.LONGITUDE, longitude);
-        insertValues.put(TrajectoryEntry.TIMESTAMP, timestamp);
-        insertValues.put(TrajectoryEntry.ISGPSON, isGpsOn);
-
-        boolean result = db.insert(TABLENAME, null, insertValues) != -1;
-        db.close();
+        try {
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(TrajectoryEntry.TID, tid);
+            insertValues.put(TrajectoryEntry.LATITUDE, latitude);
+            insertValues.put(TrajectoryEntry.LONGITUDE, longitude);
+            insertValues.put(TrajectoryEntry.TIMESTAMP, timestamp);
+            insertValues.put(TrajectoryEntry.ISGPSON, isGpsOn);
+            result = db.insert(TABLENAME, null, insertValues) != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return result;
     }
@@ -100,8 +106,14 @@ public class TrajectorySQLite {
     public int removeByTid(String tid) {
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int removedCount = db.delete(TABLENAME, TrajectoryEntry.TID + "=?", new String[]{tid});
-        db.close();
+        int removedCount = -1;
+        try {
+            removedCount = db.delete(TABLENAME, TrajectoryEntry.TID + "=?", new String[]{tid});
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return removedCount;
     }
@@ -118,14 +130,28 @@ public class TrajectorySQLite {
     public TrajectoryEntry getFirstEntry(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " ASC", "1");
-        if (!cursor.moveToFirst()) {
-            return null;
-        }
+        TrajectoryEntry entry = null;
+        try {
 
-        TrajectoryEntry entry = getEntryFromCursor(cursor);
-        cursor.close();
-        db.close();
+            Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " ASC", "1");
+            try {
+                if (!cursor.moveToFirst()) {
+                    return null;
+                }
+
+                entry = getEntryFromCursor(cursor);
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return entry;
     }
@@ -136,38 +162,64 @@ public class TrajectorySQLite {
      * @return
      */
     public TrajectoryEntry getLastEntry(String tid) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " DESC", "1");
-        if (!cursor.moveToFirst()) {
-            return null;
-        }
 
-        TrajectoryEntry entry = getEntryFromCursor(cursor);
-        cursor.close();
-        db.close();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        TrajectoryEntry entry = null;
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " DESC", "1");
+            try {
+
+                if (!cursor.moveToFirst()) {
+                    return null;
+                }
+                entry = getEntryFromCursor(cursor);
+
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
 
         return entry;
     }
 
     /**
-     * Get all entries that has passed tid as a list
+     * Get all entries that have passed tid as a list
      * @param tid
      * @return
      */
     public List<TrajectoryEntry> getTrajectory(String tid) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " ASC");
-
         List<TrajectoryEntry> ret = new ArrayList<TrajectoryEntry>();
-        boolean isEOF = cursor.moveToFirst();
-        while (isEOF) {
-            TrajectoryEntry entry = getEntryFromCursor(cursor);
-            ret.add(entry);
-            isEOF = cursor.moveToNext();
+        try {
+
+            Cursor cursor = db.query(TABLENAME, null, TrajectoryEntry.TID + "=?", new String[]{tid}, null, null, TrajectoryEntry.TIMESTAMP + " ASC");
+            try {
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    TrajectoryEntry entry = getEntryFromCursor(cursor);
+                    ret.add(entry);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return ret;
     }

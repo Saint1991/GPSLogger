@@ -73,7 +73,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
     //region initialize
 
     @UiThread
-    public void updateListView() {
+    protected void updateListView() {
 
         if (mFourSquarePoiList == null || mFourSquarePoiList.size() == 0) {
             return;
@@ -81,6 +81,10 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
         FragmentManager fManager = PoiConfirmationActivity.this.getFragmentManager();
         PoiListFragment fragment = (PoiListFragment)fManager.findFragmentById(R.id.poi_candidates);
+        if (fragment == null) {
+            return;
+        }
+
         ListView poiList = fragment.getListView();
         if (poiList == null) {
             return;
@@ -152,7 +156,7 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
     //region FreeFormSelected
 
     @Click(R.id.button_to_free_form)
-    public void showFreeFormDialog() {
+    protected void showFreeFormDialog() {
 
         final EditText inputForm = new EditText(this);
         inputForm.requestFocus();

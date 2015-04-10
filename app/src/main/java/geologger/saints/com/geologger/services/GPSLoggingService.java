@@ -10,6 +10,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EService;
 
@@ -22,7 +24,10 @@ import geologger.saints.com.geologger.activities.RecordActivity_;
 import geologger.saints.com.geologger.activities.SettingsActivity;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
+import geologger.saints.com.geologger.database.TrajectoryStatisticalInformationSQLite;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
+import geologger.saints.com.geologger.models.TrajectoryStatisticalEntry;
+import geologger.saints.com.geologger.statistics.StatisticsMonitor;
 import geologger.saints.com.geologger.utils.Position;
 import geologger.saints.com.geologger.utils.TimestampUtil;
 
@@ -42,6 +47,14 @@ public class GPSLoggingService extends Service {
 
     @Bean
     TrajectorySpanSQLite mTrajectorySpanDbHandler;
+
+    @Bean
+    TrajectoryStatisticalInformationSQLite mTrajectoryStatisticalInformationDbHandler;
+
+    @Bean
+    StatisticsMonitor mStatisticsMonitor;
+
+
 
     public GPSLoggingService() {}
 
@@ -72,6 +85,7 @@ public class GPSLoggingService extends Service {
         this.mTimer.cancel();
         this.mTrajectorySpanDbHandler.setEnd(this.mTid, TimestampUtil.getTimestamp());
         this.mTid = null;
+        this.mStatisticsMonitor.clearPrevious();
 
         stopForeground(true);
     }
@@ -117,6 +131,15 @@ public class GPSLoggingService extends Service {
                 float[] position = Position.getPosition(getApplicationContext());
                 float latitude = position[0];
                 float longitude = position[1];
+
+                if (mStatisticsMonitor != null && mTrajectoryStatisticalInformationDbHandler != null && mTid != null) {
+                    LatLng currentPosition = new LatLng(latitude, longitude);
+                    TrajectoryStatisticalEntry entry = mStatisticsMonitor.culcEntryInfoFromPrevious(mTid, currentPosition);
+                    if (entry != null) {
+                        mTrajectoryStatisticalInformationDbHandler.insert(entry);
+                    }
+                }
+
                 if (mTrajectoryDbHandler.insert(mTid, latitude, longitude)) {
                     Intent broadcastIntent = new Intent(ACTION);
                     broadcastIntent.putExtra(Position.LATITUDE, latitude);

@@ -93,7 +93,7 @@ public class LogListActivity extends Activity {
     //region lifecycle
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
 
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
@@ -233,7 +233,7 @@ public class LogListActivity extends Activity {
     //This is called when the SELECTION Button is Clicked
     //Remove Selected entries from view and DB
     @Click(R.id.log_delete_button)
-    public void deleteSelectedLog() {
+    protected void deleteSelectedLog() {
 
         //If not SELECTION mode, finish
         if (!mode.equals(MODE.SELECTION) || mLogList == null) {
@@ -287,7 +287,7 @@ public class LogListActivity extends Activity {
     }
 
     @Click(R.id.data_resend_button)
-    public void sendData() {
+    protected void sendData() {
 
         //If not SELECTION mode, finish
         if (!mode.equals(MODE.SELECTION) || mLogList == null) {
@@ -330,7 +330,7 @@ public class LogListActivity extends Activity {
     }
 
     @Click(R.id.log_delete_cancel_button)
-    public void cancelLogDeleteMode() {
+    protected void cancelLogDeleteMode() {
         switchMode(MODE.NORMAL);
     }
 

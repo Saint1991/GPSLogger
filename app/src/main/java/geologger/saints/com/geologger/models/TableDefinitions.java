@@ -19,6 +19,8 @@ public class TableDefinitions {
     public static final String SENTTRAJECTORY = "sent_trajectory";
     public static final String CHECKIN_FREE_FORM = "checkin_free_form";
     public static final String TRAJECTORY_PROPERTIES = "trajectory_property";
+    public static final String TRAJECTORY_STATISTICAL_INFORMATION = "trajectory_statistical_information";
+    public static final String PHOTOS = "photos";
 
     public static final HashMap <String, LinkedHashMap<String, String>> tables = new HashMap<String, LinkedHashMap<String, String>>() {
 
@@ -37,7 +39,7 @@ public class TableDefinitions {
         //companionテーブルの定義
         final LinkedHashMap<String, String> COMPANIONTABLE = new LinkedHashMap<String, String>() {
             {put(CompanionEntry.TID, "TEXT PRIMARY KEY");}
-            {put(CompanionEntry.COMPANION, "TEXT");}
+            {put(CompanionEntry.COMPANION, "TEXT NOT NULL");}
             {put(CompanionEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
         };
         {put(COMPANION, COMPANIONTABLE);}
@@ -45,12 +47,12 @@ public class TableDefinitions {
         //checkinテーブルの定義
         final LinkedHashMap<String, String> CHECKINTABLE = new LinkedHashMap<String, String>() {
             {put(CheckinEntry.TID, "TEXT");}
-            {put(CheckinEntry.PLACEID, "TEXT");}
-            {put(CheckinEntry.CATEGORYID, "TEXT");}
+            {put(CheckinEntry.PLACEID, "TEXT NOT NULL");}
+            {put(CheckinEntry.CATEGORYID, "TEXT DEFAULT NULL");}
             {put(CheckinEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
             {put(CheckinEntry.LATITUDE, "REAL");}
             {put(CheckinEntry.LONGITUDE, "REAL");}
-            {put(CheckinEntry.PLACENAME, "TEXT");}
+            {put(CheckinEntry.PLACENAME, "TEXT NOT NULL");}
             {put("PRIMARY KEY(" + CheckinEntry.TID + ", " + CheckinEntry.TIMESTAMP + ")", "");}
         };
         {put(CHECKIN, CHECKINTABLE);}
@@ -58,8 +60,8 @@ public class TableDefinitions {
         //フリーフォームのチェックイン入力用
         final LinkedHashMap<String, String> CHECKINFREEFORMTABLE = new LinkedHashMap<String, String>() {
             {put(CheckinFreeFormEntry.TID, "TEXT");}
-            {put(CheckinFreeFormEntry.PLACENAME, "TEXT");}
-            {put(CheckinFreeFormEntry.TIMESTAMP, "TEXT");}
+            {put(CheckinFreeFormEntry.PLACENAME, "TEXT NOT NULL");}
+            {put(CheckinFreeFormEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
             {put(CheckinFreeFormEntry.LATITUDE, "REAL");}
             {put(CheckinFreeFormEntry.LONGITUDE, "REAL");}
             {put("PRIMARY KEY (" + CheckinFreeFormEntry.TID + ", " + CheckinFreeFormEntry.TIMESTAMP + ")" , "");}
@@ -88,6 +90,28 @@ public class TableDefinitions {
             {put(TrajectoryPropertyEntry.DESCRIPTION, "TEXT DEFAULT NULL");}
         };
         {put(TRAJECTORY_PROPERTIES, TRAJECTORY_PROPERTIES_TABLE);}
+
+        //トラジェクトリの統計情報
+        final LinkedHashMap<String, String> TRAJECTORY_STATISTICAL_INFORMATION_TABLE = new LinkedHashMap<String, String>() {
+            {put(TrajectoryStatisticalEntry.TID, "TEXT");}
+            {put(TrajectoryStatisticalEntry.DURATION, "REAL NOT NULL");}
+            {put(TrajectoryStatisticalEntry.DISTANCE, "REAL NOT NULL");}
+            {put(TrajectoryStatisticalEntry.SPEED, "REAL NOT NULL");}
+            {put(TrajectoryStatisticalEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
+            {put("PRIMARY KEY (" + TrajectoryStatisticalEntry.TID + ", " + TrajectoryStatisticalEntry.TIMESTAMP + ")" , "");}
+        };
+        {put(TRAJECTORY_STATISTICAL_INFORMATION, TRAJECTORY_STATISTICAL_INFORMATION_TABLE);}
+
+        //写真情報
+        final LinkedHashMap<String, String> PHOTO_TABLE = new LinkedHashMap<String, String>() {
+            {put(PhotoEntry.TID, "TEXT");}
+            {put(PhotoEntry.LATITUDE, "REAL NOT NULL");}
+            {put(PhotoEntry.LONGITUDE, "REAL NOT NULL");}
+            {put(PhotoEntry.TIMESTAMP, "TIMESTAMP DEFAULT CURRENT_TIMESTAMP");}
+            {put(PhotoEntry.FILEPATH, "TEXT NOT NULL");}
+            {put(PhotoEntry.MEMO, "TEXT");}
+        };
+        {put(PHOTOS, PHOTO_TABLE);}
     };
 
     public static Set<String> tables() {

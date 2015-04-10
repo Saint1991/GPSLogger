@@ -29,7 +29,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String SECONDURL = "second_url";
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new ParameterSettingFragment()).commit();
     }

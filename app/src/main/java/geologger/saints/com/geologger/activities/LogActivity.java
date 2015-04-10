@@ -24,9 +24,9 @@ import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
+import geologger.saints.com.geologger.models.TrajectoryStatisticalEntry;
 import geologger.saints.com.geologger.uicomponents.PlayMapFragment;
 import geologger.saints.com.geologger.uicomponents.PlayMapFragment_;
-import geologger.saints.com.geologger.uicomponents.StatisticFragment;
 import geologger.saints.com.geologger.uicomponents.StatisticFragment_;
 import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 
@@ -123,8 +123,11 @@ public class LogActivity extends FragmentActivity implements FragmentTabHost.OnT
 
         TabHost.TabSpec statisticsSpec = mTabHost.newTabSpec(STATISTICS);
         statisticsSpec.setIndicator(resources.getString(R.string.statistics));
+        Intent intent = getIntent();
         Bundle statisticsBundle = new Bundle();
-
+        if (intent != null) {
+            statisticsBundle.putString(TrajectoryStatisticalEntry.TID, intent.getStringExtra(TrajectoryStatisticalEntry.TID));
+        }
 
         mTabHost.addTab(mapSpec, PlayMapFragment_.class, mapBundle);
         mTabHost.addTab(statisticsSpec, StatisticFragment_.class, statisticsBundle);

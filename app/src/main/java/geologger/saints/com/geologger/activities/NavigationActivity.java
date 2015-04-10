@@ -168,7 +168,7 @@ public class NavigationActivity extends FragmentActivity {
     //region updateview
 
     @UiThread
-    public void afterSearching() {
+    protected void afterSearching() {
         drawNavigationLine();
         setDestinationText();
         setDistanceText();
@@ -176,14 +176,14 @@ public class NavigationActivity extends FragmentActivity {
     }
 
     @UiThread
-    public void drawNavigationLine() {
+    protected void drawNavigationLine() {
         if (mMap != null && mMapWorker != null && mSearchResult != null) {
             mMapWorker.drawLine(mSearchResult.getPolyLinePoints());
         }
     }
 
     @UiThread
-    public void setDestinationText() {
+    protected void setDestinationText() {
         String destination = mSearchResult.getDestination();
         if (destination != null) {
             mDestinationText.setText(mSearchResult.getDestination());
@@ -198,7 +198,7 @@ public class NavigationActivity extends FragmentActivity {
     }
 
     @UiThread
-    public void setDurationText() {
+    protected void setDurationText() {
         int minutes = mSearchResult.getTotalMinutes();
         mDurationText.setText(minutes + " min");
     }
@@ -208,7 +208,7 @@ public class NavigationActivity extends FragmentActivity {
     //region navigationDialog
 
     @Click(R.id.instruction_button)
-    public void instructionButtonClicked() {
+    protected void instructionButtonClicked() {
 
         if (mSearchResult == null) {
             return;
@@ -233,7 +233,7 @@ public class NavigationActivity extends FragmentActivity {
     //region utility
 
     @UiThread
-    public void showAlertMessage() {
+    protected void showAlertMessage() {
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.network_connectivity_alert), Toast.LENGTH_SHORT).show();
     }
 
