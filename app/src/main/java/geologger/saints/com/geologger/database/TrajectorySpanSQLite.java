@@ -415,6 +415,38 @@ public class TrajectorySpanSQLite  {
         return ret;
     }
 
+    /**
+     * Get the number of Logs
+     * @return
+     */
+    public int getLogCount() {
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        String columnName = "COUNT(*)";
+        int count = -1;
+
+        try {
+
+            Cursor cursor = db.query(TABLENAME, new String[]{columnName}, null, null, null, null, null);
+            try {
+                if (cursor.moveToFirst()) {
+                    count = cursor.getInt(cursor.getColumnIndex(columnName));
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
+
+        return count;
+    }
+
     //endregion
 
     //region utility

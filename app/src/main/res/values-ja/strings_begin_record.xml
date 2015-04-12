@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="memo">メモ</string>
     <string name="companion">同伴者</string>
     <string name="companion_alert">項目が1つも選択されていません．</string>
     <string name="no_companion">同伴者なし</string>

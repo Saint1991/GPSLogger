@@ -14,17 +14,22 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.CheckedChange;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.TrajectoryPropertyEntry;
 
 @EActivity
 public class BeginRecordingActivity extends Activity {
+
+    @Bean
+    TrajectorySpanSQLite mTrajectorySpanSQLite;
 
     @ViewById(R.id.title)
     EditText mTitleText;
@@ -101,18 +106,18 @@ public class BeginRecordingActivity extends Activity {
     @Click(R.id.ok_button)
     protected void onOkButtonClicked(View clicked) {
 
-        final String title = mTitleText.getText().toString();
+        String title = mTitleText.getText().toString();
         final String memo = mMemoText.getText().toString();
-
-        if (title == null || title.length() < 1) {
-            Toast.makeText(getApplicationContext(), getResources().getText(R.string.title_alert), Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         String companion = getCompanionInput();
         if (companion == null || companion.length()  < 1) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.companion_alert), Toast.LENGTH_SHORT).show();
             return;
+        }
+
+        if (title == null || title.length() < 1) {
+            int logCount = mTrajectorySpanSQLite.getLogCount();
+            title = "log" + ++logCount;
         }
 
         Intent retIntent = new Intent();

@@ -1,7 +1,9 @@
 package geologger.saints.com.geologger.map;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
+import android.location.Location;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,7 +42,7 @@ public class BaseMapWorker {
     Activity mActivity;
 
 
-    public BaseMapWorker() {}
+    public BaseMapWorker() {mUseMyLocation = false;}
 
     //region initialize
     /**
@@ -55,9 +57,7 @@ public class BaseMapWorker {
         mUseMyLocation = useMyLocation;
 
         if (mUseMyLocation) {
-            mMap.setMyLocationEnabled(true);
-            UiSettings settings = mMap.getUiSettings();
-            settings.setCompassEnabled(true);
+            enableMyLocation();
         } else {
             updateCurrentPositionMarker();
         }
@@ -98,7 +98,7 @@ public class BaseMapWorker {
         setMap(map);
 
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        setMyLocationButtonListner();
+        setMyLocationButtonListener();
         mCurrentPositionMarker = null;
     }
 
@@ -193,7 +193,7 @@ public class BaseMapWorker {
      */
     public void updateCurrentPositionMarker(LatLng position) {
 
-        if (mMap == null) {
+        if (mMap == null || mUseMyLocation) {
             return;
         }
 
@@ -201,6 +201,7 @@ public class BaseMapWorker {
             float[] pos = Position.getPosition(mActivity.getApplicationContext());
             position = new LatLng(pos[0], pos[1]);
         }
+
 
         if (mCurrentPositionMarker == null) {
             MarkerOptions marker = new MarkerOptions();
@@ -213,7 +214,7 @@ public class BaseMapWorker {
     }
 
     /**
-     * Draw a marker that represents user's current position with the disignated position
+     * Draw a marker that represents user's current position with the designated position
      * @param latitude
      * @param longitude
      */
@@ -335,9 +336,40 @@ public class BaseMapWorker {
     //region utility
 
     /**
+     * Show MyLocation Button and enable it
+     */
+    public void enableMyLocation() {
+
+        if (mMap != null) {
+
+            mMap.setMyLocationEnabled(true);
+
+            UiSettings settings = mMap.getUiSettings();
+            settings.setCompassEnabled(true);
+            settings.setMyLocationButtonEnabled(true);
+
+            mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+                @Override
+                public void onMyLocationChange(Location location) {
+
+                    try {
+                        Context context = mActivity.getApplicationContext();
+                        Position.savePosition(context, (float)location.getLatitude(), (float)location.getLongitude());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            setMyLocationButtonListener();
+            mUseMyLocation = true;
+        }
+    }
+
+    /**
      * Set MyLocationButtonListener
      */
-    private void setMyLocationButtonListner() {
+    private void setMyLocationButtonListener() {
         if (mMap != null) {
             mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
                 @Override
@@ -357,6 +389,20 @@ public class BaseMapWorker {
         this.mMap = map;
     }
 
+    public boolean isMyLocationEnabled() {
+        return mUseMyLocation;
+    }
     //endregion
+
+    //clear map
+
+    /**
+     * Clear the map If Map is not null
+     */
+    public void clear() {
+        if (mMap != null) {
+            mMap.clear();
+        }
+    }
 
 }

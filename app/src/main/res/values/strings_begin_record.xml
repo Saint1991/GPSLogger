@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="memo">Memo</string>
     <string name="companion">Companion</string>
     <string name="companion_alert">Please check at least one!</string>
     <string name="no_companion">No Companion</string>

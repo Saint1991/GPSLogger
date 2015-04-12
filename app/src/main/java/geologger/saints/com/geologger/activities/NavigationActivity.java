@@ -125,6 +125,7 @@ public class NavigationActivity extends FragmentActivity {
         }
 
         mMapWorker.initMap(mMap, true);
+        mMapWorker.clear();
         mMapWorker.addDestinationMarker(mDestination, mPlaceName, mAddress);
     }
 

@@ -2,11 +2,15 @@ package geologger.saints.com.geologger.activities;
 
 import android.content.Intent;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -20,18 +24,24 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
+import geologger.saints.com.geologger.database.PhotoSQLite;
 import geologger.saints.com.geologger.database.TrajectoryPropertySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 import geologger.saints.com.geologger.models.CompanionEntry;
+import geologger.saints.com.geologger.models.PhotoEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.models.TrajectoryPropertyEntry;
 import geologger.saints.com.geologger.services.GPSLoggingService;
@@ -56,9 +66,12 @@ public class RecordActivity extends FragmentActivity {
     private final int POICONFIRMATIONCODE = 1;
     public static final int RECORDNOTIFICATIONCODE = 2;
     private final int BEGINRECORDINGCODE = 3;
+    private final int CAMERACODE = 4;
+    private final int PREVIEWCODE = 5;
 
     private GoogleMap mMap;
     private String mCurrentTid;
+    private String mCurrentPhotoPath;
 
     @SystemService
     LocationManager mLocationManager;
@@ -82,6 +95,9 @@ public class RecordActivity extends FragmentActivity {
     CheckinFreeFormSQLite mCheckinFreeFormDbHandler;
 
     @Bean
+    PhotoSQLite mPhotoDbHandler;
+
+    @Bean
     ServiceRunningConfirmation mServiceRunningConfirmation;
 
     @Bean
@@ -96,6 +112,7 @@ public class RecordActivity extends FragmentActivity {
     @Bean
     TidGenerator mTidGenerator;
 
+
     @ViewById(R.id.logging_start_button)
     Button mLoggingStartButton;
 
@@ -104,6 +121,9 @@ public class RecordActivity extends FragmentActivity {
 
     @ViewById(R.id.check_in_button)
     Button mCheckinButton;
+
+    @ViewById(R.id.camera_button)
+    ImageButton mCameraButton;
 
     //region LifeCycle
 
@@ -179,7 +199,7 @@ public class RecordActivity extends FragmentActivity {
             return;
         }
 
-        mMapWorker.initMap(mMap, false);
+        mMapWorker.initMap(mMap, true);
 
         //restore map state
         String tid = mTrajectorySpanDbHandler.getLoggingTid();
@@ -205,7 +225,7 @@ public class RecordActivity extends FragmentActivity {
     @Click(R.id.logging_start_button)
     protected void onLoggingStartButtonClicked(View clicked) {
         startLoggingWithEncourageGpsOn();
-        mMapWorker.initMap(mMap, false);
+        mMapWorker.initMap(mMap, true);
     }
 
     /**
@@ -363,8 +383,118 @@ public class RecordActivity extends FragmentActivity {
 
     }
 
-    private void storeCheckinFreeFormResult(Intent data) {
 
+    //endregion
+
+    //region Photo
+
+    @Click(R.id.camera_button)
+    protected void onCameraButtonClicked() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+
+            cameraIntent.addCategory(Intent.CATEGORY_DEFAULT);
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+
+            if (photoFile != null) {
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                startActivityForResult(cameraIntent, CAMERACODE);
+            }
+        }
+    }
+
+    @OnActivityResult(CAMERACODE)
+    protected void onTookAPhoto(int resultCode, Intent data) {
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        Intent previewIntent = new Intent(getApplicationContext(), PreviewActivity_.class);
+        previewIntent.putExtra(PhotoEntry.FILEPATH, mCurrentPhotoPath);
+        startActivityForResult(previewIntent, PREVIEWCODE);
+    }
+
+    @OnActivityResult(PREVIEWCODE)
+    protected void onPreviewResult(int resultCode, final Intent data) {
+
+        if (resultCode != RESULT_OK) {
+            deleteTempPhoto();
+            return;
+        }
+
+        addToGallery();
+
+        final float latitude = data.getFloatExtra(PhotoEntry.LATITUDE, 0.0F);
+        final float longitude = data.getFloatExtra(PhotoEntry.LONGITUDE, 0.0F);
+        final String timestamp = data.getStringExtra(PhotoEntry.TIMESTAMP);
+        final String filePath = data.getStringExtra(PhotoEntry.FILEPATH);
+        final String memo = data.getStringExtra(PhotoEntry.MEMO);
+
+        //地図に写真マーカーを配置する処理
+        
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (mCurrentTid == null) {
+                    mCurrentTid = mTrajectorySpanDbHandler.getLoggingTid();
+                }
+
+                Log.i(TAG, "tid: " + mCurrentTid + " latitude: " + latitude + " longitude: " + longitude + " timestamp: " + timestamp + " filepath: " + filePath + " memo: " + memo);
+                mPhotoDbHandler.insert(mCurrentTid, latitude, longitude, timestamp, filePath, memo);
+            }
+        }).run();
+
+
+
+    }
+
+    private File createImageFile() throws IOException {
+
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timestamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private void addToGallery() {
+
+        if (mCurrentPhotoPath == null) {
+            return;
+        }
+
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File file = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        sendBroadcast(mediaScanIntent);
+    }
+
+    private void deleteTempPhoto() {
+
+        if (mCurrentPhotoPath != null) {
+
+            try {
+                File picture = new File(mCurrentPhotoPath);
+                if (picture.exists()) {
+                    picture.delete();
+                    Log.i(TAG, "Delete a temp Photo");
+                }
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     //endregion
@@ -395,11 +525,11 @@ public class RecordActivity extends FragmentActivity {
     @Receiver(actions = MyLocationListener.ACTION)
     protected void onCurrentPositionUpdated(Intent intent) {
 
-        Log.i(TAG, MyLocationListener.ACTION);
-
-        if (mMap == null || mMapWorker == null) {
+        if (mMap == null || mMapWorker == null || mMapWorker.isMyLocationEnabled()) {
             return;
         }
+
+        Log.i(TAG, MyLocationListener.ACTION);
 
         float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
         float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
@@ -432,11 +562,13 @@ public class RecordActivity extends FragmentActivity {
             mLoggingStartButton.setVisibility(View.GONE);
             mLoggingStopButton.setVisibility(View.VISIBLE);
             mCheckinButton.setVisibility(View.VISIBLE);
+            mCameraButton.setVisibility(View.VISIBLE);
 
         } else {
 
             mLoggingStopButton.setVisibility(View.GONE);
             mCheckinButton.setVisibility(View.GONE);
+            mCameraButton.setVisibility(View.GONE);
             mLoggingStartButton.setVisibility(View.VISIBLE);
         }
     }

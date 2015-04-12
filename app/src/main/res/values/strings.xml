@@ -22,12 +22,14 @@
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="ok">OK</string>
+    <string name="save">Save</string>
     <string name="detail">Details</string>
     <string name="delete">DELETE</string>
     <string name="send">SEND</string>
     <string name="title">Title</string>
     <string name="search">SEARCH</string>
     <string name="keyword">keyword</string>
+    <string name="memo">Memo</string>
     <string name="gps">GPS</string>
     <string name="timestamp">Timestamp</string>
     <string name="searching">Searching...</string>
@@ -42,5 +44,12 @@
     <string name="position_updating">Position Updatinig...</string>
     <string name="current_position">I\'M HERE</string>
     <string name="now_positioning">Now Positioning...</string>
+    <string name="title_activity_preview">PreviewActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Photo -->
+    <string name="photo_saved">Photo Saved!</string>
 
 </resources>

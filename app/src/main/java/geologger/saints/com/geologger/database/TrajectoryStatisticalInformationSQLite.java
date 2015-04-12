@@ -180,7 +180,7 @@ public class TrajectoryStatisticalInformationSQLite {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         try {
 
-            Cursor cursor = db.query(TABLENAME, new String[]{"AVG(" + TrajectoryStatisticalEntry.SPEED + ")"}, TrajectoryStatisticalEntry.TID + "=?", new String[]{tid}, null, null, null);
+            Cursor cursor = db.query(TABLENAME, new String[]{"AVG(" + TrajectoryStatisticalEntry.SPEED + ")"}, TrajectoryStatisticalEntry.TID + "=? AND " + TrajectoryStatisticalEntry.SPEED + " != 0" , new String[]{tid}, null, null, null);
             try {
                 if (cursor.moveToFirst()) {
                     avgSpeed = cursor.getFloat(0);
