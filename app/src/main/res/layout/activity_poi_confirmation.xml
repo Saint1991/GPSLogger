@@ -39,7 +39,7 @@
             android:padding="5dp"
             android:background="@drawable/default_button"
             android:text="@string/free_form"
-            android:textSize="20sp"/>
+            android:textSize="16sp"/>
 
     </LinearLayout>
 

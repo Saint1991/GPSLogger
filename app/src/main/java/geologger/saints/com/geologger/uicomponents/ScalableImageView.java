@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -32,31 +31,68 @@ public class ScalableImageView extends ImageView {
         super(context, attrs, defStyle);
     }
 
+    /**
+     * Set Bitmap From file whose size adjusts to the display size
+     * @param path
+     */
     public void setImageBitmap(String path) {
-        Bitmap image = loadBitmap(path);
-        modifyView(path, image.getWidth(), image.getHeight());
+
+        Display display = ((WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        Bitmap image = loadResizedBitmap(path, size.x, size.y);
+        if (image == null) {
+            return;
+        }
+
+        adjustView(path, size.x, image.getWidth(), image.getHeight());
         setImageBitmap(image);
         invalidate();
     }
 
-    private Bitmap loadBitmap(String path) {
+    public void setImageBitmap(String path, int viewWidth, int viewHeight) {
+
+        Bitmap photo = loadResizedBitmap(path, viewWidth, viewHeight);
+        if (photo == null) {
+            return;
+        }
+
+        adjustView(path, viewWidth, photo.getWidth(), photo.getHeight());
+        setImageBitmap(photo);
+        invalidate();
+    }
+
+    private Bitmap loadResizedBitmap(String path, int width, int height) {
 
         Bitmap ret = null;
 
         try {
 
-            FileInputStream iStream = new FileInputStream(path);
-            ret = BitmapFactory.decodeStream(iStream);
-            iStream.close();
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, options);
 
-        } catch (IOException e) {
+            int scaleH = options.outWidth / width + 1;
+            int scaleV = options.outHeight / height + 1;
+            int scale = Math.max(scaleH, scaleV);
+
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = scale;
+
+            ret = BitmapFactory.decodeFile(path, options);
+
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return ret;
     }
 
-    private void modifyView(String path, int originalBitmapWidth, int originalBitmapHeight) {
+
+    private void adjustView(String path, int viewWidth, int originalBitmapWidth, int originalBitmapHeight) {
 
         try {
 
@@ -67,11 +103,6 @@ public class ScalableImageView extends ImageView {
             float factor;
             Matrix matrix = new Matrix();
             matrix.reset();
-
-            Display display = ((WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int viewWidth = size.x;
 
             switch(orientation) {
                 case 1:
@@ -141,11 +172,6 @@ public class ScalableImageView extends ImageView {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
-
-
-
-
-
-
 }

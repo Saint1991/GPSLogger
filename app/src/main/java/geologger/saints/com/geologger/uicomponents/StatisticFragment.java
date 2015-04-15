@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.CustomLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewDataInterface;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -22,6 +23,7 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -208,8 +210,19 @@ public class StatisticFragment extends Fragment {
         style.setGridColor(appColor);
         style.setHorizontalLabelsColor(appColor);
         style.setVerticalLabelsColor(appColor);
-        style.setNumHorizontalLabels(15);
-        style.setNumVerticalLabels(15);
+        style.setNumHorizontalLabels(10);
+        style.setNumVerticalLabels(10);
+        style.setTextSize(17);
+
+        mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                NumberFormat formatter = NumberFormat.getInstance();
+                formatter.setMaximumIntegerDigits(1);
+                formatter.setMaximumFractionDigits(1);
+                return formatter.format(value);
+            }
+        });
 
         final int thickness = (int)getResources().getDimension(R.dimen.graph_thickness);
         GraphViewSeries.GraphViewSeriesStyle seriesStyle = new GraphViewSeries.GraphViewSeriesStyle(getResources().getColor(R.color.app_color), thickness);

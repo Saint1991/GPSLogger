@@ -29,8 +29,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.database.PhotoSQLite;
 import geologger.saints.com.geologger.map.MapWorker;
 import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.PhotoEntry;
+import geologger.saints.com.geologger.utils.ProgressDialogUtility;
 
 @EFragment
 public class PlayMapFragment extends Fragment {
@@ -43,6 +46,7 @@ public class PlayMapFragment extends Fragment {
     private List<LatLng> mLatLngList = null;
     private List<String> mTimestampList = null;
     private List<CheckinEntry> mCheckinEntryList = null;
+    private List<PhotoEntry> mPhotoEntryList = null;
 
     private final long PLAYINTERVAL = 700L;
     private Timer mTimer = null;
@@ -50,8 +54,15 @@ public class PlayMapFragment extends Fragment {
 
     private GoogleMap mMap;
 
+
     @Bean
     MapWorker mMapWorker;
+
+    @Bean
+    PhotoSQLite mPhotoDbHandler;
+
+    @Bean
+    ProgressDialogUtility mProgressUtil;
 
     @ViewById(R.id.playButton)
     Button mPlayButton;
@@ -66,12 +77,13 @@ public class PlayMapFragment extends Fragment {
     TextView mTimestampIndicator;
 
     //factory method
-    public static PlayMapFragment newInstance(ArrayList<LatLng> latLngList, ArrayList<String> timestampList, ArrayList<CheckinEntry> checkinList) {
+    public static PlayMapFragment newInstance(String tid, ArrayList<LatLng> latLngList, ArrayList<String> timestampList, ArrayList<CheckinEntry> checkinList) {
         PlayMapFragment fragment = new PlayMapFragment();
         Bundle args = new Bundle();
         args.putParcelableArrayList(LATLNGLIST, latLngList);
         args.putStringArrayList(TIMESTAMPLIST, timestampList);
         args.putSerializable(CHECKINLIST, checkinList);
+        args.putString(PhotoEntry.TID, tid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -88,11 +100,18 @@ public class PlayMapFragment extends Fragment {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
+        mProgressUtil.showProgress(getResources().getString(R.string.loading));
+
         Bundle args = getArguments();
         if (args != null) {
             mLatLngList = args.getParcelableArrayList(LATLNGLIST);
             mTimestampList = args.getStringArrayList(TIMESTAMPLIST);
             mCheckinEntryList = (ArrayList<CheckinEntry>)args.getSerializable(CHECKINLIST);
+
+            String tid = args.getString(PhotoEntry.TID);
+            if (tid != null) {
+                mPhotoEntryList = mPhotoDbHandler.getEntryListByTid(tid);
+            }
         }
     }
 
@@ -111,6 +130,7 @@ public class PlayMapFragment extends Fragment {
         //Setup MapView
         setUpMapIfNeeded();
 
+        mProgressUtil.dismissProgress();
     }
 
     @Override
@@ -151,7 +171,6 @@ public class PlayMapFragment extends Fragment {
 
             transaction.add(R.id.map, mapFragment);
             transaction.commit();
-
         }
     }
 
@@ -160,6 +179,7 @@ public class PlayMapFragment extends Fragment {
         mMapWorker.initMap(mMap, firstPosition, BitmapDescriptorFactory.HUE_BLUE, 0.4F);
         mMapWorker.drawLine(mLatLngList);
         mMapWorker.addCheckinMarkers(mCheckinEntryList);
+        mMapWorker.addCameraMarkers(mPhotoEntryList);
     }
 
     private void initSlider() {

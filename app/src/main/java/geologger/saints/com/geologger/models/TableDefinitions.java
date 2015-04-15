@@ -44,7 +44,7 @@ public class TableDefinitions {
         };
         {put(COMPANION, COMPANIONTABLE);}
 
-        //checkinテーブルの定義
+        //checkInテーブルの定義
         final LinkedHashMap<String, String> CHECKINTABLE = new LinkedHashMap<String, String>() {
             {put(CheckinEntry.TID, "TEXT");}
             {put(CheckinEntry.PLACEID, "TEXT NOT NULL");}

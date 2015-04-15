@@ -16,8 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import geologger.saints.com.geologger.R;
+import geologger.saints.com.geologger.activities.PreviewActivity;
+import geologger.saints.com.geologger.activities.PreviewActivity_;
+import geologger.saints.com.geologger.map.infowindow.PhotoInfoAdapter;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
+import geologger.saints.com.geologger.models.PhotoEntry;
 
 /**
  * Created by Mizuno on 2015/01/31.
@@ -27,13 +31,15 @@ import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
 @EBean
 public class MapWorker extends BaseMapWorker {
 
-    private LatLng mPreviousPosition = null;
-    private HashMap<String, String> mCheckinMarkerIdMap;
-
     private static final String FOURSQUARE_ROOT = "https://ja.foursquare.com/v/";
 
+    //Map MarkerID to the entry
+    private HashMap<String, CheckinEntry> mCheckinMarkerMap;
+    private HashMap<String, PhotoEntry> mPhotoEntryMarkerMap;
+
     public MapWorker() {
-        mCheckinMarkerIdMap = new HashMap<String, String>();
+        mCheckinMarkerMap = new HashMap<>();
+        mPhotoEntryMarkerMap = new HashMap<>();
     }
 
     //region initialize
@@ -50,16 +56,28 @@ public class MapWorker extends BaseMapWorker {
 
         super.initMap(map, firstPosition, markerColor, alpha);
 
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                if (isCheckinMarker(marker)) {
+                    onCheckinMarkerClicked(marker);
+                } else if (isCameraMarker(marker)) {
+                    onCameraMarkerClicked(marker);
+                }
+
+                return false;
+            }
+        });
+
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
 
-                String id = marker.getId();
-                if (mCheckinMarkerIdMap.containsKey(id)) {
-                    String placeId = mCheckinMarkerIdMap.get(id);
-                    String url = FOURSQUARE_ROOT + placeId;
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    mActivity.startActivity(intent);
+                if (isCheckinMarker(marker)) {
+                    onCheckinInfoClicked(marker);
+                } else if (isCameraMarker(marker)) {
+                    onCameraInfoClicked(marker);
                 }
             }
         });
@@ -67,7 +85,11 @@ public class MapWorker extends BaseMapWorker {
 
     //endregion
 
-    //region Marker
+
+    //region marker
+
+    //region CheckIn
+
     /**
      * Add Checkin Marker at the corresponding point to the entry
      * @param entry
@@ -87,11 +109,17 @@ public class MapWorker extends BaseMapWorker {
 
         Marker ret = mMap.addMarker(marker);
         if (entry instanceof CheckinEntry) {
-            mCheckinMarkerIdMap.put(ret.getId(), ((CheckinEntry) entry).getPlaceId());
+            mCheckinMarkerMap.put(ret.getId(), (CheckinEntry) entry);
         }
 
         return ret;
     }
+
+    private boolean isCheckinMarker(Marker marker) {
+        String id = marker.getId();
+        return mCheckinMarkerMap.containsKey(id);
+    }
+
 
     /**
      * Add Checkin Markers at the corresponding points to the entry List
@@ -103,6 +131,19 @@ public class MapWorker extends BaseMapWorker {
             addCheckinMarker(entry);
         }
     }
+
+    private void onCheckinMarkerClicked(Marker marker) {
+
+    }
+
+    private void onCheckinInfoClicked(Marker marker) {
+        String placeId = mCheckinMarkerMap.get(marker.getId()).getPlaceId();
+        String url = FOURSQUARE_ROOT + placeId;
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        mActivity.startActivity(intent);
+    }
+
+    //endregion
 
     /**
      * Add Marker that reporesent destination
@@ -129,16 +170,58 @@ public class MapWorker extends BaseMapWorker {
         return ret;
     }
 
-    //endregion
+    //region Camera
 
-    //region utility
+    public Marker addCameraMarker(PhotoEntry entry) {
 
-    /**
-     * Clear recorded previous position.
-     */
-    public void clearPrevious() {
-        mPreviousPosition = null;
+        if (mMap == null || entry == null || entry.getFilePath() == null || entry.getFilePath().length() < 2) {
+            return null;
+        }
+
+        MarkerOptions marker = new MarkerOptions();
+        marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.camera_icon));
+        marker.position(new LatLng(entry.getLatitude(), entry.getLongitude()));
+
+        Marker ret = mMap.addMarker(marker);
+        mPhotoEntryMarkerMap.put(ret.getId(), entry);
+        return ret;
     }
+
+    public void addCameraMarkers(List<PhotoEntry> photoEntryList) {
+        for (PhotoEntry entry : photoEntryList) {
+            addCameraMarker(entry);
+        }
+    }
+
+    private boolean isCameraMarker(Marker marker) {
+        return mPhotoEntryMarkerMap.containsKey(marker.getId());
+    }
+
+    private void onCameraMarkerClicked(Marker marker) {
+
+        if (mMap == null) {
+            return;
+        }
+
+        mMap.setInfoWindowAdapter(new PhotoInfoAdapter(mActivity, mPhotoEntryMarkerMap.get(marker.getId())));
+    }
+
+    private void onCameraInfoClicked(Marker marker) {
+
+        if (mMap == null) {
+            return;
+        }
+
+        PhotoEntry entry = mPhotoEntryMarkerMap.get(marker.getId());
+        Intent intent = new Intent(mActivity.getApplicationContext(), PreviewActivity_.class);
+        intent.putExtra(PhotoEntry.FILEPATH, entry.getFilePath());
+        intent.putExtra(PhotoEntry.MEMO, entry.getMemo());
+        intent.putExtra(PreviewActivity.ISVIEWMODE , true);
+        mActivity.startActivity(intent);
+
+    }
+
+    //endregion
 
     //endregion
 

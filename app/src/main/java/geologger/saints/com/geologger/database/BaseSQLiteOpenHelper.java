@@ -22,7 +22,7 @@ public class BaseSQLiteOpenHelper extends SQLiteOpenHelper {
     private final String TAG = getClass().getSimpleName();
 
     public BaseSQLiteOpenHelper(Context context) {
-        super(context, TableDefinitions.DBNAME, null, 3);
+        super(context, TableDefinitions.DBNAME, null, 4);
     }
 
     //Create All Tables that are stated in the TableDefinitions

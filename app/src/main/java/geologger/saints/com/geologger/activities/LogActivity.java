@@ -22,6 +22,7 @@ import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.models.CheckinEntry;
+import geologger.saints.com.geologger.models.PhotoEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
 import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 import geologger.saints.com.geologger.models.TrajectoryStatisticalEntry;
@@ -117,9 +118,12 @@ public class LogActivity extends FragmentActivity implements FragmentTabHost.OnT
         TabHost.TabSpec mapSpec = mTabHost.newTabSpec(MAP);
         mapSpec.setIndicator(resources.getString(R.string.map));
         Bundle mapBundle = new Bundle();
+        String tid = getIntent().getStringExtra(TrajectorySpanEntry.TID);
+        mapBundle.putString(PhotoEntry.TID, tid);
         mapBundle.putParcelableArrayList(PlayMapFragment.LATLNGLIST, createLatLngList());
         mapBundle.putStringArrayList(PlayMapFragment.TIMESTAMPLIST, createTimestampList());
         mapBundle.putSerializable(PlayMapFragment.CHECKINLIST, mCheckinEntryList);
+
 
         TabHost.TabSpec statisticsSpec = mTabHost.newTabSpec(STATISTICS);
         statisticsSpec.setIndicator(resources.getString(R.string.statistics));

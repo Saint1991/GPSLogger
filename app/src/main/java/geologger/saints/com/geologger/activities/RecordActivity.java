@@ -238,7 +238,6 @@ public class RecordActivity extends FragmentActivity {
 
         Intent serviceIntent = new Intent(this.getApplicationContext(), GPSLoggingService_.class);
         stopService(serviceIntent);
-        mMapWorker.clearPrevious();
 
         setLoggingStateOnView();
 
@@ -435,9 +434,7 @@ public class RecordActivity extends FragmentActivity {
         final String timestamp = data.getStringExtra(PhotoEntry.TIMESTAMP);
         final String filePath = data.getStringExtra(PhotoEntry.FILEPATH);
         final String memo = data.getStringExtra(PhotoEntry.MEMO);
-
-        //地図に写真マーカーを配置する処理
-        
+        PhotoEntry entry = new PhotoEntry(mCurrentTid, latitude, longitude, timestamp, filePath, memo);
 
         new Thread(new Runnable() {
             @Override
@@ -447,13 +444,13 @@ public class RecordActivity extends FragmentActivity {
                     mCurrentTid = mTrajectorySpanDbHandler.getLoggingTid();
                 }
 
-                Log.i(TAG, "tid: " + mCurrentTid + " latitude: " + latitude + " longitude: " + longitude + " timestamp: " + timestamp + " filepath: " + filePath + " memo: " + memo);
                 mPhotoDbHandler.insert(mCurrentTid, latitude, longitude, timestamp, filePath, memo);
+
             }
         }).run();
 
-
-
+        //Add Marker to the map
+        mMapWorker.addCameraMarker(entry);
     }
 
     private File createImageFile() throws IOException {
@@ -558,14 +555,11 @@ public class RecordActivity extends FragmentActivity {
     private void setLoggingStateOnView() {
 
         if (mServiceRunningConfirmation.isLogging()) {
-
             mLoggingStartButton.setVisibility(View.GONE);
             mLoggingStopButton.setVisibility(View.VISIBLE);
             mCheckinButton.setVisibility(View.VISIBLE);
             mCameraButton.setVisibility(View.VISIBLE);
-
         } else {
-
             mLoggingStopButton.setVisibility(View.GONE);
             mCheckinButton.setVisibility(View.GONE);
             mCameraButton.setVisibility(View.GONE);

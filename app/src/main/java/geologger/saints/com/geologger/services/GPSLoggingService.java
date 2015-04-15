@@ -105,7 +105,9 @@ public class GPSLoggingService extends Service {
         //Get Tid from intent and insert TrajectorySpanEntry
         if (this.mTid == null) {
             this.mTid = intent.getStringExtra(TrajectoryEntry.TID);
-            mTrajectorySpanDbHandler.insert(this.mTid);
+            if (!mTrajectorySpanDbHandler.isExistTid(this.mTid)) {
+                mTrajectorySpanDbHandler.insert(this.mTid);
+            }
         }
 
         if (mTimer == null) {

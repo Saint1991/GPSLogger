@@ -3,7 +3,9 @@ package geologger.saints.com.geologger.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,6 +23,8 @@ import geologger.saints.com.geologger.utils.TimestampUtil;
 @EActivity
 public class PreviewActivity extends Activity {
 
+    public static final String ISVIEWMODE = "IsViewMode";
+
     @SystemService
     WindowManager mWindowManager;
 
@@ -30,16 +34,42 @@ public class PreviewActivity extends Activity {
     @ViewById(R.id.memo_text)
     EditText mMemoText;
 
+    @ViewById(R.id.save_button)
+    Button mSaveButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview);
-        setPreviewImage();
+        initialize();
     }
 
-    private void setPreviewImage() {
-        String path = getIntent().getStringExtra(PhotoEntry.FILEPATH);
-        mPreviewImage.setImageBitmap(path);
+    private void initialize() {
+
+        Intent data = getIntent();
+        boolean isViewMode = data.getBooleanExtra(ISVIEWMODE, false);
+        String filePath = data.getStringExtra(PhotoEntry.FILEPATH);
+        mPreviewImage.setImageBitmap(filePath);
+
+        if (isViewMode) {
+
+            String memo = data.getStringExtra(PhotoEntry.MEMO);
+            mSaveButton.setVisibility(View.GONE);
+            mMemoText.setEnabled(false);
+            mMemoText.setFocusable(false);
+            mMemoText.setFocusableInTouchMode(false);
+            mMemoText.setBackgroundResource(R.drawable.only_border);
+            mMemoText.setTextColor(getResources().getColor(R.color.white));
+            mMemoText.setPadding(10, 10, 10, 10);
+
+            if (memo != null) {
+                mMemoText.setText(memo);
+            }
+
+        } else {
+
+        }
+
     }
 
     @Click(R.id.save_button)
