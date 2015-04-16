@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -146,7 +147,9 @@ public class GPSLoggingService extends Service {
                     Intent broadcastIntent = new Intent(ACTION);
                     broadcastIntent.putExtra(Position.LATITUDE, latitude);
                     broadcastIntent.putExtra(Position.LONGITUDE, longitude);
-                    sendBroadcast(broadcastIntent);
+                    LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
+                    manager.sendBroadcast(broadcastIntent);
+                    //sendBroadcast(broadcastIntent);
                 }
 
             }

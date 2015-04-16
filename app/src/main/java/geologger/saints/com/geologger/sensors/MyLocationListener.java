@@ -6,6 +6,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.androidannotations.annotations.Bean;
@@ -45,7 +46,10 @@ public class MyLocationListener implements LocationListener {
         Intent broadcastIntent = new Intent(ACTION);
         broadcastIntent.putExtra(Position.LATITUDE, latitude);
         broadcastIntent.putExtra(Position.LONGITUDE, longitude);
-        mContext.sendBroadcast(broadcastIntent);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(mContext);
+        manager.sendBroadcast(broadcastIntent);
+
+        //mContext.sendBroadcast(broadcastIntent);
     }
 
     @Override

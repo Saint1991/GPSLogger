@@ -2,10 +2,14 @@ package geologger.saints.com.geologger.activities;
 
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -44,6 +48,16 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
     private List<FourSquarePoi> mFourSquarePoiList;
     private boolean mIsPositionUpdated = false;
 
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!mIsPositionUpdated) {
+                mProgressUtility.dismissProgress();
+                mIsPositionUpdated = true;
+            }
+        }
+    };
+
     @Bean
     ProgressDialogUtility mProgressUtility;
 
@@ -76,6 +90,7 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
         }
 
         restartPositioningService();
+        registerBroadcastReceiver();
     }
 
     @Override
@@ -88,22 +103,8 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
             Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
             stopService(intent);
         }
-    }
 
-    //endregion
-
-    //region initialize
-
-    /**
-     * Wait till first position update is occurred
-     * @param intent
-     */
-    @Receiver(actions = MyLocationListener.ACTION)
-    protected void onCurrentPositionUpdated(Intent intent) {
-        if (!mIsPositionUpdated) {
-            mProgressUtility.dismissProgress();
-            mIsPositionUpdated = true;
-        }
+        unregisterBroadcastReceiver();
     }
 
     //endregion
@@ -209,6 +210,18 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
             stopService(intent);
         }
         startService(intent);
+    }
+
+    private void registerBroadcastReceiver() {
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.registerReceiver(mReceiver, new IntentFilter(MyLocationListener.ACTION));
+    }
+
+    private void unregisterBroadcastReceiver() {
+        if (mReceiver != null) {
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+            manager.unregisterReceiver(mReceiver);
+        }
     }
 
     //endregion

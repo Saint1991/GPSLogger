@@ -218,7 +218,7 @@ public class StatisticFragment extends Fragment {
             @Override
             public String formatLabel(double value, boolean isValueX) {
                 NumberFormat formatter = NumberFormat.getInstance();
-                formatter.setMaximumIntegerDigits(1);
+                formatter.setMaximumIntegerDigits(2);
                 formatter.setMaximumFractionDigits(1);
                 return formatter.format(value);
             }

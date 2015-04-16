@@ -1,12 +1,16 @@
 package geologger.saints.com.geologger.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,7 +24,6 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.OnActivityResult;
-import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 
@@ -72,6 +75,9 @@ public class RecordActivity extends FragmentActivity {
     private GoogleMap mMap;
     private String mCurrentTid;
     private String mCurrentPhotoPath;
+
+    private BroadcastReceiver mPositionLoggedReceiver = null;
+    private BroadcastReceiver mPositionUpdatedReceiver = null;
 
     @SystemService
     LocationManager mLocationManager;
@@ -143,6 +149,7 @@ public class RecordActivity extends FragmentActivity {
         }
 
         setUpMapIfNeeded();
+        registerBroadcastReceivers();
     }
 
     @Override
@@ -162,6 +169,7 @@ public class RecordActivity extends FragmentActivity {
             Intent intent = new Intent(getApplicationContext(), PositioningService_.class);
             stopService(intent);
         }
+        unregisterBroadcastReceivers();
     }
 
     @Override
@@ -500,37 +508,42 @@ public class RecordActivity extends FragmentActivity {
 
     /**
      * This is called when a trajectory entry is stored in the database
-     * @param intent
      */
-    @Receiver(actions = GPSLoggingService.ACTION)
-    protected void onPositionLogged(Intent intent) {
+    class PositionLoggedBroadcastReceiver extends BroadcastReceiver {
 
-        if (mMap == null || mMapWorker == null) {
-            return;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (!intent.getAction().equals(GPSLoggingService.ACTION) || mMap == null || mMapWorker == null) {
+                return;
+            }
+
+            float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
+            float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
+            mMapWorker.addMarker(latitude, longitude);
         }
-
-        float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
-        float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
-        mMapWorker.addMarker(latitude, longitude);
     }
+
 
     /**
      * This is called when onLocationChanged in LocationListener is called.
      * Update the marker's position that represents user's current position.
-     * @param intent
      */
-    @Receiver(actions = MyLocationListener.ACTION)
-    protected void onCurrentPositionUpdated(Intent intent) {
+    class PositionUpdatedBroadcastReceiver extends BroadcastReceiver {
 
-        if (mMap == null || mMapWorker == null || mMapWorker.isMyLocationEnabled()) {
-            return;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (!intent.getAction().equals(MyLocationListener.ACTION) || mMap == null || mMapWorker == null || mMapWorker.isMyLocationEnabled()) {
+                return;
+            }
+
+            Log.i(TAG, MyLocationListener.ACTION);
+
+            float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
+            float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
+            mMapWorker.updateCurrentPositionMarker(latitude, longitude);
         }
-
-        Log.i(TAG, MyLocationListener.ACTION);
-
-        float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
-        float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
-        mMapWorker.updateCurrentPositionMarker(latitude, longitude);
     }
 
     //endregion
@@ -564,6 +577,24 @@ public class RecordActivity extends FragmentActivity {
             mCheckinButton.setVisibility(View.GONE);
             mCameraButton.setVisibility(View.GONE);
             mLoggingStartButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void registerBroadcastReceivers() {
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        mPositionLoggedReceiver = new PositionLoggedBroadcastReceiver();
+        mPositionUpdatedReceiver = new PositionUpdatedBroadcastReceiver();
+        manager.registerReceiver(mPositionLoggedReceiver, new IntentFilter(GPSLoggingService.ACTION));
+        manager.registerReceiver(mPositionUpdatedReceiver, new IntentFilter(MyLocationListener.ACTION));
+    }
+
+    private void unregisterBroadcastReceivers() {
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        if (mPositionUpdatedReceiver != null) {
+            manager.unregisterReceiver(mPositionUpdatedReceiver);
+        }
+        if (mPositionLoggedReceiver != null) {
+            manager.unregisterReceiver(mPositionLoggedReceiver);
         }
     }
 
