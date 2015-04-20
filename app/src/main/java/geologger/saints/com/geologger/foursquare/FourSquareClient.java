@@ -6,23 +6,29 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
 
-import java.util.ArrayList;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Locale;
 
 import geologger.saints.com.geologger.activities.SettingsActivity;
 import geologger.saints.com.geologger.foursquare.models.FourSquarePoi;
-import geologger.saints.com.geologger.utils.BaseHttpClient;
+import geologger.saints.com.geologger.http.AppController;
 import geologger.saints.com.geologger.utils.Position;
 
 /**
  * Created by Mizuno on 2015/01/25.
  */
 @EBean
-public class FourSquareClient extends BaseHttpClient {
+public class FourSquareClient {
 
     private final String TAG = getClass().getSimpleName();
     public static final String FOURSQUARE_ROOT = "https://ja.foursquare.com/v/";
@@ -44,44 +50,53 @@ public class FourSquareClient extends BaseHttpClient {
 
     //region POI
 
-    public List<FourSquarePoi> searchPoi(String term) {
-
-        List<FourSquarePoi> ret = null;
+    public void searchPoi(final String term, final IPoiSearchResultCallback callback) {
 
         float[] position = Position.getPosition(mContext);
-        float latitude = position[0];
-        float longitude = position[1];
+        final float latitude = position[0];
+        final float longitude = position[1];
 
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String poiCount = preference.getString(SettingsActivity.POICOUNT, DEFAULTPOICOUNT);
+        final String poiCount = preference.getString(SettingsActivity.POICOUNT, DEFAULTPOICOUNT);
 
-
-        //make query for searching POI
-        StringBuffer query = new StringBuffer();
-        query.append(ENDPOINT_POISEARCH);
-        query.append("client_id=" + CLIENT_ID);
-        query.append("&client_secret=" + CLIENT_SECRET);
-        query.append("&ll=" + latitude + "," + longitude);
-        query.append("&limit=" + poiCount);
-        query.append("&locale=" + LANGUAGE);
-        query.append("&intent=checkin");
-        query.append("&m=foursquare");
-        query.append("&v=20150126");
+        StringBuilder url = new StringBuilder(ENDPOINT_POISEARCH);
+        url.append("client_id=" + CLIENT_ID);
+        url.append("&client_secret=" + CLIENT_SECRET);
+        url.append("&ll=" + latitude + "," + longitude);
+        url.append("&limit=" + poiCount);
+        url.append("&locale=" + LANGUAGE);
+        url.append("&intent=checkin");
+        url.append("&m=foursquare");
+        url.append("&v=20150126");
         if (term != null && term.length() > 0) {
-            query.append("&query=" + term);
+            try {
+                url.append("&query=" + URLEncoder.encode(term, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
 
-        try {
+        Log.i(TAG, url.toString());
 
-            String result  = this.sendHttpGetRequest(query.toString());
-            ret = FourSquareParser.parsePoiSearchResult(result);
+        StringRequest request = new StringRequest(Request.Method.GET, url.toString(), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                callback.onSearchResult(FourSquareParser.parsePoiSearchResult(response));
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                callback.onErrorResult();
+            }
+        });
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        AppController.getInstance().addToRequestQueue(request, TAG);
+    }
 
-        Log.i(TAG, query.toString());
-        return ret;
+    public interface IPoiSearchResultCallback {
+        public void onSearchResult(List<FourSquarePoi> result);
+        public void onErrorResult();
     }
 
     //endregion
@@ -95,46 +110,37 @@ public class FourSquareClient extends BaseHttpClient {
      * @param height
      * @return
      */
-    public List<String> searchPhotos(String placeId, int resultCount, int width, int height) {
+    public void searchPhotos(String placeId, final int resultCount, final int width, final int height, final IPhotoSearchResult callback) {
 
-        List<String> urlList = new ArrayList<String>();
+        StringBuilder url = new StringBuilder(ENDPOINT_PHOTOSEARCH + placeId +"/photos?");
+        url.append("limit=" + resultCount);
+        url.append("&client_id=" + CLIENT_ID);
+        url.append("&client_secret=" + CLIENT_SECRET);
+        url.append("&m=foursquare");
+        url.append("&v=20150126");
 
-        StringBuilder query = new StringBuilder();
-        query.append(ENDPOINT_PHOTOSEARCH);
-        query.append(placeId + "/");
-        query.append("photos");
-        query.append("?limit=" + resultCount);
-        query.append("&client_id=" + CLIENT_ID);
-        query.append("&client_secret=" + CLIENT_SECRET);
-        query.append("&m=foursquare");
-        query.append("&v=20150126");
-        Log.i(TAG, query.toString());
+        StringRequest request = new StringRequest(Request.Method.GET, url.toString(), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                callback.onSearchResult(FourSquareParser.parsePhotoSearchResult(response, width, height));
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
 
-        try {
-
-            String result = this.sendHttpGetRequest(query.toString());
-            urlList = FourSquareParser.parsePhotoSearchResult(result, width, height);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return urlList;
-
+        AppController.getInstance().addToRequestQueue(request, TAG);
     }
 
-    public String searchPhoto(String placeId, int width, int height) {
-
-        String ret = null;
-
-        List<String> result = searchPhotos(placeId, 1, width, height);
-        if (result != null && result.size() > 0) {
-            ret = result.get(0);
-        }
-
-        return ret;
+    public void searchPhoto(String placeId, final int width, final int height, final IPhotoSearchResult callback) {
+        searchPhotos(placeId, 1, width, height, callback);
     }
 
+    public interface IPhotoSearchResult {
+        public void onSearchResult(List<String> urlList);
+    }
     //endregion
 
 }

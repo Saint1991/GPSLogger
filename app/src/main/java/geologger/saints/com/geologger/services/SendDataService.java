@@ -2,40 +2,26 @@ package geologger.saints.com.geologger.services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import geologger.saints.com.geologger.activities.SettingsActivity;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
 import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
 import geologger.saints.com.geologger.database.SentTrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
-import geologger.saints.com.geologger.models.CheckinEntry;
-import geologger.saints.com.geologger.models.CheckinFreeFormEntry;
-import geologger.saints.com.geologger.models.CompanionEntry;
-import geologger.saints.com.geologger.models.TrajectoryEntry;
-import geologger.saints.com.geologger.utils.BaseHttpClient;
 import geologger.saints.com.geologger.utils.SendDataTask;
-import geologger.saints.com.geologger.utils.SendDataUtil;
-import geologger.saints.com.geologger.utils.UserId;
 
 
 @EService
@@ -48,9 +34,6 @@ public class SendDataService extends Service {
 
     @Bean
     SendDataTask mSendDataTask;
-
-    @Bean
-    BaseHttpClient mHttpClient;
 
     @Bean
     CheckinFreeFormSQLite mCheckinFreeFormDbHandler;

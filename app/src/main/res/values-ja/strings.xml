@@ -14,6 +14,7 @@
     <string name="title_activity_poi_confirmation">POI選択</string>
     <string name="title_activity_record">ロギング</string>
     <string name="title_activity_settings">設定</string>
+    <string name="title_activity_preview">写真</string>
 
     <!-- Basic -->
     <string name="start">開始</string>

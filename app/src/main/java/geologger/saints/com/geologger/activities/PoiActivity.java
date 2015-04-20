@@ -21,7 +21,6 @@ import android.widget.ListView;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
@@ -123,9 +122,19 @@ public class PoiActivity extends FragmentActivity implements PoiListFragment.OnF
 
         new Thread(new Runnable() {
            public void run() {
-               mFourSquarePoiList = mFourSquareClient.searchPoi(query);
-               updateListView();
-               mProgressUtility.dismissProgress();
+               mFourSquareClient.searchPoi(query, new FourSquareClient.IPoiSearchResultCallback() {
+                   @Override
+                   public void onSearchResult(List<FourSquarePoi> result) {
+                       mFourSquarePoiList = result;
+                       updateListView();
+                       mProgressUtility.dismissProgress();
+                   }
+                   @Override
+                   public void onErrorResult() {
+                       mProgressUtility.dismissProgress();
+                   }
+               });
+
            }
         }).start();
     }

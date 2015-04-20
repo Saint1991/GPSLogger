@@ -24,7 +24,7 @@ import java.util.List;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.map.MapWorker;
-import geologger.saints.com.geologger.mapsapi.MapsApiParser;
+import geologger.saints.com.geologger.mapsapi.models.MapLeg;
 import geologger.saints.com.geologger.mapsapi.models.MapRouteSearchResult;
 import geologger.saints.com.geologger.models.CheckinEntry;
 import geologger.saints.com.geologger.models.TrajectoryEntry;
@@ -147,18 +147,21 @@ public class NavigationActivity extends FragmentActivity {
                 float[] position = Position.getPosition(getApplicationContext());
                 LatLng origin = new LatLng(position[0], position[1]);
 
-                String response = mMapApiClient.query(origin, mDestination, getResources().getConfiguration().locale.getLanguage());
-                if (response == null) {
-                    showAlertMessage();
-                    mProgressUtility.dismissProgress();
-                } else {
-
-                    //ここでガイドのルートを描画する処理を記述
-                    mSearchResult = new MapRouteSearchResult(MapsApiParser.parseRoute(response));
-                    if (mSearchResult != null) {
-                        afterSearching();
+                mMapApiClient.query(origin, mDestination, getResources().getConfiguration().locale.getLanguage(), new MapsApiClient.INavigationCallback() {
+                    @Override
+                    public void onNavigationResult(List<MapLeg> result) {
+                        if (result == null || result.size() < 1) {
+                            showAlertMessage();
+                            mProgressUtility.dismissProgress();
+                        } else {
+                            mSearchResult = new MapRouteSearchResult(result);
+                            if (mSearchResult != null) {
+                                afterSearching();
+                            }
+                        }
                     }
-                }
+                });
+
             }
 
         }).start();

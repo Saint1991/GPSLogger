@@ -60,9 +60,20 @@ public class PoiConfirmationActivity extends FragmentActivity implements PoiList
 
             @Override
             public void run() {
-                mFourSquarePoiList = mFourSquareClient.searchPoi(null);
-                updateListView();
-                mProgressUtility.dismissProgress();
+                mFourSquareClient.searchPoi(null, new FourSquareClient.IPoiSearchResultCallback() {
+                    @Override
+                    public void onSearchResult(List<FourSquarePoi> result) {
+                        mFourSquarePoiList = result;
+                        updateListView();
+                        mProgressUtility.dismissProgress();
+                    }
+
+                    @Override
+                    public void onErrorResult() {
+                        mProgressUtility.dismissProgress();
+                    }
+                });
+
             }
 
         }).start();

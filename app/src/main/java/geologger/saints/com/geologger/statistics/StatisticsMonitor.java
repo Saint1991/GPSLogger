@@ -6,9 +6,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.androidannotations.annotations.EBean;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import geologger.saints.com.geologger.models.TrajectoryStatisticalEntry;
 import geologger.saints.com.geologger.utils.TimestampUtil;
 

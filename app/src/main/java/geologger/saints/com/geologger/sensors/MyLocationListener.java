@@ -48,8 +48,6 @@ public class MyLocationListener implements LocationListener {
         broadcastIntent.putExtra(Position.LONGITUDE, longitude);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(mContext);
         manager.sendBroadcast(broadcastIntent);
-
-        //mContext.sendBroadcast(broadcastIntent);
     }
 
     @Override

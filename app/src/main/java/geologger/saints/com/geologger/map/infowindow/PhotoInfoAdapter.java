@@ -45,13 +45,10 @@ public class PhotoInfoAdapter implements GoogleMap.InfoWindowAdapter {
             memoText.setText(mEntry.getMemo());
         }
 
-
         if (mEntry.getFilePath() != null) {
             ScalableImageView photoImage = (ScalableImageView)ret.findViewById(R.id.photo);
             photoImage.setImageBitmap(mEntry.getFilePath(), 180, 150);
         }
-
-
 
         return ret;
     }

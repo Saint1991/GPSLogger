@@ -26,7 +26,7 @@
 
         </LinearLayout>
 
-        <geologger.saints.com.geologger.uicomponents.FourSquarePhotoLoaderImageView_
+        <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/poi_photo"
             android:layout_width="50dp"
             android:layout_height="50dp"

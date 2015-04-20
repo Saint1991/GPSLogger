@@ -133,7 +133,7 @@ public class MapWorker extends BaseMapWorker {
     }
 
     private void onCheckinMarkerClicked(Marker marker) {
-
+        mMap.setInfoWindowAdapter(null);
     }
 
     private void onCheckinInfoClicked(Marker marker) {

@@ -1,7 +1,6 @@
 package geologger.saints.com.geologger.utils;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 

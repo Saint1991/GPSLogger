@@ -12,7 +12,6 @@ import java.util.List;
 
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.models.LogListEntry;
-import geologger.saints.com.geologger.models.TrajectorySpanEntry;
 
 /**
  * Created by Mizuno on 2015/01/29.

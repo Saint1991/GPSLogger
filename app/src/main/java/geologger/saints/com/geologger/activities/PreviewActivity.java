@@ -3,7 +3,6 @@ package geologger.saints.com.geologger.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -47,29 +46,13 @@ public class PreviewActivity extends Activity {
     private void initialize() {
 
         Intent data = getIntent();
-        boolean isViewMode = data.getBooleanExtra(ISVIEWMODE, false);
         String filePath = data.getStringExtra(PhotoEntry.FILEPATH);
+        String memo = data.getStringExtra(PhotoEntry.MEMO);
+
         mPreviewImage.setImageBitmap(filePath);
-
-        if (isViewMode) {
-
-            String memo = data.getStringExtra(PhotoEntry.MEMO);
-            mSaveButton.setVisibility(View.GONE);
-            mMemoText.setEnabled(false);
-            mMemoText.setFocusable(false);
-            mMemoText.setFocusableInTouchMode(false);
-            mMemoText.setBackgroundResource(R.drawable.only_border);
-            mMemoText.setTextColor(getResources().getColor(R.color.white));
-            mMemoText.setPadding(10, 10, 10, 10);
-
-            if (memo != null) {
-                mMemoText.setText(memo);
-            }
-
-        } else {
-
+        if (memo != null && memo.length() > 0) {
+            mMemoText.setText(memo);
         }
-
     }
 
     @Click(R.id.save_button)
@@ -89,5 +72,4 @@ public class PreviewActivity extends Activity {
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.photo_saved), Toast.LENGTH_SHORT).show();
         finish();
     }
-
 }

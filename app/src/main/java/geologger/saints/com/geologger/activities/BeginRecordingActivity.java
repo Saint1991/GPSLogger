@@ -20,10 +20,13 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
+import java.util.List;
+
 import geologger.saints.com.geologger.R;
 import geologger.saints.com.geologger.database.TrajectorySpanSQLite;
 import geologger.saints.com.geologger.models.CompanionEntry;
 import geologger.saints.com.geologger.models.TrajectoryPropertyEntry;
+import geologger.saints.com.geologger.utils.CollectionUtil;
 
 @EActivity
 public class BeginRecordingActivity extends Activity {
@@ -110,7 +113,7 @@ public class BeginRecordingActivity extends Activity {
         final String memo = mMemoText.getText().toString();
 
         String companion = getCompanionInput();
-        if (companion == null || companion.length()  < 1) {
+        if (companion == null) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.companion_alert), Toast.LENGTH_SHORT).show();
             return;
         }
@@ -150,11 +153,10 @@ public class BeginRecordingActivity extends Activity {
 
             StringBuilder companionBuilder = new StringBuilder();
             SparseBooleanArray checkedPositions = mCompanionList.getCheckedItemPositions();
+            List<Integer> checkedIndexList = CollectionUtil.convertToCheckedIndexList(checkedPositions);
             ArrayAdapter<String> adapter = (ArrayAdapter)mCompanionList.getAdapter();
-            for (int i = 0; i < checkedPositions.size(); i++) {
-                if (checkedPositions.get(i)) {
-                    companionBuilder.append(adapter.getItem(i) + ",");
-                }
+            for (int index : checkedIndexList) {
+                companionBuilder.append(adapter.getItem(index) + ",");
             }
 
             if (companionBuilder.length() > 1) {

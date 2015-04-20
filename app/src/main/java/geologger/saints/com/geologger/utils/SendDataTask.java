@@ -6,15 +6,19 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.RootContext;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import geologger.saints.com.geologger.activities.SettingsActivity;
 import geologger.saints.com.geologger.database.CheckinFreeFormSQLite;
@@ -22,6 +26,7 @@ import geologger.saints.com.geologger.database.CheckinSQLite;
 import geologger.saints.com.geologger.database.CompanionSQLite;
 import geologger.saints.com.geologger.database.SentTrajectorySQLite;
 import geologger.saints.com.geologger.database.TrajectorySQLite;
+import geologger.saints.com.geologger.http.AppController;
 
 /**
  * Created by Mizuno on 2015/03/13.
@@ -36,9 +41,6 @@ public class SendDataTask implements Runnable {
 
     @RootContext
     Context mContext;
-
-    @Bean
-    BaseHttpClient mHttpClient;
 
     @Bean
     CheckinFreeFormSQLite mCheckinFreeFormDbHandler;
@@ -70,35 +72,69 @@ public class SendDataTask implements Runnable {
             return;
         }
 
-        JSONArray sendData = SendDataUtil.makeSendData(mTidListToSend, mTrajectoryDbHandler, mCheckinFreeFormDbHandler, mCheckinDbHandler, mCompanionDbHandler);
-
+        final JSONArray sendData = SendDataUtil.makeSendData(mTidListToSend, mTrajectoryDbHandler, mCheckinFreeFormDbHandler, mCheckinDbHandler, mCompanionDbHandler);
         if (sendData == null || sendData.toString().equals("[]")) {
             return;
         }
+        Log.i(TAG, sendData.toString());
 
-        Log.i(TAG, "[Send Data] " + sendData.toString());
-        List<NameValuePair> sendParams = new ArrayList<>();
-        sendParams.add(new BasicNameValuePair("Data", sendData.toString()));
-        sendParams.add(new BasicNameValuePair("UserID", UserId.getUserId(mContext)));
+        //メインサーバへの送信
+        SendLogRequest request = new SendLogRequest(Request.Method.POST, SERVERURL, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.i(TAG, "response: " + response);
+                mSentTrajectoryDbHandler.insertSentTidList(mTidListToSend);
+            }
+
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i(TAG, "SendDataError");
+                error.printStackTrace();
+            }
+
+        }, sendData.toString());
 
 
-        //Preferenceで設定された2nd ServerのURLを取得
+        //Preferenceで設定された2nd Serverへの送信
         SharedPreferences preference = PreferenceManager.getDefaultSharedPreferences(mContext);
         final String secondUrl = preference.getString(SettingsActivity.SECONDURL, null);
+        SendLogRequest request2 = new SendLogRequest(Request.Method.POST, secondUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
 
-        //2nd URLに対する送信
-        if (secondUrl != null && secondUrl.length() > 7) {
-            mHttpClient.sendHttpPostRequest(secondUrl, sendParams);
-            Log.i(TAG, "Sent to the second Server " + secondUrl);
-        }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        }, sendData.toString());
 
-        //1st URLに対する送信
-        //成功時に送信済みのTIDを記録する
-        String result = mHttpClient.sendHttpPostRequest(SERVERURL, sendParams);
-        if (result != null) {
-            mSentTrajectoryDbHandler.insertSentTidList(mTidListToSend);
-        }
 
-        Log.i(TAG,"response: " + result);
+        AppController.getInstance().addToRequestQueue(request, TAG);
+        AppController.getInstance().addToRequestQueue(request2, TAG);
+
     }
+
+    private class SendLogRequest extends StringRequest {
+
+        private String mSendData = null;
+
+        SendLogRequest(int method, String url, Response.Listener listener, Response.ErrorListener errorListener, String sendData) {
+            super(method, url, listener, errorListener);
+            mSendData = sendData;
+        }
+
+        @Override
+        protected Map<String, String> getParams() {
+            Map<String, String> params = new HashMap<>();
+            params.put("Data", mSendData);
+            params.put("UserID", UserId.getUserId(mContext));
+            return params;
+        }
+    }
+
 }
