@@ -71,6 +71,7 @@ public class ScalableImageView extends ImageView {
 
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
             BitmapFactory.decodeFile(path, options);
 
             int scaleH = options.outWidth / width + 1;
