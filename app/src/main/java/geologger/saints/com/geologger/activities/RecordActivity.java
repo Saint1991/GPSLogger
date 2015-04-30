@@ -520,7 +520,14 @@ public class RecordActivity extends FragmentActivity {
 
             float latitude = intent.getFloatExtra(Position.LATITUDE, 0.0f);
             float longitude = intent.getFloatExtra(Position.LONGITUDE, 0.0f);
-            mMapWorker.addMarker(latitude, longitude);
+            try {
+                mMapWorker.addMarker(latitude, longitude);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } catch (Error e) {
+                e.printStackTrace();
+            }
+
         }
     }
 

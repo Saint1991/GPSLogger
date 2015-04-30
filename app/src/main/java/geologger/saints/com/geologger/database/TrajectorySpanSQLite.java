@@ -251,6 +251,40 @@ public class TrajectorySpanSQLite  {
     }
 
     /**
+     * Get the list of the tid that end timestamp hasn't been set.
+     * @return
+     */
+    public List<String> getNotCompletedLogTidList() {
+
+        List<String> ret = new ArrayList<>();
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        try {
+
+            Cursor cursor = db.query(TABLENAME, new String[]{TrajectorySpanEntry.TID}, TrajectorySpanEntry.END + " IS NULL", null, null, null, null);
+            try {
+                boolean isEOF = cursor.moveToFirst();
+                while (isEOF) {
+                    String tid = cursor.getString(cursor.getColumnIndex(TrajectorySpanEntry.TID));
+                    ret.add(tid);
+                    isEOF = cursor.moveToNext();
+                }
+            } catch (SQLiteException ex) {
+                ex.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
+
+        return ret;
+    }
+
+    /**
      * Get the tid whose trajectory is on logging
      * if logging is not going return null
      * @return tid that of currently logging trajectory

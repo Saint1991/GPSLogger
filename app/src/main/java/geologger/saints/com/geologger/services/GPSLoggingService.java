@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EService;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -103,6 +104,9 @@ public class GPSLoggingService extends Service {
 
     private void initialize(Intent intent) {
 
+        //clean up previous loggings
+        cleanLogState();
+
         //Get Tid from intent and insert TrajectorySpanEntry
         if (this.mTid == null) {
             this.mTid = intent.getStringExtra(TrajectoryEntry.TID);
@@ -149,7 +153,6 @@ public class GPSLoggingService extends Service {
                     broadcastIntent.putExtra(Position.LONGITUDE, longitude);
                     LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
                     manager.sendBroadcast(broadcastIntent);
-                    //sendBroadcast(broadcastIntent);
                 }
 
             }
@@ -160,6 +163,19 @@ public class GPSLoggingService extends Service {
     //endregion
 
     //region utility
+
+    /**
+     * 異常終了等などで，終了時刻が設定されていないログに終了時刻を設定し，
+     * 終了させる・
+     */
+    private void cleanLogState() {
+        List<String> notCompletedLigTid = mTrajectorySpanDbHandler.getNotCompletedLogTidList();
+        for (String tid : notCompletedLigTid) {
+            TrajectoryEntry entry = mTrajectoryDbHandler.getLastEntry(tid);
+            String endTimestamp = entry.getTimestamp();
+            mTrajectorySpanDbHandler.setEnd(tid, endTimestamp);
+        }
+    }
 
     private void makeForegroundService() {
 
