@@ -24,12 +24,12 @@ android {
         applicationId "geologger.saints.com.geologger"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 8
-        versionName "1.2.1"
+        versionCode 10
+        versionName "1.2.3"
     }
     buildTypes {
         debug {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
