@@ -215,9 +215,11 @@ public class RecordActivity extends FragmentActivity {
             List<CheckinEntry> checkinList = mCheckinDbHandler.getCheckinList(tid);
             List<CheckinFreeFormEntry> checkinFreeFormList = mCheckinFreeFormDbHandler.getCheckinFreeFormList(tid);
             List<TrajectoryEntry> positionList = mTrajectoryDbHandler.getTrajectory(tid);
+            List<PhotoEntry> photoList = mPhotoDbHandler.getEntryListByTid(tid);
             mMapWorker.addMarkers(positionList);
             mMapWorker.addCheckinMarkers(checkinList);
             mMapWorker.addCheckinMarkers(checkinFreeFormList);
+            mMapWorker.addCameraMarkers(photoList);
         }
 
     }
